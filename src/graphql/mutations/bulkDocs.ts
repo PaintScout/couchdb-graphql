@@ -1,9 +1,6 @@
 import { gql } from 'apollo-server'
 import axios from 'axios'
 
-/**
- * PUTs a document using _bulk_docs endpoint
- */
 export const typeDefs = gql`
   type BulkDocsResponseObject {
     _id: String
