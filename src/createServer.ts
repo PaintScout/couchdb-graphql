@@ -5,7 +5,7 @@ import { ApolloServer, gql, GraphQLSchemaModule } from 'apollo-server'
 import { buildFederatedSchema } from '@apollo/federation'
 
 import { get, info } from './graphql/queries'
-import { put } from './graphql/mutations'
+import { put, bulkDocs } from './graphql/mutations'
 import { ContextFunction, Context } from 'apollo-server-core'
 import { ExpressContext } from 'apollo-server-express/dist/ApolloServer'
 
@@ -19,7 +19,13 @@ export function createServer({ setContext }: CreateServerOptions = {}) {
   `
 
   const server = new ApolloServer({
-    schema: buildFederatedSchema([{ typeDefs: base }, get, info, put] as any),
+    schema: buildFederatedSchema([
+      { typeDefs: base },
+      get,
+      info,
+      put,
+      bulkDocs,
+    ] as any),
     context: args => {
       const { req } = args
       let context = {}

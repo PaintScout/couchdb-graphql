@@ -1,64 +1,80 @@
 import { gql } from 'apollo-server'
 import axios from 'axios'
-import queryString from 'query-string'
 
 /**
  * PUTs a document using _bulk_docs endpoint
  */
 export const typeDefs = gql`
-  type BulkDocsResponse {
-    documents: [JSON!]!
+  type BulkDocsResponseObject {
+    _id: String
+    _rev: String
+    document: JSON
+    error: String
+    reason: String
   }
 
   extend type Mutation {
-    bulkDocs(input: [JSON!]!, upsert: Boolean, new_edits: Boolean): PutResponse
+    bulkDocs(
+      input: [JSON!]!
+      upsert: Boolean
+      new_edits: Boolean
+    ): [BulkDocsResponseObject]
   }
 `
 
 export const resolvers = {
   Mutation: {
-    put: async (parent, { input, upsert, new_edits }, context, info) => {
+    bulkDocs: async (parent, { input, upsert, new_edits }, context, info) => {
       let url = `${context.dbUrl}/_bulk_docs`
-      let rev = input._rev
+      let previousRevs: Record<string, string> = {}
 
-      // get previous _rev for upsert
+      // get previous _revs for upsert
       if (upsert) {
-        if (!input._id) {
-          throw Error('upsert option requires input to contain _id')
-        }
+        const ids: string[] = input.map(i => i._id).filter(id => !!id)
 
-        try {
-          const {
-            data: { _rev },
-          } = await axios.get(`${context.dbUrl}/${input._id}`)
-          rev = _rev
-        } catch (e) {
-          throw Error(
-            'Unable to find previous _rev for upsert (does document exist?)'
-          )
-        }
+        const { data: allDocs } = await axios.post(
+          `${context.dbUrl}/_all_docs`,
+          {
+            keys: ids,
+          }
+        )
+
+        allDocs.rows.forEach(row => {
+          previousRevs[row.id] = row.value.rev
+        })
       }
 
       const response = await axios.post(url, {
-        docs: [{ ...input, _rev: rev }],
+        docs: input.map(i => ({
+          ...i,
+          _rev: upsert && i._id ? previousRevs[i._id] : i._rev,
+        })),
         new_edits,
       })
 
-      const [result] = response.data
+      const results = response.data
 
-      if (result.error) {
-        throw new Error(result.reason)
-      }
+      return results.map((result, index) => {
+        const document = input[index]
 
-      return {
-        _id: result.id,
-        _rev: result.rev,
-        document: {
-          ...input,
+        const _rev = result.error
+          ? // if an error, return the last _rev
+            previousRevs[document._id] || document._rev
+          : // otherwise result.rev will be populated
+            result.rev
+
+        return {
           _id: result.id,
-          _rev: result.rev,
-        },
-      }
+          _rev,
+          error: result.error,
+          reason: result.reason,
+          document: {
+            ...document,
+            _id: result.id,
+            _rev,
+          },
+        }
+      })
     },
   },
 }

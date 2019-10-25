@@ -35,10 +35,9 @@ export const resolvers = {
           } = await axios.get(`${context.dbUrl}/${input._id}`)
           rev = _rev
         } catch (e) {
-          console.error(e)
-          throw Error(
-            'Unable to find previous _rev for upsert (does document exist?)'
-          )
+          if (e.status !== 404) {
+            throw e
+          }
         }
       }
 
