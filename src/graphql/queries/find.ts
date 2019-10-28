@@ -8,12 +8,12 @@ export const typeDefs = gql`
     execution_stats: JSON
     bookmark: String
     warning: String
-    docs: [JSON]
+    docs: [JSON!]
   }
 
   type FindRow {
     id: String
-    order: [Int]
+    order: [Int!]
     fields: JSON
   }
 
@@ -23,8 +23,8 @@ export const typeDefs = gql`
       limit: Int
       skip: Int
       sort: Int
-      fields: [String]
-      use_index: [String]
+      fields: [String!]
+      use_index: [String!]
       r: Int
       bookmark: String
       update: Boolean
