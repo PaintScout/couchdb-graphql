@@ -1,6 +1,7 @@
 {
   "name": "cloudant-graphql-server",
   "version": "0.1.0",
+  "private": true,
   "main": "dist/index.js",
   "module": "dist/cloudant-graphql-server.esm.js",
   "typings": "dist/index.d.ts",

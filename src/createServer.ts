@@ -6,7 +6,11 @@ import { buildFederatedSchema } from '@apollo/federation'
 
 import * as queries from './graphql/queries'
 import * as mutations from './graphql/mutations'
-import { ContextFunction, Context } from 'apollo-server-core'
+import {
+  ContextFunction,
+  Context,
+  AuthenticationError,
+} from 'apollo-server-core'
 import { ExpressContext } from 'apollo-server-express/dist/ApolloServer'
 
 export interface CreateServerOptions {
@@ -24,17 +28,20 @@ export function createServer({ setContext }: CreateServerOptions = {}) {
       ...Object.keys(queries).map(key => queries[key]),
       ...Object.keys(mutations).map(key => mutations[key]),
     ] as any),
-    context: args => {
+    context: async args => {
       const { req } = args
       let context = {}
 
       if (setContext) {
-        context = setContext(args)
+        context = await setContext(args)
       }
 
       // this would ideally be jwt token decryption, but for testing it'll just be the header.db value
       const dbName = req ? req.headers.db : ''
 
+      if (!dbName) {
+        throw new AuthenticationError('Authentication required')
+      }
       return {
         dbName,
         dbUrl: `${process.env.PS_DB_ADMIN_URL}/${dbName}`,
