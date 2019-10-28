@@ -32,6 +32,6 @@ proof of concept for a Cloudant GraphQL server
 - [x] bulkDocs
 - [x] bulkGet
 - [x] changes
-- [ ] search
-- [ ] find
+- [x] search
+- [x] find
 - [ ] query

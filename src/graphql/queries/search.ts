@@ -3,9 +3,6 @@ import axios from 'axios'
 import queryString from 'query-string'
 import createResolver from '../../util/createResolver'
 
-/**
- * Generic GET on a document
- */
 export const typeDefs = gql`
   type SearchResponse {
     total_rows: Int
