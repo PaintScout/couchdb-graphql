@@ -1,6 +1,7 @@
 import React from 'react'
 import SearchQuotes from './components/SearchQuotes'
 import SearchContacts from './components/SearchContacts'
+import Quote from './components/Quote'
 import { Router, Switch, Route } from 'react-router'
 import { createBrowserHistory } from 'history'
 import { Link } from 'react-router-dom'
@@ -18,6 +19,7 @@ const App: React.FC = () => {
       </ul>
       <Switch>
         <Route path="/contacts" exact component={SearchContacts} />
+        <Route path="/quote/:id" exact component={Quote} />
         <Route path="/" exact component={SearchQuotes} />
       </Switch>
     </Router>
