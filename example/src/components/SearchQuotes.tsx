@@ -15,7 +15,9 @@ export const SEARCH_QUOTES = gql`
 `
 
 export default function SearchQuotes() {
-  const { loading, error, data } = useQuery(SEARCH_QUOTES)
+  const { loading, error, data } = useQuery(SEARCH_QUOTES, {
+    notifyOnNetworkStatusChange: true,
+  })
 
   if (loading) return <p>Loading...</p>
   if (error) return <p>Error :(</p>

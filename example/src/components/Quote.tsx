@@ -5,10 +5,12 @@ import { useParams } from 'react-router'
 import TextField from '@material-ui/core/TextField'
 import { Button } from '@material-ui/core'
 import { SEARCH_QUOTES } from './SearchQuotes'
+import { useSnackbar } from 'notistack'
 
 const GET_QUOTE = gql`
   query getQuote($id: String!) {
     get(id: $id) {
+      _id
       document
     }
   }
@@ -16,16 +18,24 @@ const GET_QUOTE = gql`
 
 const SAVE_QUOTE = gql`
   mutation saveQuote($input: JSON) {
-    put(input: $input) {
+    put(input: $input, upsert: true) {
+      _id
       document
     }
   }
 `
 export default function Quote() {
   const { id } = useParams()
+  const { enqueueSnackbar } = useSnackbar()
+  const { loading, error, data } = useQuery(GET_QUOTE, {
+    variables: { id },
+    fetchPolicy: 'cache-and-network',
+    notifyOnNetworkStatusChange: true,
+  })
 
-  const { loading, error, data } = useQuery(GET_QUOTE, { variables: { id } })
-  const [quote, setQuote] = useState(data ? data.get.document : null)
+  const [dirtyQuote, setDirtyQuote] = useState(null)
+
+  const quote = data.get.document || dirtyQuote
   const [saveQuote, { loading: saving }] = useMutation(SAVE_QUOTE, {
     refetchQueries: [
       { query: GET_QUOTE, variables: { id } },
@@ -33,33 +43,68 @@ export default function Quote() {
     ],
   })
 
-  useEffect(() => {
-    if (!quote && data) {
-      setQuote(data.get.document)
-    }
-  }, [data, quote])
+  // useEffect(() => {
+  //   if (data && !isDirty) {
+  //     setQuote(data.get.document)
+  //   }
+  // }, [data, isDirty])
 
-  if (error) return <p>Error :(</p>
-  if (loading || !quote) return <p>Loading...</p>
+  if (error && !data) return <p>Error :(</p>
+  if (loading && !data) return <p>Loading...</p>
 
   return (
     <div>
-      <h1>Quote #{data.get.document.number}</h1>
-
+      <h1>Quote #{quote.number}</h1>
+      <h2>_rev: {data && data.get.document._rev}</h2>
       <TextField
         label="Set Number"
         disabled={saving}
         value={quote.number}
         onChange={ev =>
-          setQuote({ ...quote, number: parseInt(ev.target.value) || undefined })
+          setDirtyQuote({
+            ...quote,
+            number: parseInt(ev.target.value) || undefined,
+          })
         }
       />
       <Button
         variant="outlined"
         disabled={saving}
         onClick={async () => {
-          const result = await saveQuote({ variables: { input: quote } })
-          setQuote(result.data.put.document)
+          try {
+            const result = await saveQuote({
+              variables: { input: quote },
+              optimisticResponse: {
+                put: {
+                  _id: quote._id,
+                  document: quote,
+                  __typename: 'PutResponse',
+                },
+              },
+              update(cache, { data: { put } }) {
+                const data = cache.readQuery({
+                  query: GET_QUOTE,
+                  variables: { id },
+                }) as any
+
+                cache.writeQuery({
+                  query: GET_QUOTE,
+                  variables: { id },
+                  data: {
+                    ...data,
+                    get: {
+                      ...data.get,
+                      document: put.document,
+                    },
+                  },
+                })
+              },
+            })
+
+            enqueueSnackbar('Saved', { variant: 'success' })
+          } catch (e) {
+            enqueueSnackbar('Error', { variant: 'error' })
+          }
         }}
       >
         Save

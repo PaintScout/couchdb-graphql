@@ -1,7 +1,8 @@
-import { ApolloClient } from 'apollo-client'
+import { ApolloClient } from '@wora/apollo-offline'
 import { createHttpLink } from 'apollo-link-http'
 import { setContext } from 'apollo-link-context'
-import { InMemoryCache } from 'apollo-cache-inmemory'
+import ApolloCache from '@wora/apollo-cache'
+import filterKeys from '@wora/cache-persist/lib/layers/filterKeys'
 
 const authLink = setContext((_, { headers }) => {
   return {
@@ -16,8 +17,46 @@ const httpLink = createHttpLink({
   uri: 'http://localhost:4000/',
 })
 
-const client = new ApolloClient({
+const offlineOptions = {
   link: authLink.concat(httpLink),
-  cache: new InMemoryCache(),
-})
+}
+
+const cache = new ApolloCache(
+  {
+    dataIdFromObject: o => o.id,
+  },
+  {
+    mutateKeys: [
+      filterKeys(key => {
+        // don't save search results to storage
+        return !key.includes('$ROOT_QUERY.search')
+      }),
+    ],
+  }
+)
+
+const client = new ApolloClient(
+  {
+    link: authLink.concat(httpLink),
+    defaultOptions: {
+      watchQuery: {
+        fetchPolicy: 'cache-and-network',
+        errorPolicy: 'ignore',
+        notifyOnNetworkStatusChange: true,
+      },
+      query: {
+        fetchPolicy: 'network-only',
+        errorPolicy: 'all',
+      },
+      mutate: {
+        errorPolicy: 'all',
+      },
+    },
+    cache,
+  },
+  offlineOptions,
+  {}
+)
+
+export { cache }
 export default client
