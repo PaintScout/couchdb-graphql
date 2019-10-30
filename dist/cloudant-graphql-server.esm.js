@@ -2,7 +2,6 @@ import { gql, ApolloServer } from 'apollo-server';
 import { buildFederatedSchema } from '@apollo/federation';
 import axios from 'axios';
 import queryString from 'query-string';
-import { AuthenticationError } from 'apollo-server-core';
 
 function _extends() {
   _extends = Object.assign || function (target) {
@@ -621,11 +620,17 @@ function _templateObject$9() {
 }
 
 require('dotenv').config();
-function createServer(_temp) {
-  var _ref = _temp === void 0 ? {} : _temp,
-      setContext = _ref.setContext;
-
+function createServer(_ref) {
+  var dbUrl = _ref.dbUrl,
+      setContext = _ref.setContext,
+      _ref$schemas = _ref.schemas,
+      schemas = _ref$schemas === void 0 ? [] : _ref$schemas;
   var base = gql(_templateObject$9());
+
+  if (!dbUrl) {
+    console.warn('Cannot find dbUrl - did you pass it into createServer()?');
+  }
+
   var server = new ApolloServer({
     schema: buildFederatedSchema([{
       typeDefs: base
@@ -633,27 +638,23 @@ function createServer(_temp) {
       return queries[key];
     }), Object.keys(mutations).map(function (key) {
       return mutations[key];
-    }))),
+    }), schemas)),
     context: function (args) {
       try {
-        var _temp4 = function _temp4() {
-          // this would ideally be jwt token decryption, but for testing it'll just be the header.db value
-          var dbName = req ? req.headers.db : '';
-
-          if (!dbName) {
-            throw new AuthenticationError('Authentication required');
+        var _temp3 = function _temp3() {
+          if (!context.dbName) {
+            throw new Error('dbName is required to exist in context');
           }
 
           return _extends({
-            dbName: dbName,
-            dbUrl: process.env.PS_DB_ADMIN_URL + "/" + dbName
+            dbUrl: (context.dbUrl || dbUrl) + "/" + context.dbName
           }, context);
         };
 
         var req = args.req;
         var context = {};
 
-        var _temp5 = function () {
+        var _temp4 = function () {
           if (setContext) {
             return Promise.resolve(setContext(args)).then(function (_setContext) {
               context = _setContext;
@@ -661,7 +662,7 @@ function createServer(_temp) {
           }
         }();
 
-        return Promise.resolve(_temp5 && _temp5.then ? _temp5.then(_temp4) : _temp4(_temp5));
+        return Promise.resolve(_temp4 && _temp4.then ? _temp4.then(_temp3) : _temp3(_temp4));
       } catch (e) {
         return Promise.reject(e);
       }

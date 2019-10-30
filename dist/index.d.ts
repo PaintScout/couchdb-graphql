@@ -1,5 +1,5 @@
 import { GraphQLResolverMap } from "@apollographql/apollo-tools";
-import { ApolloServer } from "apollo-server";
+import { ApolloServer, GraphQLSchemaModule } from "apollo-server";
 import { ContextFunction, Context } from "apollo-server-core";
 import { ExpressContext } from "apollo-server-express/dist/ApolloServer";
 /**
@@ -151,7 +151,9 @@ declare module bulkDocs {
     };
 }
 interface CreateServerOptions {
+    dbUrl: string;
     setContext?: ContextFunction<ExpressContext, Context>;
+    schemas?: GraphQLSchemaModule[];
 }
-declare function createServer({ setContext }?: CreateServerOptions): ApolloServer;
+declare function createServer({ dbUrl, setContext, schemas, }: CreateServerOptions): ApolloServer;
 export { get, info, bulkGet, changes, search, find, query, put, bulkDocs, CreateServerOptions, createServer };
