@@ -4,7 +4,7 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 
 var apolloServerCore = require('apollo-server-core');
 var axios = _interopDefault(require('axios'));
-var queryString = _interopDefault(require('query-string'));
+var queryString = _interopDefault(require('qs'));
 var federation = require('@apollo/federation');
 
 function _extends() {
@@ -617,7 +617,7 @@ var query = ({
 });
 
 function _templateObject$a() {
-  var data = _taggedTemplateLiteralLoose(["\n  type SearchResponse {\n    total_rows: Int\n    bookmark: String\n    rows: [SearchRow]\n    counts: JSON\n  }\n\n  type SearchRow {\n    id: String\n    order: [Int]\n    fields: JSON\n  }\n\n  extend type Query {\n    search(\n      index: String!\n      ddoc: String!\n      bookmark: String\n      counts: [String!]\n      drilldown: JSON\n      group_field: String\n      group_limit: Int\n      group_sort: JSON\n      highlight_fields: [String!]\n      highlight_pre_tag: String\n      highlight_post_tag: String\n      highlight_number: Int\n      highlight_size: Int\n      include_docs: Boolean\n      include_fields: [String]\n      limit: Int\n      query: String!\n      ranges: JSON\n      sort: [String]\n      stale: String\n    ): SearchResponse\n  }\n"]);
+  var data = _taggedTemplateLiteralLoose(["\n  type SearchResponse {\n    total_rows: Int\n    bookmark: String\n    rows: [SearchRow]\n    counts: JSON\n  }\n\n  type SearchRow {\n    id: String\n    order: [Int]\n    fields: JSON\n  }\n\n  extend type Query {\n    search(\n      index: String!\n      ddoc: String!\n      bookmark: String\n      counts: [String!]\n      drilldown: JSON\n      group_field: String\n      group_limit: Int\n      group_sort: JSON\n      highlight_fields: [String!]\n      highlight_pre_tag: String\n      highlight_post_tag: String\n      highlight_number: Int\n      highlight_size: Int\n      include_docs: Boolean\n      include_fields: [String!]\n      limit: Int\n      query: String!\n      ranges: JSON\n      sort: [String!]\n      stale: String\n    ): SearchResponse\n  }\n"]);
 
   _templateObject$a = function _templateObject() {
     return data;
@@ -642,13 +642,7 @@ createResolver({
 
       try {
         var url = context.dbUrl + "/" + context.dbName + "/_design/" + ddoc + "/_search/" + index;
-        var hasArgs = Object.keys(args).length > 0;
-
-        if (hasArgs) {
-          url += "?" + queryString.stringify(args);
-        }
-
-        return Promise.resolve(axios.get(url)).then(function (response) {
+        return Promise.resolve(axios.post(url, args)).then(function (response) {
           return response.data;
         });
       } catch (e) {
