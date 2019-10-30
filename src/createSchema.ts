@@ -25,7 +25,7 @@ export function createSchema({
 
   return buildFederatedSchema([
     base,
-    ...Object.keys(cloudant ? couchdbQueries : queries).map(
+    ...Object.keys(cloudant ? queries : couchdbQueries).map(
       key => queries[key]
     ),
     ...Object.keys(mutations).map(key => mutations[key]),

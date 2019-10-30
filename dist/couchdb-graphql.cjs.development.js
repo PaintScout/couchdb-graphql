@@ -691,7 +691,7 @@ function createSchema(_temp) {
 
   var couchdbQueries = _objectWithoutPropertiesLoose(queries, ["search"]);
 
-  return federation.buildFederatedSchema([base].concat(Object.keys(cloudant ? couchdbQueries : queries).map(function (key) {
+  return federation.buildFederatedSchema([base].concat(Object.keys(cloudant ? queries : couchdbQueries).map(function (key) {
     return queries[key];
   }), Object.keys(mutations).map(function (key) {
     return mutations[key];
