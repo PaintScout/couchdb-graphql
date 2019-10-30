@@ -3,7 +3,7 @@ import { gql } from 'apollo-server'
 import { createTestServer, dbUrl } from '../../test/util/createTestServer'
 import asJestMock from '../../test/util/asJestMock'
 
-const { query, mutate } = createTestServer()
+const { query } = createTestServer()
 
 jest.mock('axios', () => ({
   post: jest.fn(),

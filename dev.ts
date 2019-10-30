@@ -1,16 +1,16 @@
-require('dotenv').config()
+import { ApolloServer } from 'apollo-server'
+import { createSchema } from './src/createSchema'
 
-import { createServer } from './src/index'
-
-createServer({
-  dbUrl: process.env.DB_URL,
-  setContext: ({ req }) => {
+const server = new ApolloServer({
+  schema: createSchema(),
+  context: ({ req }) => {
     return {
+      dbUrl: process.env.DB_URL,
       dbName: req.headers.db,
     }
   },
 })
-  .listen()
-  .then(({ url }) => {
-    console.log(`🚀  Server ready at ${url}`)
-  })
+
+server.listen().then(({ url }) => {
+  console.log(`🚀  Server ready at ${url}`)
+})

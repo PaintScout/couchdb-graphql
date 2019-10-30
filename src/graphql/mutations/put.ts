@@ -1,6 +1,5 @@
 import { gql } from 'apollo-server'
 import axios from 'axios'
-import queryString from 'query-string'
 
 /**
  * PUTs a document using _bulk_docs endpoint

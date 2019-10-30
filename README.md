@@ -2,14 +2,35 @@
 
 proof of concept for a Cloudant GraphQL server
 
-# Development
+# Usage
 
-- create a copy of `.env-sample` as `.env` and fill in the appropriate values
+```js
+import { ApolloServer } from 'apollo-server'
+import { createSchema } from 'couchdb-graphql'
+
+const server = new ApolloServer({
+  schema: createSchema(),
+
+  // set dbUrl and dbName in context however you wish
+  context: ({ req }) => {
+    return {
+      dbUrl: 'https://my-couchdb-url.com',
+      dbName: 'my-database',
+    }
+  },
+})
+
+server.listen().then(({ url }) => {
+  console.log(`🚀  Server ready at ${url}`)
+})
+```
+
+# Development
 
 - run
 
   ```cli
-  yarn start
+  DB_URL=<admin-couchdb-url> yarn dev
   ```
 
 - open up the GraphiQL editor at http://localhost:4000
@@ -23,15 +44,3 @@ proof of concept for a Cloudant GraphQL server
   ```
 
 - now you can make requests in the GraphiQL editor
-
-# API coverage
-
-- [x] get
-- [x] info
-- [x] put
-- [x] bulkDocs
-- [x] bulkGet
-- [x] changes
-- [x] search
-- [x] find
-- [ ] query

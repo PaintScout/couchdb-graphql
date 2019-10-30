@@ -3,7 +3,7 @@ import { gql } from 'apollo-server'
 import { createTestServer, dbUrl } from '../../test/util/createTestServer'
 import asJestMock from '../../test/util/asJestMock'
 
-const { query, mutate } = createTestServer()
+const { query } = createTestServer()
 
 jest.mock('axios', () => ({
   get: jest.fn(),
@@ -51,7 +51,7 @@ describe('get', () => {
   })
 
   it('should get a doc with extra options', async () => {
-    const result = await query({
+    await query({
       query: gql`
         query getMyDocument {
           get(id: "1", conflicts: true, revs: true) {

@@ -1,6 +1,5 @@
 import { gql } from 'apollo-server'
 import axios from 'axios'
-import queryString from 'query-string'
 import createResolver from '../../util/createResolver'
 
 export const typeDefs = gql`
