@@ -1,6 +1,6 @@
 import { gql } from 'apollo-server-core'
 import axios from 'axios'
-import queryString from 'query-string'
+import queryString from 'qs'
 import createResolver from '../../util/createResolver'
 
 export const typeDefs = gql`
@@ -33,11 +33,11 @@ export const typeDefs = gql`
       highlight_number: Int
       highlight_size: Int
       include_docs: Boolean
-      include_fields: [String]
+      include_fields: [String!]
       limit: Int
       query: String!
       ranges: JSON
-      sort: [String]
+      sort: [String!]
       stale: String
     ): SearchResponse
   }
@@ -53,12 +53,7 @@ export const resolvers = createResolver({
     ) => {
       let url = `${context.dbUrl}/${context.dbName}/_design/${ddoc}/_search/${index}`
 
-      const hasArgs = Object.keys(args).length > 0
-      if (hasArgs) {
-        url += `?${queryString.stringify(args)}`
-      }
-
-      const response = await axios.get(url)
+      const response = await axios.post(url, args)
 
       return response.data
     },
