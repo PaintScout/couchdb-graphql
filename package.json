@@ -9,7 +9,7 @@
     "dist"
   ],
   "scripts": {
-    "start": "ts-node-dev --respawn --transpileOnly src/dev.ts",
+    "start": "ts-node-dev --respawn --transpileOnly dev.ts",
     "build": "tsdx build",
     "test": "tsdx test",
     "test:watch": "tsdx test --watchAll",
@@ -28,18 +28,13 @@
     "trailingComma": "es5"
   },
   "devDependencies": {
-    "@apollo/federation": "^0.10.2",
-    "@apollographql/apollo-tools": "^0.4.0",
     "@types/jest": "^24.0.19",
     "@types/node": "^12.11.7",
     "@types/pouchdb": "^6.4.0",
     "@types/query-string": "^6.3.0",
-    "apollo-server": "^2.9.7",
     "apollo-server-integration-testing": "^2.2.0",
     "apollo-server-testing": "^2.9.7",
-    "axios": "^0.19.0",
     "dotenv": "^8.2.0",
-    "graphql": "^14.5.8",
     "husky": "^3.0.9",
     "jest-mock-axios": "^3.1.1",
     "ts-node": "^8.4.1",
@@ -49,6 +44,11 @@
     "typescript": "^3.6.4"
   },
   "dependencies": {
+    "@apollo/federation": "^0.10.2",
+    "@apollographql/apollo-tools": "^0.4.0",
+    "apollo-server": "^2.9.7",
+    "axios": "^0.19.0",
+    "graphql": "^14.5.8",
     "query-string": "^6.8.3"
   }
 }

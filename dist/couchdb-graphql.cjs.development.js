@@ -622,8 +622,6 @@ function _templateObject$9() {
 
   return data;
 }
-
-require('dotenv').config();
 function createServer(_ref) {
   var dbUrl = _ref.dbUrl,
       setContext = _ref.setContext,

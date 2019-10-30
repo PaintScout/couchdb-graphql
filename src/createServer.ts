@@ -1,5 +1,3 @@
-require('dotenv').config()
-
 import { ApolloServer, gql, GraphQLSchemaModule } from 'apollo-server'
 
 import { buildFederatedSchema } from '@apollo/federation'
