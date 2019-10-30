@@ -37,7 +37,7 @@ export const typeDefs = gql`
       limit: Int
       query: String!
       ranges: JSON
-      sort: String
+      sort: [String]
       stale: String
     ): SearchResponse
   }
