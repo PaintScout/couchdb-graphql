@@ -1,13 +1,15 @@
 import { createTestClient } from 'apollo-server-testing'
-import { createServer } from '../../createServer'
+import { ApolloServer } from 'apollo-server'
+import { createSchema } from '../../createSchema'
 
 export const dbName = 'test'
 export const dbUrl = 'https://fakeeeeeee.url/test'
 
 export function createTestServer() {
   return createTestClient(
-    createServer({
-      setContext: () => ({
+    new ApolloServer({
+      schema: createSchema(),
+      context: () => ({
         dbName,
         dbUrl,
       }),

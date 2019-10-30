@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { gql } from 'apollo-server'
+import { gql } from 'apollo-server-core'
 import { createTestServer, dbUrl } from '../../test/util/createTestServer'
 import asJestMock from '../../test/util/asJestMock'
 

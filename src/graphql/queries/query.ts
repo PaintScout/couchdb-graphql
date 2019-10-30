@@ -1,4 +1,4 @@
-import { gql } from 'apollo-server'
+import { gql } from 'apollo-server-core'
 import axios from 'axios'
 import queryString from 'query-string'
 import createResolver from '../../util/createResolver'
