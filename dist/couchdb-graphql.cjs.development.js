@@ -676,4 +676,4 @@ function createServer(_ref) {
 }
 
 exports.createServer = createServer;
-//# sourceMappingURL=cloudant-graphql-server.cjs.development.js.map
+//# sourceMappingURL=couchdb-graphql.cjs.development.js.map

@@ -672,4 +672,4 @@ function createServer(_ref) {
 }
 
 export { createServer };
-//# sourceMappingURL=cloudant-graphql-server.esm.js.map
+//# sourceMappingURL=couchdb-graphql.esm.js.map

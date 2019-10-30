@@ -2,7 +2,7 @@
 'use strict'
 
 if (process.env.NODE_ENV === 'production') {
-  module.exports = require('./cloudant-graphql-server.cjs.production.min.js')
+  module.exports = require('./couchdb-graphql.cjs.production.min.js')
 } else {
-  module.exports = require('./cloudant-graphql-server.cjs.development.js')
+  module.exports = require('./couchdb-graphql.cjs.development.js')
 }

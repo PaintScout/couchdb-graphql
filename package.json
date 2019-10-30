@@ -1,9 +1,9 @@
 {
-  "name": "cloudant-graphql-server",
+  "name": "couchdb-graphql",
   "version": "0.1.0",
   "private": true,
   "main": "dist/index.js",
-  "module": "dist/cloudant-graphql-server.esm.js",
+  "module": "dist/couchdb-graphql.esm.js",
   "typings": "dist/index.d.ts",
   "files": [
     "dist"
