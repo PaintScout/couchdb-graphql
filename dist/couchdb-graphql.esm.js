@@ -147,7 +147,7 @@ var resolvers = {
             }
 
             return _catch(function () {
-              return Promise.resolve(axios.get(context.dbUrl + "/" + context.dbName + "/" + input._id)).then(function (_ref2) {
+              return Promise.resolve(axios.get(context.dbUrl + "/" + context.dbName + "/" + encodeURIComponent(input._id))).then(function (_ref2) {
                 var _rev = _ref2.data._rev;
                 rev = _rev;
               });
@@ -301,7 +301,7 @@ createResolver({
 
       try {
         var hasArgs = Object.keys(args).length > 0;
-        var url = context.dbUrl + "/" + context.dbName + "/" + id;
+        var url = context.dbUrl + "/" + context.dbName + "/" + encodeURIComponent(id);
 
         if (hasArgs) {
           url += "?" + queryString.stringify(args);

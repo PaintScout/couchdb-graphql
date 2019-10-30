@@ -31,7 +31,11 @@ export const resolvers = {
         try {
           const {
             data: { _rev },
-          } = await axios.get(`${context.dbUrl}/${context.dbName}/${input._id}`)
+          } = await axios.get(
+            `${context.dbUrl}/${context.dbName}/${encodeURIComponent(
+              input._id
+            )}`
+          )
           rev = _rev
         } catch (e) {
           if (e.status !== 404) {
