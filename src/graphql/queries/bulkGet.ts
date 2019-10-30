@@ -13,7 +13,7 @@ export const typeDefs = gql`
   }
 
   type BulkGetResponse {
-    results: [BulkGetResult]
+    results: [BulkGetResult!]!
   }
 
   type BulkGetResult {

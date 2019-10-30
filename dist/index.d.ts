@@ -58,40 +58,40 @@ declare module bulkDocs {
         };
     };
 }
-/**
- * Generic GET on a document
- */
 declare const typeDefs_$1: import("graphql").DocumentNode;
 declare const resolvers_$1: import("@apollographql/apollo-tools").GraphQLResolverMap<{
     dbName: string;
     dbUrl: string;
 }>;
+/**
+ * Generic GET on a document
+ */
 declare const typeDefs_$2: import("graphql").DocumentNode;
 declare const resolvers_$2: import("@apollographql/apollo-tools").GraphQLResolverMap<{
     dbName: string;
     dbUrl: string;
 }>;
-/**
- * Generic GET on a document
- */
 declare const typeDefs_$3: import("graphql").DocumentNode;
 declare const resolvers_$3: import("@apollographql/apollo-tools").GraphQLResolverMap<{
     dbName: string;
     dbUrl: string;
 }>;
-/**
- * Generic GET on a document
- */
 declare const typeDefs_$4: import("graphql").DocumentNode;
 declare const resolvers_$4: import("@apollographql/apollo-tools").GraphQLResolverMap<{
     dbName: string;
     dbUrl: string;
 }>;
+/**
+ * Generic GET on a document
+ */
 declare const typeDefs_$5: import("graphql").DocumentNode;
 declare const resolvers_$5: import("@apollographql/apollo-tools").GraphQLResolverMap<{
     dbName: string;
     dbUrl: string;
 }>;
+/**
+ * Generic GET on a document
+ */
 declare const typeDefs_$6: import("graphql").DocumentNode;
 declare const resolvers_$6: import("@apollographql/apollo-tools").GraphQLResolverMap<{
     dbName: string;
@@ -102,42 +102,47 @@ declare const resolvers_$7: import("@apollographql/apollo-tools").GraphQLResolve
     dbName: string;
     dbUrl: string;
 }>;
-declare module get {
+declare const typeDefs_$8: import("graphql").DocumentNode;
+declare const resolvers_$8: import("@apollographql/apollo-tools").GraphQLResolverMap<{
+    dbName: string;
+    dbUrl: string;
+}>;
+declare module allDocs {
     const typeDefs_$1: import("graphql").DocumentNode;
     const resolvers_$1: import("@apollographql/apollo-tools").GraphQLResolverMap<{
         dbName: string;
         dbUrl: string;
     }>;
 }
-declare module changes {
+declare module bulkGet {
     const typeDefs_$2: import("graphql").DocumentNode;
     const resolvers_$2: import("@apollographql/apollo-tools").GraphQLResolverMap<{
         dbName: string;
         dbUrl: string;
     }>;
 }
-declare module bulkGet {
+declare module changes {
     const typeDefs_$3: import("graphql").DocumentNode;
     const resolvers_$3: import("@apollographql/apollo-tools").GraphQLResolverMap<{
         dbName: string;
         dbUrl: string;
     }>;
 }
-declare module info {
+declare module find {
     const typeDefs_$4: import("graphql").DocumentNode;
     const resolvers_$4: import("@apollographql/apollo-tools").GraphQLResolverMap<{
         dbName: string;
         dbUrl: string;
     }>;
 }
-declare module search {
+declare module get {
     const typeDefs_$5: import("graphql").DocumentNode;
     const resolvers_$5: import("@apollographql/apollo-tools").GraphQLResolverMap<{
         dbName: string;
         dbUrl: string;
     }>;
 }
-declare module find {
+declare module info {
     const typeDefs_$6: import("graphql").DocumentNode;
     const resolvers_$6: import("@apollographql/apollo-tools").GraphQLResolverMap<{
         dbName: string;
@@ -147,6 +152,13 @@ declare module find {
 declare module query {
     const typeDefs_$7: import("graphql").DocumentNode;
     const resolvers_$7: import("@apollographql/apollo-tools").GraphQLResolverMap<{
+        dbName: string;
+        dbUrl: string;
+    }>;
+}
+declare module search {
+    const typeDefs_$8: import("graphql").DocumentNode;
+    const resolvers_$8: import("@apollographql/apollo-tools").GraphQLResolverMap<{
         dbName: string;
         dbUrl: string;
     }>;
@@ -164,4 +176,4 @@ interface CreateSchemaOptions {
  * Creates a GraphQL Schema for CouchDB
  */
 declare function createSchema({ schemas, cloudant, }?: CreateSchemaOptions): import("graphql").GraphQLSchema;
-export { put, bulkDocs, get, info, bulkGet, changes, search, find, query, CreateSchemaOptions, createSchema, queries, mutations, base };
+export { put, bulkDocs, get, info, bulkGet, changes, search, find, query, allDocs, CreateSchemaOptions, createSchema, queries, mutations, base };
