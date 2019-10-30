@@ -2,10 +2,10 @@
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var federation = require('@apollo/federation');
-var apolloServer = require('apollo-server');
+var apolloServerCore = require('apollo-server-core');
 var axios = _interopDefault(require('axios'));
 var queryString = _interopDefault(require('query-string'));
+var federation = require('@apollo/federation');
 
 function _extends() {
   _extends = Object.assign || function (target) {
@@ -61,7 +61,7 @@ function _templateObject() {
 var base = {
   typeDefs:
   /*#__PURE__*/
-  apolloServer.gql(
+  apolloServerCore.gql(
   /*#__PURE__*/
   _templateObject())
 };
@@ -103,7 +103,7 @@ function _templateObject$1() {
 
 var typeDefs =
 /*#__PURE__*/
-apolloServer.gql(
+apolloServerCore.gql(
 /*#__PURE__*/
 _templateObject$1());
 var resolvers = {
@@ -188,7 +188,7 @@ function _templateObject$2() {
 }
 var typeDefs$1 =
 /*#__PURE__*/
-apolloServer.gql(
+apolloServerCore.gql(
 /*#__PURE__*/
 _templateObject$2());
 var resolvers$1 = {
@@ -292,7 +292,7 @@ function _templateObject$3() {
 
 var typeDefs$2 =
 /*#__PURE__*/
-apolloServer.gql(
+apolloServerCore.gql(
 /*#__PURE__*/
 _templateObject$3());
 var resolvers$2 =
@@ -342,7 +342,7 @@ function _templateObject$4() {
 }
 var typeDefs$3 =
 /*#__PURE__*/
-apolloServer.gql(
+apolloServerCore.gql(
 /*#__PURE__*/
 _templateObject$4());
 var resolvers$3 =
@@ -401,7 +401,7 @@ function _templateObject$5() {
 
 var typeDefs$4 =
 /*#__PURE__*/
-apolloServer.gql(
+apolloServerCore.gql(
 /*#__PURE__*/
 _templateObject$5());
 var resolvers$4 =
@@ -455,7 +455,7 @@ function _templateObject$6() {
 
 var typeDefs$5 =
 /*#__PURE__*/
-apolloServer.gql(
+apolloServerCore.gql(
 /*#__PURE__*/
 _templateObject$6());
 var resolvers$5 =
@@ -492,7 +492,7 @@ function _templateObject$7() {
 }
 var typeDefs$6 =
 /*#__PURE__*/
-apolloServer.gql(
+apolloServerCore.gql(
 /*#__PURE__*/
 _templateObject$7());
 var resolvers$6 =
@@ -540,7 +540,7 @@ function _templateObject$8() {
 }
 var typeDefs$7 =
 /*#__PURE__*/
-apolloServer.gql(
+apolloServerCore.gql(
 /*#__PURE__*/
 _templateObject$8());
 var resolvers$7 =
@@ -581,7 +581,7 @@ function _templateObject$9() {
 }
 var typeDefs$8 =
 /*#__PURE__*/
-apolloServer.gql(
+apolloServerCore.gql(
 /*#__PURE__*/
 _templateObject$9());
 var resolvers$8 =

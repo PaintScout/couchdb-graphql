@@ -1,7 +1,7 @@
-import { buildFederatedSchema } from '@apollo/federation';
-import { gql } from 'apollo-server';
+import { gql } from 'apollo-server-core';
 import axios from 'axios';
 import queryString from 'query-string';
+import { buildFederatedSchema } from '@apollo/federation';
 
 function _extends() {
   _extends = Object.assign || function (target) {
