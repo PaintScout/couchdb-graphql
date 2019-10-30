@@ -46,7 +46,7 @@ export const resolvers = createResolver({
   Query: {
     changes: async (parent, args, context, info) => {
       const hasArgs = Object.keys(args).length > 0
-      let url = `${context.dbUrl}/_changes`
+      let url = `${context.dbUrl}/${context.dbName}/_changes`
 
       if (hasArgs) {
         if (args.lastEventId) {

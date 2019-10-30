@@ -22,7 +22,7 @@ export const typeDefs = gql`
 export const resolvers = {
   Mutation: {
     bulkDocs: async (parent, { input, upsert, new_edits }, context, info) => {
-      let url = `${context.dbUrl}/_bulk_docs`
+      let url = `${context.dbUrl}/${context.dbName}/_bulk_docs`
       let previousRevs: Record<string, string> = {}
 
       // get previous _revs for upsert
@@ -30,7 +30,7 @@ export const resolvers = {
         const ids: string[] = input.map(i => i._id).filter(id => !!id)
 
         const { data: allDocs } = await axios.post(
-          `${context.dbUrl}/_all_docs`,
+          `${context.dbUrl}/${context.dbName}/_all_docs`,
           {
             keys: ids,
           }

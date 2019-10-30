@@ -41,7 +41,7 @@ export const typeDefs = gql`
 export const resolvers = createResolver({
   Query: {
     bulkGet: async (parent, { docs, revs }, context, info) => {
-      let url = `${context.dbUrl}/_bulk_get`
+      let url = `${context.dbUrl}/${context.dbName}/_bulk_get`
 
       if (revs) {
         url += `?${queryString.stringify({ revs })}`

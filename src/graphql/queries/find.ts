@@ -37,7 +37,7 @@ export const typeDefs = gql`
 export const resolvers = createResolver({
   Query: {
     find: async (parent, { index, ddoc, ...args }, context, info) => {
-      let url = `${context.dbUrl}/_find`
+      let url = `${context.dbUrl}/${context.dbName}/_find`
 
       const response = await axios.post(url, args)
 

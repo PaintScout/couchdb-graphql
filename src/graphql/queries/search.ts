@@ -51,7 +51,7 @@ export const resolvers = createResolver({
       context,
       info
     ) => {
-      let url = `${context.dbUrl}/_design/${ddoc}/_search/${index}`
+      let url = `${context.dbUrl}/${context.dbName}/_design/${ddoc}/_search/${index}`
 
       const hasArgs = Object.keys(args).length > 0
       if (hasArgs) {

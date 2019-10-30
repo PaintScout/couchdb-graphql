@@ -141,7 +141,7 @@ var resolvers = {
         };
 
         var _exit2 = false;
-        var url = context.dbUrl + "/_bulk_docs";
+        var url = context.dbUrl + "/" + context.dbName + "/_bulk_docs";
         var rev = input._rev; // get previous _rev for upsert
 
         var _temp4 = function () {
@@ -151,7 +151,7 @@ var resolvers = {
             }
 
             return _catch(function () {
-              return Promise.resolve(axios.get(context.dbUrl + "/" + input._id)).then(function (_ref2) {
+              return Promise.resolve(axios.get(context.dbUrl + "/" + context.dbName + "/" + input._id)).then(function (_ref2) {
                 var _rev = _ref2.data._rev;
                 rev = _rev;
               });
@@ -230,7 +230,7 @@ var resolvers$1 = {
           });
         };
 
-        var url = context.dbUrl + "/_bulk_docs";
+        var url = context.dbUrl + "/" + context.dbName + "/_bulk_docs";
         var previousRevs = {}; // get previous _revs for upsert
 
         var _temp4 = function () {
@@ -240,7 +240,7 @@ var resolvers$1 = {
             }).filter(function (id) {
               return !!id;
             });
-            return Promise.resolve(axios.post(context.dbUrl + "/_all_docs", {
+            return Promise.resolve(axios.post(context.dbUrl + "/" + context.dbName + "/_all_docs", {
               keys: ids
             })).then(function (_ref2) {
               var allDocs = _ref2.data;
@@ -305,7 +305,7 @@ createResolver({
 
       try {
         var hasArgs = Object.keys(args).length > 0;
-        var url = context.dbUrl + "/" + id;
+        var url = context.dbUrl + "/" + context.dbName + "/" + id;
 
         if (hasArgs) {
           url += "?" + queryString.stringify(args);
@@ -352,7 +352,7 @@ createResolver({
     changes: function (parent, args, context, info) {
       try {
         var hasArgs = Object.keys(args).length > 0;
-        var url = context.dbUrl + "/_changes";
+        var url = context.dbUrl + "/" + context.dbName + "/_changes";
 
         if (hasArgs) {
           if (args.lastEventId) {
@@ -413,7 +413,7 @@ createResolver({
           revs = _ref.revs;
 
       try {
-        var url = context.dbUrl + "/_bulk_get";
+        var url = context.dbUrl + "/" + context.dbName + "/_bulk_get";
 
         if (revs) {
           url += "?" + queryString.stringify({
@@ -506,7 +506,7 @@ createResolver({
           args = _objectWithoutPropertiesLoose(_ref, ["index", "ddoc", "typename"]);
 
       try {
-        var url = context.dbUrl + "/_design/" + ddoc + "/_search/" + index;
+        var url = context.dbUrl + "/" + context.dbName + "/_design/" + ddoc + "/_search/" + index;
         var hasArgs = Object.keys(args).length > 0;
 
         if (hasArgs) {
@@ -553,7 +553,7 @@ createResolver({
           args = _objectWithoutPropertiesLoose(_ref, ["index", "ddoc"]);
 
       try {
-        var url = context.dbUrl + "/_find";
+        var url = context.dbUrl + "/" + context.dbName + "/_find";
         return Promise.resolve(axios.post(url, args)).then(function (response) {
           return response.data;
         });
@@ -594,7 +594,7 @@ createResolver({
           args = _objectWithoutPropertiesLoose(_ref, ["view", "ddoc"]);
 
       try {
-        var url = context.dbUrl + "/_design/" + ddoc + "/_view/" + view;
+        var url = context.dbUrl + "/" + context.dbName + "/_design/" + ddoc + "/_view/" + view;
         var hasArgs = Object.keys(args).length > 0;
 
         if (hasArgs) {

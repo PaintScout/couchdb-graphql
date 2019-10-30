@@ -19,7 +19,7 @@ export const typeDefs = gql`
 export const resolvers = {
   Mutation: {
     put: async (parent, { input, upsert, new_edits }, context, info) => {
-      let url = `${context.dbUrl}/_bulk_docs`
+      let url = `${context.dbUrl}/${context.dbName}/_bulk_docs`
       let rev = input._rev
 
       // get previous _rev for upsert
@@ -31,7 +31,7 @@ export const resolvers = {
         try {
           const {
             data: { _rev },
-          } = await axios.get(`${context.dbUrl}/${input._id}`)
+          } = await axios.get(`${context.dbUrl}/${context.dbName}/${input._id}`)
           rev = _rev
         } catch (e) {
           if (e.status !== 404) {

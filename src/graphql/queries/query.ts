@@ -48,7 +48,7 @@ export const typeDefs = gql`
 export const resolvers = createResolver({
   Query: {
     query: async (parent, { view, ddoc, ...args }, context, info) => {
-      let url = `${context.dbUrl}/_design/${ddoc}/_view/${view}`
+      let url = `${context.dbUrl}/${context.dbName}/_design/${ddoc}/_view/${view}`
 
       const hasArgs = Object.keys(args).length > 0
       if (hasArgs) {

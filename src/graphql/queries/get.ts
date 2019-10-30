@@ -31,7 +31,7 @@ export const resolvers = createResolver({
   Query: {
     get: async (parent, { id, ...args }, context, info) => {
       const hasArgs = Object.keys(args).length > 0
-      let url = `${context.dbUrl}/${id}`
+      let url = `${context.dbUrl}/${context.dbName}/${id}`
 
       if (hasArgs) {
         url += `?${queryString.stringify(args)}`
