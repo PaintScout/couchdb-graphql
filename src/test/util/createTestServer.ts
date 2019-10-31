@@ -3,7 +3,7 @@ import { ApolloServer } from 'apollo-server'
 import { createSchema } from '../../createSchema'
 
 export const dbName = 'test'
-export const dbUrl = 'https://fakeeeeeee.url/test'
+export const dbUrl = 'https://fakeeeeeee.url'
 
 export function createTestServer() {
   return createTestClient(

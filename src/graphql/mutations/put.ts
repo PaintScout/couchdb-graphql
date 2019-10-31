@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-core'
-import axios from 'axios'
+import getAxios from '../../util/getAxios'
 
 /**
  * PUTs a document using _bulk_docs endpoint
@@ -31,7 +31,7 @@ export const resolvers = {
         try {
           const {
             data: { _rev },
-          } = await axios.get(
+          } = await getAxios(context).get(
             `${context.dbUrl}/${context.dbName}/${encodeURIComponent(
               input._id
             )}`
@@ -44,7 +44,7 @@ export const resolvers = {
         }
       }
 
-      const response = await axios.post(url, {
+      const response = await getAxios(context).post(url, {
         docs: [{ ...input, _rev: rev }],
         new_edits,
       })

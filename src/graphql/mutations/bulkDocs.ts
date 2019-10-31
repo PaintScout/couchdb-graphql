@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-core'
-import axios from 'axios'
+import getAxios from '../../util/getAxios'
 
 export const typeDefs = gql`
   type BulkDocsResponseObject {
@@ -29,7 +29,7 @@ export const resolvers = {
       if (upsert) {
         const ids: string[] = input.map(i => i._id).filter(id => !!id)
 
-        const { data: allDocs } = await axios.post(
+        const { data: allDocs } = await getAxios(context).post(
           `${context.dbUrl}/${context.dbName}/_all_docs`,
           {
             keys: ids,
@@ -41,7 +41,7 @@ export const resolvers = {
         })
       }
 
-      const response = await axios.post(url, {
+      const response = await getAxios(context).post(url, {
         docs: input.map(i => ({
           ...i,
           _rev: upsert && i._id ? previousRevs[i._id] : i._rev,

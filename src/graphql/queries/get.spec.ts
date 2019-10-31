@@ -1,13 +1,17 @@
-import axios from 'axios'
 import { gql } from 'apollo-server-core'
-import { createTestServer, dbUrl } from '../../test/util/createTestServer'
-import asJestMock from '../../test/util/asJestMock'
+import {
+  createTestServer,
+  dbUrl,
+  dbName,
+} from '../../test/util/createTestServer'
 
 const { query } = createTestServer()
 
-jest.mock('axios', () => ({
+const axios = {
   get: jest.fn(),
-}))
+}
+
+jest.mock('../../util/getAxios', () => () => axios)
 
 describe('get', () => {
   afterEach(() => {
@@ -15,7 +19,7 @@ describe('get', () => {
   })
 
   it('should get a doc', async () => {
-    asJestMock(axios.get).mockResolvedValueOnce({
+    axios.get.mockResolvedValueOnce({
       data: {
         _id: '1',
         _rev: '1',
@@ -36,7 +40,7 @@ describe('get', () => {
       variables: { id: '1' },
     })
 
-    expect(axios.get).toHaveBeenCalledWith(`${dbUrl}/1`)
+    expect(axios.get).toHaveBeenCalledWith(`${dbUrl}/${dbName}/1`)
     expect(result.data).toMatchObject({
       get: {
         _id: '1',
@@ -64,7 +68,7 @@ describe('get', () => {
     })
 
     expect(axios.get).toHaveBeenCalledWith(
-      `${dbUrl}/1?conflicts=true&revs=true`
+      `${dbUrl}/${dbName}/1?revs=true&conflicts=true`
     )
   })
 })

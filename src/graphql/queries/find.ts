@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-core'
-import axios from 'axios'
+import getAxios from '../../util/getAxios'
 import createResolver from '../../util/createResolver'
 
 export const typeDefs = gql`
@@ -39,7 +39,7 @@ export const resolvers = createResolver({
     find: async (parent, { index, ddoc, ...args }, context, info) => {
       let url = `${context.dbUrl}/${context.dbName}/_find`
 
-      const response = await axios.post(url, args)
+      const response = await getAxios(context).post(url, args)
 
       return response.data
     },

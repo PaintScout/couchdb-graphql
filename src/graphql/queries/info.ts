@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-core'
-import axios from 'axios'
+import getAxios from '../../util/getAxios'
 import createResolver from '../../util/createResolver'
 
 /**
@@ -49,7 +49,7 @@ export const resolvers = createResolver({
     info: async (parent, args, context, info) => {
       let url = `${context.dbUrl}`
 
-      const response = await axios.get(url)
+      const response = await getAxios(context).get(url)
 
       return response.data
     },

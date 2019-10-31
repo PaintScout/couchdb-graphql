@@ -14,8 +14,12 @@ const server = new ApolloServer({
   // set dbUrl and dbName in context however you wish
   context: ({ req }) => {
     return {
+      // required
       dbUrl: 'https://my-couchdb-url.com',
       dbName: 'my-database',
+
+      // optional
+      dbHeaders: { ... } // headers to be sent for requests made to couchdb
     }
   },
 })

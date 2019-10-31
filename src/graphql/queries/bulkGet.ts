@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-core'
-import axios from 'axios'
+import getAxios from '../../util/getAxios'
 import queryString from 'qs'
 import createResolver from '../../util/createResolver'
 
@@ -47,7 +47,7 @@ export const resolvers = createResolver({
         url += `?${queryString.stringify({ revs })}`
       }
 
-      const response = await axios.post(url, {
+      const response = await getAxios(context).post(url, {
         docs,
         revs,
       })

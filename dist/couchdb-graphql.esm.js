@@ -84,6 +84,12 @@ function _catch(body, recover) {
   return result;
 } // Asynchronously await a promise and pass the result to a finally continuation
 
+function getAxios(context) {
+  return axios.create({
+    headers: context.dbHeaders
+  });
+}
+
 function _templateObject$1() {
   var data = _taggedTemplateLiteralLoose(["\n  type PutResponse {\n    _id: String!\n    _rev: String\n    document: JSON\n  }\n\n  extend type Mutation {\n    put(input: JSON, upsert: Boolean, new_edits: Boolean): PutResponse\n  }\n"]);
 
@@ -111,7 +117,7 @@ var resolvers = {
 
       try {
         var _temp3 = function _temp3(_result2) {
-          return _exit2 ? _result2 : Promise.resolve(axios.post(url, {
+          return _exit2 ? _result2 : Promise.resolve(getAxios(context).post(url, {
             docs: [_extends({}, input, {
               _rev: rev
             })],
@@ -147,7 +153,7 @@ var resolvers = {
             }
 
             return _catch(function () {
-              return Promise.resolve(axios.get(context.dbUrl + "/" + context.dbName + "/" + encodeURIComponent(input._id))).then(function (_ref2) {
+              return Promise.resolve(getAxios(context).get(context.dbUrl + "/" + context.dbName + "/" + encodeURIComponent(input._id))).then(function (_ref2) {
                 var _rev = _ref2.data._rev;
                 rev = _rev;
               });
@@ -196,7 +202,7 @@ var resolvers$1 = {
 
       try {
         var _temp3 = function _temp3() {
-          return Promise.resolve(axios.post(url, {
+          return Promise.resolve(getAxios(context).post(url, {
             docs: input.map(function (i) {
               return _extends({}, i, {
                 _rev: upsert && i._id ? previousRevs[i._id] : i._rev
@@ -236,7 +242,7 @@ var resolvers$1 = {
             }).filter(function (id) {
               return !!id;
             });
-            return Promise.resolve(axios.post(context.dbUrl + "/" + context.dbName + "/_all_docs", {
+            return Promise.resolve(getAxios(context).post(context.dbUrl + "/" + context.dbName + "/_all_docs", {
               keys: ids
             })).then(function (_ref2) {
               var allDocs = _ref2.data;
@@ -302,7 +308,7 @@ createResolver({
           url += "?" + queryString.stringify(args);
         }
 
-        return Promise.resolve(axios.post(url, {
+        return Promise.resolve(getAxios(context).post(url, {
           keys: keys
         })).then(function (response) {
           return response.data;
@@ -355,7 +361,7 @@ createResolver({
           });
         }
 
-        return Promise.resolve(axios.post(url, {
+        return Promise.resolve(getAxios(context).post(url, {
           docs: docs,
           revs: revs
         })).then(function (response) {
@@ -413,7 +419,7 @@ createResolver({
           url += "?" + queryString.stringify(args);
         }
 
-        return Promise.resolve(axios.get(url)).then(function (response) {
+        return Promise.resolve(getAxios(context).get(url)).then(function (response) {
           return response.data;
         });
       } catch (e) {
@@ -454,7 +460,7 @@ createResolver({
 
       try {
         var url = context.dbUrl + "/" + context.dbName + "/_find";
-        return Promise.resolve(axios.post(url, args)).then(function (response) {
+        return Promise.resolve(getAxios(context).post(url, args)).then(function (response) {
           return response.data;
         });
       } catch (e) {
@@ -504,7 +510,7 @@ createResolver({
           url += "?" + queryString.stringify(args);
         }
 
-        return Promise.resolve(axios.get(url)).then(function (response) {
+        return Promise.resolve(getAxios(context).get(url)).then(function (response) {
           return {
             _id: response.data._id,
             _rev: response.data._rev,
@@ -549,7 +555,7 @@ createResolver({
     info: function (parent, args, context, _info) {
       try {
         var url = "" + context.dbUrl;
-        return Promise.resolve(axios.get(url)).then(function (response) {
+        return Promise.resolve(getAxios(context).get(url)).then(function (response) {
           return response.data;
         });
       } catch (e) {
@@ -596,7 +602,7 @@ createResolver({
           url += "?" + queryString.stringify(args);
         }
 
-        return Promise.resolve(axios.get(url)).then(function (response) {
+        return Promise.resolve(getAxios(context).get(url)).then(function (response) {
           return response.data;
         });
       } catch (e) {
@@ -638,7 +644,7 @@ createResolver({
 
       try {
         var url = context.dbUrl + "/" + context.dbName + "/_design/" + ddoc + "/_search/" + index;
-        return Promise.resolve(axios.post(url, args)).then(function (response) {
+        return Promise.resolve(getAxios(context).post(url, args)).then(function (response) {
           return response.data;
         });
       } catch (e) {

@@ -1,13 +1,17 @@
-import axios from 'axios'
 import { gql } from 'apollo-server-core'
-import { createTestServer, dbUrl } from '../../test/util/createTestServer'
-import asJestMock from '../../test/util/asJestMock'
+import {
+  createTestServer,
+  dbUrl,
+  dbName,
+} from '../../test/util/createTestServer'
+
+const axios = {
+  post: jest.fn(),
+}
+
+jest.mock('../../util/getAxios', () => () => axios)
 
 const { query } = createTestServer()
-
-jest.mock('axios', () => ({
-  post: jest.fn(),
-}))
 
 describe('bulkDocs', () => {
   afterEach(() => {
@@ -15,7 +19,7 @@ describe('bulkDocs', () => {
   })
 
   it('should create docs', async () => {
-    asJestMock(axios.post).mockResolvedValueOnce({
+    axios.post.mockResolvedValueOnce({
       data: [
         {
           id: '1',
@@ -74,7 +78,7 @@ describe('bulkDocs', () => {
         },
       ],
     })
-    expect(axios.post).toHaveBeenCalledWith(`${dbUrl}/_bulk_docs`, {
+    expect(axios.post).toHaveBeenCalledWith(`${dbUrl}/${dbName}/_bulk_docs`, {
       docs: [
         {
           _id: '1',
@@ -89,7 +93,7 @@ describe('bulkDocs', () => {
   })
 
   it('should update docs', async () => {
-    asJestMock(axios.post).mockResolvedValueOnce({
+    axios.post.mockResolvedValueOnce({
       data: [
         {
           id: '1',
@@ -150,7 +154,7 @@ describe('bulkDocs', () => {
         },
       ],
     })
-    expect(axios.post).toHaveBeenCalledWith(`${dbUrl}/_bulk_docs`, {
+    expect(axios.post).toHaveBeenCalledWith(`${dbUrl}/${dbName}/_bulk_docs`, {
       docs: [
         {
           _id: '1',
@@ -168,7 +172,7 @@ describe('bulkDocs', () => {
 
   it('should upsert docs', async () => {
     // allDocs
-    asJestMock(axios.post)
+    axios.post
       .mockResolvedValueOnce({
         data: {
           rows: [
@@ -247,7 +251,7 @@ describe('bulkDocs', () => {
         },
       ],
     })
-    expect(axios.post).toHaveBeenCalledWith(`${dbUrl}/_bulk_docs`, {
+    expect(axios.post).toHaveBeenCalledWith(`${dbUrl}/${dbName}/_bulk_docs`, {
       docs: [
         {
           _id: '1',
@@ -264,7 +268,7 @@ describe('bulkDocs', () => {
   })
 
   it('should have errors for failed docs', async () => {
-    asJestMock(axios.post).mockResolvedValueOnce({
+    axios.post.mockResolvedValueOnce({
       data: [
         {
           id: '1',

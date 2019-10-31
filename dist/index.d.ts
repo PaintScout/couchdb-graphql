@@ -94,6 +94,9 @@ declare const resolvers_$5: import("@apollographql/apollo-tools").GraphQLResolve
  */
 declare const typeDefs_$6: import("graphql").DocumentNode;
 declare const resolvers_$6: import("@apollographql/apollo-tools").GraphQLResolverMap<{
+    /**
+     * Generic GET on a document
+     */
     dbName: string;
     dbUrl: string;
 }>;
