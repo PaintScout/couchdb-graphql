@@ -158,7 +158,7 @@ var resolvers = {
                 rev = _rev;
               });
             }, function (e) {
-              if (e.status !== 404) {
+              if (!e.response || e.response.status !== 404) {
                 throw e;
               }
             });
@@ -247,7 +247,7 @@ var resolvers$1 = {
             })).then(function (_ref2) {
               var allDocs = _ref2.data;
               allDocs.rows.forEach(function (row) {
-                previousRevs[row.id] = row.value.rev;
+                previousRevs[row.id] = row.value ? row.value.rev : null;
               });
             });
           }

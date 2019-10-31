@@ -37,7 +37,7 @@ export const resolvers = {
         )
 
         allDocs.rows.forEach(row => {
-          previousRevs[row.id] = row.value.rev
+          previousRevs[row.id] = row.value ? row.value.rev : null
         })
       }
 
