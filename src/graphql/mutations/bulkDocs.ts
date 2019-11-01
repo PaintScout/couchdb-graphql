@@ -1,5 +1,6 @@
 import { gql } from 'apollo-server-core'
 import getAxios from '../../util/getAxios'
+import resolveConflicts from '../../util/resolveConflicts'
 
 export const typeDefs = gql`
   type BulkDocsResponseObject {
@@ -21,7 +22,12 @@ export const typeDefs = gql`
 
 export const resolvers = {
   Mutation: {
-    bulkDocs: async (parent, { input, upsert, new_edits }, context, info) => {
+    bulkDocs: async (
+      parent,
+      { input, upsert, new_edits = true },
+      context,
+      info
+    ) => {
       let url = `${context.dbUrl}/${context.dbName}/_bulk_docs`
       let previousRevs: Record<string, string> = {}
 
@@ -42,16 +48,40 @@ export const resolvers = {
       }
 
       const response = await getAxios(context).post(url, {
-        docs: input.map(i => ({
-          ...i,
-          _rev: upsert && i._id ? previousRevs[i._id] : i._rev,
+        docs: input.map(doc => ({
+          ...doc,
+          _rev: upsert && doc._id ? previousRevs[doc._id] : doc._rev,
         })),
         new_edits,
       })
 
-      const results = response.data
+      let saveResults = response.data
+      const conflicts = response.data.filter(
+        result => result.error === 'conflict'
+      )
 
-      return results.map((result, index) => {
+      if (conflicts) {
+        const resolved = await resolveConflicts(
+          input.filter(doc =>
+            conflicts.find(conflict => conflict.id === doc._id)
+          ),
+          context
+        )
+
+        // update any "conflict" results with the resolved result
+        saveResults = saveResults.map(saveResult => {
+          const resolvedDoc = resolved.find(
+            resolvedResult => resolvedResult.id === saveResult.id
+          )
+          if (saveResult.error === 'conflict' && resolvedDoc) {
+            return resolvedDoc
+          }
+
+          return saveResult
+        })
+      }
+
+      return saveResults.map((result, index) => {
         const document = input[index]
 
         const _rev = result.error

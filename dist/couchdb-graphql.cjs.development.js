@@ -346,44 +346,75 @@ var resolvers$1 = {
     bulkDocs: function (parent, _ref, context, info) {
       var input = _ref.input,
           upsert = _ref.upsert,
-          new_edits = _ref.new_edits;
+          _ref$new_edits = _ref.new_edits,
+          new_edits = _ref$new_edits === void 0 ? true : _ref$new_edits;
 
       try {
-        var _temp3 = function _temp3() {
+        var _temp5 = function _temp5() {
           return Promise.resolve(getAxios(context).post(url, {
-            docs: input.map(function (i) {
-              return _extends({}, i, {
-                _rev: upsert && i._id ? previousRevs[i._id] : i._rev
+            docs: input.map(function (doc) {
+              return _extends({}, doc, {
+                _rev: upsert && doc._id ? previousRevs[doc._id] : doc._rev
               });
             }),
             new_edits: new_edits
           })).then(function (response) {
-            var results = response.data;
-            return results.map(function (result, index) {
-              var document = input[index];
+            function _temp2() {
+              return saveResults.map(function (result, index) {
+                var document = input[index];
 
-              var _rev = result.error ? // if an error, return the last _rev
-              previousRevs[document._id] || document._rev : // otherwise result.rev will be populated
-              result.rev;
+                var _rev = result.error ? // if an error, return the last _rev
+                previousRevs[document._id] || document._rev : // otherwise result.rev will be populated
+                result.rev;
 
-              return {
-                _id: result.id,
-                _rev: _rev,
-                error: result.error,
-                reason: result.reason,
-                document: _extends({}, document, {
+                return {
                   _id: result.id,
-                  _rev: _rev
-                })
-              };
+                  _rev: _rev,
+                  error: result.error,
+                  reason: result.reason,
+                  document: _extends({}, document, {
+                    _id: result.id,
+                    _rev: _rev
+                  })
+                };
+              });
+            }
+
+            var saveResults = response.data;
+            var conflicts = response.data.filter(function (result) {
+              return result.error === 'conflict';
             });
+
+            var _temp = function () {
+              if (conflicts) {
+                return Promise.resolve(resolveConflicts(input.filter(function (doc) {
+                  return conflicts.find(function (conflict) {
+                    return conflict.id === doc._id;
+                  });
+                }), context)).then(function (resolved) {
+                  saveResults = saveResults.map(function (saveResult) {
+                    var resolvedDoc = resolved.find(function (resolvedResult) {
+                      return resolvedResult.id === saveResult.id;
+                    });
+
+                    if (saveResult.error === 'conflict' && resolvedDoc) {
+                      return resolvedDoc;
+                    }
+
+                    return saveResult;
+                  });
+                });
+              }
+            }();
+
+            return _temp && _temp.then ? _temp.then(_temp2) : _temp2(_temp);
           });
         };
 
         var url = context.dbUrl + "/" + context.dbName + "/_bulk_docs";
         var previousRevs = {}; // get previous _revs for upsert
 
-        var _temp4 = function () {
+        var _temp6 = function () {
           if (upsert) {
             var ids = input.map(function (i) {
               return i._id;
@@ -401,7 +432,7 @@ var resolvers$1 = {
           }
         }();
 
-        return Promise.resolve(_temp4 && _temp4.then ? _temp4.then(_temp3) : _temp3(_temp4));
+        return Promise.resolve(_temp6 && _temp6.then ? _temp6.then(_temp5) : _temp5(_temp6));
       } catch (e) {
         return Promise.reject(e);
       }

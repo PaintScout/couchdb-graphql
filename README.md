@@ -19,7 +19,13 @@ const server = new ApolloServer({
       dbName: 'my-database',
 
       // optional
-      dbHeaders: { ... } // headers to be sent for requests made to couchdb
+      dbHeaders: { ... }, // headers to be sent for requests made to couchdb
+
+      // optional - is called to resolve a document if a save is rejected by a conflict
+      async onResolveConflict({ document, conflicts }) {
+        // upserts document
+        return document
+      }
     }
   },
 })

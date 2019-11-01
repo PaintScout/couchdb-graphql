@@ -27,7 +27,7 @@ declare const resolvers_$0: {
         bulkDocs: (parent: any, { input, upsert, new_edits }: {
             input: any;
             upsert: any;
-            new_edits: any;
+            new_edits?: boolean | undefined;
         }, context: any, info: any) => Promise<any>;
     };
 };
@@ -42,7 +42,7 @@ declare module bulkDocs {
             bulkDocs: (parent: any, { input, upsert, new_edits }: {
                 input: any;
                 upsert: any;
-                new_edits: any;
+                new_edits?: boolean | undefined;
             }, context: any, info: any) => Promise<any>;
         };
     };
@@ -117,4 +117,4 @@ interface CreateSchemaOptions {
  * Creates a GraphQL Schema for CouchDB
  */
 declare function createSchema({ schemas, cloudant, }?: CreateSchemaOptions): import("graphql").GraphQLSchema;
-export { put, bulkDocs, get, info, bulkGet, changes, search, find, query, allDocs, CreateSchemaOptions, createSchema, queries, mutations, base };
+export { put, bulkDocs, get, info, bulkGet, changes, search, find, query, allDocs, CreateSchemaOptions, createSchema, CouchDbContext, queries, mutations, base };
