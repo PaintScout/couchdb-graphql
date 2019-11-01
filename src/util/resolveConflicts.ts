@@ -1,4 +1,4 @@
-import { CouchDbContext } from '..'
+import { CouchDbContext } from './createResolver'
 import getAxios from './getAxios'
 
 /**

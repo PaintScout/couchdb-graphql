@@ -1,13 +1,26 @@
-import { GraphQLSchemaModule } from "apollo-server-core";
 import { GraphQLResolverMap } from "@apollographql/apollo-tools";
+import { GraphQLSchemaModule } from "apollo-server-core";
 declare const base: {
     typeDefs: import("graphql").DocumentNode;
 };
+interface CouchDbDocument {
+    _id: string;
+    _rev?: string;
+}
+interface CouchDbContext {
+    dbUrl: string;
+    dbName: string;
+    onResolveConflict: <T extends CouchDbDocument>(args: {
+        document: T;
+        conflicts: T[];
+        context: CouchDbContext;
+    }) => T;
+}
 /**
  * PUTs a document using _bulk_docs endpoint
  */
 declare const typeDefs: import("graphql").DocumentNode;
-declare const resolvers: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
+declare const resolvers: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../../util/createResolver").CouchDbContext>;
 declare const typeDefs_$0: import("graphql").DocumentNode;
 declare const resolvers_$0: {
     Mutation: {
@@ -20,7 +33,7 @@ declare const resolvers_$0: {
 };
 declare module put {
     const typeDefs: import("graphql").DocumentNode;
-    const resolvers: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
+    const resolvers: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../../util/createResolver").CouchDbContext>;
 }
 declare module bulkDocs {
     const typeDefs_$0: import("graphql").DocumentNode;
@@ -35,61 +48,61 @@ declare module bulkDocs {
     };
 }
 declare const typeDefs_$1: import("graphql").DocumentNode;
-declare const resolvers_$1: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
+declare const resolvers_$1: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../../util/createResolver").CouchDbContext>;
 /**
  * Generic GET on a document
  */
 declare const typeDefs_$2: import("graphql").DocumentNode;
-declare const resolvers_$2: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
+declare const resolvers_$2: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../../util/createResolver").CouchDbContext>;
 declare const typeDefs_$3: import("graphql").DocumentNode;
-declare const resolvers_$3: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
+declare const resolvers_$3: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../../util/createResolver").CouchDbContext>;
 declare const typeDefs_$4: import("graphql").DocumentNode;
-declare const resolvers_$4: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
+declare const resolvers_$4: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../../util/createResolver").CouchDbContext>;
 /**
  * Generic GET on a document
  */
 declare const typeDefs_$5: import("graphql").DocumentNode;
-declare const resolvers_$5: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
+declare const resolvers_$5: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../../util/createResolver").CouchDbContext>;
 /**
  * Generic GET on a document
  */
 declare const typeDefs_$6: import("graphql").DocumentNode;
-declare const resolvers_$6: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
+declare const resolvers_$6: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../../util/createResolver").CouchDbContext>;
 declare const typeDefs_$7: import("graphql").DocumentNode;
-declare const resolvers_$7: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
+declare const resolvers_$7: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../../util/createResolver").CouchDbContext>;
 declare const typeDefs_$8: import("graphql").DocumentNode;
-declare const resolvers_$8: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
+declare const resolvers_$8: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../../util/createResolver").CouchDbContext>;
 declare module allDocs {
     const typeDefs_$1: import("graphql").DocumentNode;
-    const resolvers_$1: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
+    const resolvers_$1: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../../util/createResolver").CouchDbContext>;
 }
 declare module bulkGet {
     const typeDefs_$2: import("graphql").DocumentNode;
-    const resolvers_$2: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
+    const resolvers_$2: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../../util/createResolver").CouchDbContext>;
 }
 declare module changes {
     const typeDefs_$3: import("graphql").DocumentNode;
-    const resolvers_$3: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
+    const resolvers_$3: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../../util/createResolver").CouchDbContext>;
 }
 declare module find {
     const typeDefs_$4: import("graphql").DocumentNode;
-    const resolvers_$4: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
+    const resolvers_$4: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../../util/createResolver").CouchDbContext>;
 }
 declare module get {
     const typeDefs_$5: import("graphql").DocumentNode;
-    const resolvers_$5: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
+    const resolvers_$5: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../../util/createResolver").CouchDbContext>;
 }
 declare module info {
     const typeDefs_$6: import("graphql").DocumentNode;
-    const resolvers_$6: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
+    const resolvers_$6: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../../util/createResolver").CouchDbContext>;
 }
 declare module query {
     const typeDefs_$7: import("graphql").DocumentNode;
-    const resolvers_$7: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
+    const resolvers_$7: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../../util/createResolver").CouchDbContext>;
 }
 declare module search {
     const typeDefs_$8: import("graphql").DocumentNode;
-    const resolvers_$8: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
+    const resolvers_$8: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../../util/createResolver").CouchDbContext>;
 }
 interface CreateSchemaOptions {
     /**
@@ -104,17 +117,4 @@ interface CreateSchemaOptions {
  * Creates a GraphQL Schema for CouchDB
  */
 declare function createSchema({ schemas, cloudant, }?: CreateSchemaOptions): import("graphql").GraphQLSchema;
-interface CouchDbDocument {
-    _id: string;
-    _rev?: string;
-}
-export interface CouchDbContext {
-    dbUrl: string;
-    dbName: string;
-    onResolveConflict: <T extends CouchDbDocument>(args: {
-        document: T;
-        conflicts: T[];
-        context: CouchDbContext;
-    }) => T;
-}
 export { put, bulkDocs, get, info, bulkGet, changes, search, find, query, allDocs, CreateSchemaOptions, createSchema, queries, mutations, base };
