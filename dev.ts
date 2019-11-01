@@ -11,6 +11,10 @@ const server = new ApolloServer({
       onResolveConflict({ document, conflicts, context }) {
         return document
       },
+      onConflictsResolved(documents) {
+        console.log('Documents resolved:')
+        console.log(documents)
+      },
     } as CouchDbContext
   },
 })

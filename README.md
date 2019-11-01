@@ -25,7 +25,13 @@ const server = new ApolloServer({
       async onResolveConflict({ document, conflicts }) {
         // upserts document
         return document
-      }
+      },
+
+      // optional - called when documents have been successfully resolved
+      onConflictsResolved(documents) {
+        console.log('Documents resolved:')
+        console.log(documents)
+      },
     }
   },
 })

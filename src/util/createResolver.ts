@@ -3,6 +3,7 @@ import { GraphQLResolverMap } from '@apollographql/apollo-tools'
 interface CouchDbDocument {
   _id: string
   _rev?: string
+  [key: string]: any
 }
 
 export interface CouchDbContext {
@@ -13,6 +14,7 @@ export interface CouchDbContext {
     conflicts: T[]
     context: CouchDbContext
   }) => T
+  onConflictsResolved: <T extends CouchDbDocument>(documents: T[]) => any
 }
 
 export default function createResolver(

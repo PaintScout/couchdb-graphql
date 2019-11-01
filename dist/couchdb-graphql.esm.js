@@ -191,7 +191,7 @@ var resolveConflicts = function resolveConflicts(documents, context) {
           return Promise.reject(e);
         }
       }))).then(function (resolvedDocs) {
-        var docsToSave = [].concat(resolvedDocs, Object.keys(conflictingDocuments).reduce(function (deleted, docId) {
+        docsToSave = [].concat(resolvedDocs, Object.keys(conflictingDocuments).reduce(function (deleted, docId) {
           return [].concat(deleted, conflictingDocuments[docId].conflicts.map(function (conflict) {
             return _extends({}, conflict, {
               _deleted: true
@@ -202,7 +202,22 @@ var resolveConflicts = function resolveConflicts(documents, context) {
         }, []));
         return Promise.resolve(getAxios(context).post(context.dbUrl + "/" + context.dbName + "/_bulk_docs", {
           docs: docsToSave
-        })).then(function (response) {
+        })).then(function (_getAxios$post) {
+          response = _getAxios$post;
+
+          if (context.onConflictsResolved) {
+            context.onConflictsResolved(response.data.filter(function (result) {
+              return result.ok;
+            }).map(function (result) {
+              return _extends({}, docsToSave.find(function (doc) {
+                return doc._id === result.id;
+              }), {
+                _rev: result.rev,
+                _id: result.id
+              });
+            }));
+          }
+
           return response.data;
         });
       });
@@ -388,6 +403,7 @@ var resolvers$1 = {
                     return conflict.id === doc._id;
                   });
                 }), context)).then(function (resolved) {
+                  // update any "conflict" results with the resolved result
                   saveResults = saveResults.map(function (saveResult) {
                     var resolvedDoc = resolved.find(function (resolvedResult) {
                       return resolvedResult.id === saveResult.id;

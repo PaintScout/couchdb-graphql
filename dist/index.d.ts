@@ -6,6 +6,7 @@ declare const base: {
 interface CouchDbDocument {
     _id: string;
     _rev?: string;
+    [key: string]: any;
 }
 interface CouchDbContext {
     dbUrl: string;
@@ -15,6 +16,7 @@ interface CouchDbContext {
         conflicts: T[];
         context: CouchDbContext;
     }) => T;
+    onConflictsResolved: <T extends CouchDbDocument>(documents: T[]) => any;
 }
 /**
  * PUTs a document using _bulk_docs endpoint
