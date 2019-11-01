@@ -1,6 +1,6 @@
 import { gql } from 'apollo-server-core'
 import getAxios from '../../util/getAxios'
-import resolveConflicts from '../../util/resolveConflicts'
+import { resolveConflicts } from '../../util/resolveConflicts'
 
 export const typeDefs = gql`
   type BulkDocsResponseObject {

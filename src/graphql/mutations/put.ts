@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core'
 import getAxios from '../../util/getAxios'
-import createResolver from '../../util/createResolver'
-import resolveConflicts from '../../util/resolveConflicts'
+import { createResolver } from '../../util/createResolver'
+import { resolveConflicts } from '../../util/resolveConflicts'
 
 /**
  * PUTs a document using _bulk_docs endpoint

@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core'
 import getAxios from '../../util/getAxios'
 import queryString from 'qs'
-import createResolver from '../../util/createResolver'
+import { createResolver } from '../../util/createResolver'
 
 export const typeDefs = gql`
   type QueryResponse {

@@ -17,8 +17,6 @@ export interface CouchDbContext {
   onConflictsResolved: <T extends CouchDbDocument>(documents: T[]) => any
 }
 
-export default function createResolver(
-  resolver: GraphQLResolverMap<CouchDbContext>
-) {
+export function createResolver(resolver: GraphQLResolverMap<CouchDbContext>) {
   return resolver
 }

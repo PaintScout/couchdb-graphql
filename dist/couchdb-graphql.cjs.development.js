@@ -99,13 +99,68 @@ function createResolver(resolver) {
 }
 
 /**
- * Resolves conflicts by calling context.onResolveConflict and saving its result
- */
-
-/**
  * Returns an object where the key is the doc id and the value is the rejected document
  * and full conflicting documents
  */
+
+/**
+ * Resolves conflicts by calling context.onResolveConflict and saving its result
+ */
+var resolveConflicts = function resolveConflicts(documents, context) {
+  try {
+    return Promise.resolve(getConflictsByDocument(documents, context)).then(function (conflictingDocuments) {
+      return Promise.resolve(Promise.all(Object.keys(conflictingDocuments).map(function (id) {
+        try {
+          return Promise.resolve(context.onResolveConflict({
+            document: conflictingDocuments[id].document,
+            conflicts: conflictingDocuments[id].conflicts,
+            context: context
+          })).then(function (_ref) {
+            var _conflicts = _ref._conflicts,
+                resolved = _objectWithoutPropertiesLoose(_ref, ["_conflicts"]);
+
+            return _extends({}, resolved, {
+              _rev: conflictingDocuments[id].revToSave
+            });
+          });
+        } catch (e) {
+          return Promise.reject(e);
+        }
+      }))).then(function (resolvedDocs) {
+        var docsToSave = [].concat(resolvedDocs, Object.keys(conflictingDocuments).reduce(function (deleted, docId) {
+          return [].concat(deleted, conflictingDocuments[docId].conflicts.map(function (conflict) {
+            return _extends({}, conflict, {
+              _deleted: true
+            });
+          }).filter(function (conflict) {
+            return conflict._rev !== conflictingDocuments[docId].revToSave;
+          }));
+        }, []));
+        return Promise.resolve(getAxios(context).post(context.dbUrl + "/" + context.dbName + "/_bulk_docs", {
+          docs: docsToSave
+        })).then(function (response) {
+          if (context.onConflictsResolved) {
+            context.onConflictsResolved(response.data.filter(function (result) {
+              return result.ok;
+            }).map(function (result) {
+              return _extends({}, docsToSave.find(function (doc) {
+                return doc._id === result.id;
+              }), {
+                _rev: result.rev,
+                _id: result.id
+              });
+            }));
+          }
+
+          return response.data;
+        });
+      });
+    });
+  } catch (e) {
+    return Promise.reject(e);
+  }
+};
+
 var getConflictsByDocument = function getConflictsByDocument(documents, context) {
   try {
     // get _conflicts for each document
@@ -135,7 +190,7 @@ var getConflictsByDocument = function getConflictsByDocument(documents, context)
           return !!doc;
         });
       })).then(function (conflictingDocuments) {
-        return documentsWithConflictRevs.reduce(function (result, doc) {
+        var result = documentsWithConflictRevs.reduce(function (result, doc) {
           if (!result[doc._id]) {
             var conflictedDoc = documentsWithConflictRevs.find(function (d) {
               return d._id === doc._id;
@@ -166,64 +221,7 @@ var getConflictsByDocument = function getConflictsByDocument(documents, context)
 
           return result;
         }, {});
-      });
-    });
-  } catch (e) {
-    return Promise.reject(e);
-  }
-};
-
-var resolveConflicts = function resolveConflicts(documents, context) {
-  try {
-    return Promise.resolve(getConflictsByDocument(documents, context)).then(function (_getConflictsByDocume) {
-      conflictingDocuments = _getConflictsByDocume;
-      return Promise.resolve(Promise.all(Object.keys(conflictingDocuments).map(function (id) {
-        try {
-          return Promise.resolve(context.onResolveConflict({
-            document: conflictingDocuments[id].document,
-            conflicts: conflictingDocuments[id].conflicts,
-            context: context
-          })).then(function (_ref) {
-            var _conflicts = _ref._conflicts,
-                resolved = _objectWithoutPropertiesLoose(_ref, ["_conflicts"]);
-
-            return _extends({}, resolved, {
-              _rev: conflictingDocuments[id].revToSave
-            });
-          });
-        } catch (e) {
-          return Promise.reject(e);
-        }
-      }))).then(function (resolvedDocs) {
-        docsToSave = [].concat(resolvedDocs, Object.keys(conflictingDocuments).reduce(function (deleted, docId) {
-          return [].concat(deleted, conflictingDocuments[docId].conflicts.map(function (conflict) {
-            return _extends({}, conflict, {
-              _deleted: true
-            });
-          }).filter(function (conflict) {
-            return conflict._rev !== conflictingDocuments[docId].revToSave;
-          }));
-        }, []));
-        return Promise.resolve(getAxios(context).post(context.dbUrl + "/" + context.dbName + "/_bulk_docs", {
-          docs: docsToSave
-        })).then(function (_getAxios$post) {
-          response = _getAxios$post;
-
-          if (context.onConflictsResolved) {
-            context.onConflictsResolved(response.data.filter(function (result) {
-              return result.ok;
-            }).map(function (result) {
-              return _extends({}, docsToSave.find(function (doc) {
-                return doc._id === result.id;
-              }), {
-                _rev: result.rev,
-                _id: result.id
-              });
-            }));
-          }
-
-          return response.data;
-        });
+        return result;
       });
     });
   } catch (e) {
@@ -886,7 +884,9 @@ function createSchema(_temp) {
 }
 
 exports.base = base;
+exports.createResolver = createResolver;
 exports.createSchema = createSchema;
 exports.mutations = mutations;
 exports.queries = queries;
+exports.resolveConflicts = resolveConflicts;
 //# sourceMappingURL=couchdb-graphql.cjs.development.js.map

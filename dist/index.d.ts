@@ -18,6 +18,11 @@ interface CouchDbContext {
     }) => T;
     onConflictsResolved: <T extends CouchDbDocument>(documents: T[]) => any;
 }
+declare function createResolver(resolver: GraphQLResolverMap<CouchDbContext>): GraphQLResolverMap<CouchDbContext>;
+/**
+ * Resolves conflicts by calling context.onResolveConflict and saving its result
+ */
+declare function resolveConflicts(documents: any[], context: CouchDbContext): Promise<any>;
 /**
  * PUTs a document using _bulk_docs endpoint
  */
@@ -119,4 +124,4 @@ interface CreateSchemaOptions {
  * Creates a GraphQL Schema for CouchDB
  */
 declare function createSchema({ schemas, cloudant, }?: CreateSchemaOptions): import("graphql").GraphQLSchema;
-export { put, bulkDocs, get, info, bulkGet, changes, search, find, query, allDocs, CreateSchemaOptions, createSchema, CouchDbContext, queries, mutations, base };
+export { put, bulkDocs, get, info, bulkGet, changes, search, find, query, allDocs, CreateSchemaOptions, createSchema, resolveConflicts, CouchDbContext, createResolver, queries, mutations, base };
