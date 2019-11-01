@@ -1,13 +1,17 @@
 import { ApolloServer } from 'apollo-server'
-import { createSchema } from './src/createSchema'
+import { createSchema, CouchDbContext } from './src'
 
 const server = new ApolloServer({
   schema: createSchema(),
   context: ({ req }) => {
     return {
       dbUrl: process.env.DB_URL,
-      dbName: req.headers.db,
-    }
+      // dbName: req.headers.db,
+      dbName: 'yhufhcglgjveqzgn',
+      onResolveConflict({ document, conflicts, context }) {
+        return document
+      },
+    } as CouchDbContext
   },
 })
 

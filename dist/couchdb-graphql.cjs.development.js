@@ -94,6 +94,128 @@ function getAxios(context) {
   });
 }
 
+function createResolver(resolver) {
+  return resolver;
+}
+
+/**
+ * Resolves conflicts by calling context.onResolveConflict and saving its result
+ */
+
+/**
+ * Returns an object where the key is the doc id and the value is the rejected document
+ * and full conflicting documents
+ */
+var getConflictsByDocument = function getConflictsByDocument(documents, context) {
+  try {
+    // get _conflicts for each document
+    return Promise.resolve(getAxios(context).post(context.dbUrl + "/" + context.dbName + "/_all_docs?conflicts=true&include_docs=true", {
+      keys: documents.map(function (doc) {
+        return doc._id;
+      })
+    }).then(function (res) {
+      return res.data.rows.map(function (row) {
+        return row.doc;
+      });
+    })).then(function (documentsWithConflictRevs) {
+      // get full document for each _conflict
+      return Promise.resolve(getAxios(context).post(context.dbUrl + "/" + context.dbName + "/_bulk_get", {
+        docs: documentsWithConflictRevs.reduce(function (conflicts, doc) {
+          return [].concat(conflicts, (doc._conflicts || []).map(function (rev) {
+            return {
+              id: doc._id,
+              rev: rev
+            };
+          }));
+        }, [])
+      }).then(function (res) {
+        return res.data.results.map(function (row) {
+          return row.docs[0].ok;
+        }).filter(function (doc) {
+          return !!doc;
+        });
+      })).then(function (conflictingDocuments) {
+        return documentsWithConflictRevs.reduce(function (result, doc) {
+          if (!result[doc._id]) {
+            var conflictedDoc = documentsWithConflictRevs.find(function (d) {
+              return d._id === doc._id;
+            });
+            result[doc._id] = {
+              // the document rejected by the conflict
+              document: documents.find(function (original) {
+                return original._id === doc._id;
+              }),
+              // all conflicts in the db including the one with _conflicts
+              conflicts: [doc],
+              revToSave: conflictedDoc._rev
+            };
+          } // check if any _conflicts were for this document
+
+
+          var conflicts = conflictingDocuments.filter(function (d) {
+            return d._id === doc._id;
+          });
+
+          if (conflicts) {
+            var _extends2;
+
+            return _extends({}, result, (_extends2 = {}, _extends2[doc._id] = _extends({}, result[doc._id], {
+              conflicts: [].concat(result[doc._id].conflicts, conflicts)
+            }), _extends2));
+          }
+
+          return result;
+        }, {});
+      });
+    });
+  } catch (e) {
+    return Promise.reject(e);
+  }
+};
+
+var resolveConflicts = function resolveConflicts(documents, context) {
+  try {
+    return Promise.resolve(getConflictsByDocument(documents, context)).then(function (_getConflictsByDocume) {
+      conflictingDocuments = _getConflictsByDocume;
+      return Promise.resolve(Promise.all(Object.keys(conflictingDocuments).map(function (id) {
+        try {
+          return Promise.resolve(context.onResolveConflict({
+            document: conflictingDocuments[id].document,
+            conflicts: conflictingDocuments[id].conflicts,
+            context: context
+          })).then(function (_ref) {
+            var _conflicts = _ref._conflicts,
+                resolved = _objectWithoutPropertiesLoose(_ref, ["_conflicts"]);
+
+            return _extends({}, resolved, {
+              _rev: conflictingDocuments[id].revToSave
+            });
+          });
+        } catch (e) {
+          return Promise.reject(e);
+        }
+      }))).then(function (resolvedDocs) {
+        var docsToSave = [].concat(resolvedDocs, Object.keys(conflictingDocuments).reduce(function (deleted, docId) {
+          return [].concat(deleted, conflictingDocuments[docId].conflicts.map(function (conflict) {
+            return _extends({}, conflict, {
+              _deleted: true
+            });
+          }).filter(function (conflict) {
+            return conflict._rev !== conflictingDocuments[docId].revToSave;
+          }));
+        }, []));
+        return Promise.resolve(getAxios(context).post(context.dbUrl + "/" + context.dbName + "/_bulk_docs", {
+          docs: docsToSave
+        })).then(function (response) {
+          return response.data;
+        });
+      });
+    });
+  } catch (e) {
+    return Promise.reject(e);
+  }
+};
+
 function _templateObject$1() {
   var data = _taggedTemplateLiteralLoose(["\n  type PutResponse {\n    _id: String!\n    _rev: String\n    document: JSON\n  }\n\n  extend type Mutation {\n    put(input: JSON, upsert: Boolean, new_edits: Boolean): PutResponse\n  }\n"]);
 
@@ -112,45 +234,67 @@ var typeDefs =
 apolloServerCore.gql(
 /*#__PURE__*/
 _templateObject$1());
-var resolvers = {
+var resolvers =
+/*#__PURE__*/
+createResolver({
   Mutation: {
     put: function (parent, _ref, context, info) {
       var input = _ref.input,
           upsert = _ref.upsert,
-          new_edits = _ref.new_edits;
+          _ref$new_edits = _ref.new_edits,
+          new_edits = _ref$new_edits === void 0 ? true : _ref$new_edits;
 
       try {
-        var _temp3 = function _temp3(_result2) {
-          return _exit2 ? _result2 : Promise.resolve(getAxios(context).post(url, {
+        var _temp5 = function _temp5(_result2) {
+          return _exit3 ? _result2 : Promise.resolve(getAxios(context).post(url, {
             docs: [_extends({}, input, {
               _rev: rev
             })],
             new_edits: new_edits
           })).then(function (response) {
+            var _exit2 = false;
+
+            function _temp2(_result4) {
+              return _exit2 ? _result4 : result ? {
+                _id: result.id,
+                _rev: result.rev,
+                document: _extends({}, input, {
+                  _id: result.id,
+                  _rev: result.rev
+                })
+              } : {};
+            }
+
             var _response$data = response.data,
                 result = _response$data[0];
 
-            if (result.error) {
-              console.error(result.error + ': ' + result.reason);
-              throw new Error(result.reason);
-            }
+            var _temp = function () {
+              if (result && result.error) {
+                return function () {
+                  if (result.error === 'conflict' && result.id && context.onResolveConflict) {
+                    return Promise.resolve(resolveConflicts([input], context)).then(function (resolved) {
+                      result = resolved[0];
 
-            return {
-              _id: result.id,
-              _rev: result.rev,
-              document: _extends({}, input, {
-                _id: result.id,
-                _rev: result.rev
-              })
-            };
+                      if (result.error) {
+                        throw new Error(result.reason);
+                      }
+                    });
+                  } else {
+                    throw new Error(result.reason);
+                  }
+                }();
+              }
+            }();
+
+            return _temp && _temp.then ? _temp.then(_temp2) : _temp2(_temp);
           });
         };
 
-        var _exit2 = false;
+        var _exit3 = false;
         var url = context.dbUrl + "/" + context.dbName + "/_bulk_docs";
         var rev = input._rev; // get previous _rev for upsert
 
-        var _temp4 = function () {
+        var _temp6 = function () {
           if (upsert) {
             if (!input._id) {
               throw Error('upsert option requires input to contain _id');
@@ -169,13 +313,13 @@ var resolvers = {
           }
         }();
 
-        return Promise.resolve(_temp4 && _temp4.then ? _temp4.then(_temp3) : _temp3(_temp4));
+        return Promise.resolve(_temp6 && _temp6.then ? _temp6.then(_temp5) : _temp5(_temp6));
       } catch (e) {
         return Promise.reject(e);
       }
     }
   }
-};
+});
 
 var put = ({
   __proto__: null,
@@ -278,10 +422,6 @@ var mutations = ({
   put: put,
   bulkDocs: bulkDocs
 });
-
-function createResolver(resolver) {
-  return resolver;
-}
 
 function _templateObject$3() {
   var data = _taggedTemplateLiteralLoose(["\n  type AllDocsRow {\n    id: String!\n    rev: String\n    value: JSON\n    doc: JSON\n  }\n\n  type AllDocsResponse {\n    total_rows: Int!\n    offset: Int!\n    rows: [AllDocsRow!]!\n  }\n\n  extend type Query {\n    allDocs(\n      conflicts: Boolean\n      endkey: JSON\n      include_docs: Boolean\n      inclusive_end: Boolean\n      key: JSON\n      keys: [JSON!]\n      limit: Int\n      skip: Int\n      startkey: JSON\n      update_seq: Boolean\n    ): AllDocsResponse\n  }\n"]);

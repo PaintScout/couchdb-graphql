@@ -32,7 +32,6 @@
     "@types/node": "^12.11.7",
     "@types/qs": "^6.5.3",
     "@types/query-string": "^6.3.0",
-    "apollo-server": "^2.9.7",
     "apollo-server-integration-testing": "^2.2.0",
     "apollo-server-testing": "^2.9.7",
     "express": "^4.17.1",
@@ -47,9 +46,10 @@
   "dependencies": {
     "@apollo/federation": "^0.10.2",
     "@apollographql/apollo-tools": "^0.4.0",
-    "apollo-server-core": "^2.9.7",
+    "apollo-server": "^2.9.7",
     "axios": "^0.19.0",
     "graphql": "^14.5.8",
+    "pouchdb-md5": "^7.1.1",
     "qs": "^6.9.0"
   }
 }

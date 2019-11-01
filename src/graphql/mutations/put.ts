@@ -1,5 +1,7 @@
 import { gql } from 'apollo-server-core'
 import getAxios from '../../util/getAxios'
+import createResolver from '../../util/createResolver'
+import resolveConflicts from '../../util/resolveConflicts'
 
 /**
  * PUTs a document using _bulk_docs endpoint
@@ -16,9 +18,9 @@ export const typeDefs = gql`
   }
 `
 
-export const resolvers = {
+export const resolvers = createResolver({
   Mutation: {
-    put: async (parent, { input, upsert, new_edits }, context, info) => {
+    put: async (parent, { input, upsert, new_edits = true }, context, info) => {
       let url = `${context.dbUrl}/${context.dbName}/_bulk_docs`
       let rev = input._rev
 
@@ -49,22 +51,36 @@ export const resolvers = {
         new_edits,
       })
 
-      const [result] = response.data
+      let [result] = response.data
 
-      if (result.error) {
-        console.error(result.error + ': ' + result.reason)
-        throw new Error(result.reason)
+      if (result && result.error) {
+        if (
+          result.error === 'conflict' &&
+          result.id &&
+          context.onResolveConflict
+        ) {
+          const resolved = await resolveConflicts([input], context)
+          result = resolved[0]
+
+          if (result.error) {
+            throw new Error(result.reason)
+          }
+        } else {
+          throw new Error(result.reason)
+        }
       }
 
-      return {
-        _id: result.id,
-        _rev: result.rev,
-        document: {
-          ...input,
-          _id: result.id,
-          _rev: result.rev,
-        },
-      }
+      return result
+        ? {
+            _id: result.id,
+            _rev: result.rev,
+            document: {
+              ...input,
+              _id: result.id,
+              _rev: result.rev,
+            },
+          }
+        : {}
     },
   },
-}
+})

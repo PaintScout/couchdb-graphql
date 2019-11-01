@@ -1,7 +1,8 @@
 import { GraphQLResolverMap } from '@apollographql/apollo-tools'
+import { CouchDbContext } from '..'
 
 export default function createResolver(
-  resolver: GraphQLResolverMap<{ dbName: string; dbUrl: string }>
+  resolver: GraphQLResolverMap<CouchDbContext>
 ) {
   return resolver
 }
