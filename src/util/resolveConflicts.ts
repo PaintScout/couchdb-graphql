@@ -80,11 +80,15 @@ export async function resolveConflicts(
   documents: any[],
   context: CouchDbContext
 ) {
+  if (!context.onResolveConflict) {
+    return null
+  }
+
   const conflictingDocuments = await getConflictsByDocument(documents, context)
 
   const resolvedDocs = await Promise.all(
     Object.keys(conflictingDocuments).map(async id => {
-      const { _conflicts, ...resolved } = await context.onResolveConflict({
+      const { _conflicts, ...resolved } = await context.onResolveConflict!({
         document: conflictingDocuments[id].document,
         conflicts: conflictingDocuments[id].conflicts,
         context,
