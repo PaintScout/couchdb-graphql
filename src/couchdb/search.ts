@@ -39,7 +39,7 @@ export interface SearchResponse {
 export async function search(
   context: CouchDbContext,
   { index, ddoc, ...options }: SearchOptions
-) {
+): Promise<SearchResponse> {
   let url = `${context.dbUrl}/${context.dbName}/_design/${ddoc}/_search/${index}`
 
   const response = await getAxios(context).post(url, options)
