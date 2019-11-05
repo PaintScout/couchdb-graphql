@@ -46,27 +46,26 @@ export const resolvers = createResolver({
         }
       }
 
-      const response = await getAxios(context).post(url, {
-        docs: [{ ...input, _rev: rev }],
-        new_edits,
-      })
+      const result = await getAxios(context)
+        .post(url, {
+          docs: [{ ...input, _rev: rev }],
+          new_edits,
+        })
+        .then(async res => {
+          const [result] = res.data
 
-      let [result] = response.data
+          // resolve conflicts
+          if (result && result.id && result.error === 'conflict') {
+            const resolved = await resolveConflicts([input], context)
+
+            return resolved[0]
+          }
+
+          return result
+        })
 
       if (result && result.error) {
-        if (result.error === 'conflict' && result.id) {
-          const resolved = await resolveConflicts([input], context)
-
-          if (resolved) {
-            result = resolved[0]
-          }
-
-          if (result.error) {
-            throw new Error(result.reason)
-          }
-        } else {
-          throw new Error(result.reason)
-        }
+        throw new Error(result.reason)
       }
 
       if (result) {

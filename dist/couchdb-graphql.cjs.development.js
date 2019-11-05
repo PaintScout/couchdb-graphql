@@ -262,71 +262,65 @@ createResolver({
           new_edits = _ref$new_edits === void 0 ? true : _ref$new_edits;
 
       try {
-        var _temp5 = function _temp5(_result2) {
-          return _exit3 ? _result2 : Promise.resolve(getAxios(context).post(url, {
+        var _temp3 = function _temp3(_result2) {
+          return _exit2 ? _result2 : Promise.resolve(getAxios(context).post(url, {
             docs: [_extends({}, input, {
               _rev: rev
             })],
             new_edits: new_edits
-          })).then(function (response) {
-            var _exit2 = false;
+          }).then(function (res) {
+            try {
+              var _exit4 = false;
+              var _res$data = res.data,
+                  result = _res$data[0]; // resolve conflicts
 
-            function _temp2(_result4) {
-              if (_exit2) return _result4;
-
-              if (result) {
-                var savedDocument = result && _extends({}, input, {
-                  _id: result.id,
-                  _rev: result.rev
-                });
-
-                if (context.onDocumentsSaved) {
-                  context.onDocumentsSaved([savedDocument]);
+              var _temp6 = function () {
+                if (result && result.id && result.error === 'conflict') {
+                  return Promise.resolve(resolveConflicts([input], context)).then(function (resolved) {
+                    _exit4 = true;
+                    return resolved[0];
+                  });
                 }
+              }();
 
-                return {
-                  _id: result.id,
-                  _rev: result.rev,
-                  document: savedDocument
-                };
-              } else {
-                // new_edits=false returns empty response
-                return {};
-              }
+              return Promise.resolve(_temp6 && _temp6.then ? _temp6.then(function (_result3) {
+                return _exit4 ? _result3 : result;
+              }) : _exit4 ? _temp6 : result);
+            } catch (e) {
+              return Promise.reject(e);
+            }
+          })).then(function (result) {
+            if (result && result.error) {
+              throw new Error(result.reason);
             }
 
-            var _response$data = response.data,
-                result = _response$data[0];
+            if (result) {
+              var savedDocument = result && _extends({}, input, {
+                _id: result.id,
+                _rev: result.rev
+              });
 
-            var _temp = function () {
-              if (result && result.error) {
-                return function () {
-                  if (result.error === 'conflict' && result.id) {
-                    return Promise.resolve(resolveConflicts([input], context)).then(function (resolved) {
-                      if (resolved) {
-                        result = resolved[0];
-                      }
-
-                      if (result.error) {
-                        throw new Error(result.reason);
-                      }
-                    });
-                  } else {
-                    throw new Error(result.reason);
-                  }
-                }();
+              if (context.onDocumentsSaved) {
+                context.onDocumentsSaved([savedDocument]);
               }
-            }();
 
-            return _temp && _temp.then ? _temp.then(_temp2) : _temp2(_temp);
+              return {
+                _id: result.id,
+                _rev: result.rev,
+                document: savedDocument
+              };
+            } else {
+              // new_edits=false returns empty response
+              return {};
+            }
           });
         };
 
-        var _exit3 = false;
+        var _exit2 = false;
         var url = context.dbUrl + "/" + context.dbName + "/_bulk_docs";
         var rev = input._rev; // get previous _rev for upsert
 
-        var _temp6 = function () {
+        var _temp4 = function () {
           if (upsert) {
             if (!input._id) {
               throw Error('upsert option requires input to contain _id');
@@ -345,7 +339,7 @@ createResolver({
           }
         }();
 
-        return Promise.resolve(_temp6 && _temp6.then ? _temp6.then(_temp5) : _temp5(_temp6));
+        return Promise.resolve(_temp4 && _temp4.then ? _temp4.then(_temp3) : _temp3(_temp4));
       } catch (e) {
         return Promise.reject(e);
       }
@@ -384,7 +378,7 @@ createResolver({
           new_edits = _ref$new_edits === void 0 ? true : _ref$new_edits;
 
       try {
-        var _temp5 = function _temp5() {
+        var _temp3 = function _temp3() {
           return Promise.resolve(getAxios(context).post(url, {
             docs: input.map(function (doc) {
               return _extends({}, doc, {
@@ -392,76 +386,84 @@ createResolver({
               });
             }),
             new_edits: new_edits
-          })).then(function (saveResponse) {
-            function _temp2() {
-              var response = saveResults.map(function (result, index) {
-                var document = input[index];
+          }).then(function (res) {
+            try {
+              var _temp7 = function _temp7(_result) {
+                return _exit2 ? _result : res.data;
+              };
 
-                var _rev = result.error ? // if an error, return the last _rev
-                previousRevs[document._id] || document._rev : // otherwise result.rev will be populated
-                result.rev;
-
-                return {
-                  _id: result.id,
-                  _rev: _rev,
-                  error: result.error,
-                  reason: result.reason,
-                  document: _extends({}, document, {
-                    _id: result.id,
-                    _rev: _rev
-                  })
-                };
+              var _exit2 = false;
+              // resolve conflicts
+              var conflicts = res.data.filter(function (result) {
+                return result.error === 'conflict';
               });
 
-              if (context.onDocumentsSaved) {
-                context.onDocumentsSaved(response.filter(function (res) {
-                  return !res.error;
-                }).map(function (res) {
-                  return res.document;
-                }));
-              }
+              var _temp8 = function () {
+                if (conflicts.length > 0) {
+                  return Promise.resolve(resolveConflicts(input.filter(function (doc) {
+                    return conflicts.find(function (conflict) {
+                      return conflict.id === doc._id;
+                    });
+                  }), context)).then(function (resolved) {
+                    if (resolved) {
+                      // update any "conflict" results with the resolved result
+                      _exit2 = true;
+                      return res.data.map(function (saveResult) {
+                        var resolvedDoc = resolved.find(function (resolvedResult) {
+                          return resolvedResult.id === saveResult.id;
+                        });
 
-              return response;
+                        if (saveResult.error === 'conflict' && resolvedDoc) {
+                          return resolvedDoc;
+                        }
+
+                        return saveResult;
+                      });
+                    }
+                  });
+                }
+              }();
+
+              return Promise.resolve(_temp8 && _temp8.then ? _temp8.then(_temp7) : _temp7(_temp8)); // return bulkDocs data
+            } catch (e) {
+              return Promise.reject(e);
             }
+          })).then(function (saveResults) {
+            var response = saveResults.map(function (result, index) {
+              var document = input[index];
 
-            var saveResults = saveResponse.data;
-            var conflicts = saveResponse.data.filter(function (result) {
-              return result.error === 'conflict';
+              var _rev = result.error ? // if an error, return the last _rev
+              previousRevs[document._id] || document._rev : // otherwise result.rev will be populated
+              result.rev;
+
+              return {
+                _id: result.id,
+                _rev: _rev,
+                error: result.error,
+                reason: result.reason,
+                document: _extends({}, document, {
+                  _id: result.id,
+                  _rev: _rev
+                })
+              };
             });
 
-            var _temp = function () {
-              if (conflicts.length > 0) {
-                return Promise.resolve(resolveConflicts(input.filter(function (doc) {
-                  return conflicts.find(function (conflict) {
-                    return conflict.id === doc._id;
-                  });
-                }), context)).then(function (resolved) {
-                  if (resolved) {
-                    // update any "conflict" results with the resolved result
-                    saveResults = saveResults.map(function (saveResult) {
-                      var resolvedDoc = resolved.find(function (resolvedResult) {
-                        return resolvedResult.id === saveResult.id;
-                      });
+            if (context.onDocumentsSaved) {
+              context.onDocumentsSaved(response.filter(function (res) {
+                return !res.error;
+              }).map(function (res) {
+                return res.document;
+              }));
+            }
 
-                      if (saveResult.error === 'conflict' && resolvedDoc) {
-                        return resolvedDoc;
-                      }
-
-                      return saveResult;
-                    });
-                  }
-                });
-              }
-            }();
-
-            return _temp && _temp.then ? _temp.then(_temp2) : _temp2(_temp);
+            return response;
           });
         };
 
         var url = context.dbUrl + "/" + context.dbName + "/_bulk_docs";
         var previousRevs = {}; // get previous _revs for upsert
 
-        var _temp6 = function () {
+        var _temp4 = function () {
           if (upsert) {
             var ids = input.map(function (i) {
               return i._id;
@@ -479,7 +481,7 @@ createResolver({
           }
         }();
 
-        return Promise.resolve(_temp6 && _temp6.then ? _temp6.then(_temp5) : _temp5(_temp6));
+        return Promise.resolve(_temp4 && _temp4.then ? _temp4.then(_temp3) : _temp3(_temp4));
       } catch (e) {
         return Promise.reject(e);
       }
