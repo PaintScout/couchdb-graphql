@@ -1,46 +1,6 @@
-import { gql } from 'apollo-server-core'
 import getAxios from '../util/getAxios'
 import queryString from 'qs'
 import { CouchDbContext } from '../util/createResolver'
-
-export const typeDefs = gql`
-  type Change {
-    rev: String
-  }
-  type ChangesResult {
-    changes: [Change]
-    id: String
-    seq: JSON
-    doc: JSON
-    deleted: Boolean
-  }
-
-  type ChangesResponse {
-    last_seq: JSON
-    pending: Int
-    results: [ChangesResult]
-  }
-
-  extend type Query {
-    changes(
-      doc_ids: [String!]
-      conflicts: Boolean
-      descending: Boolean
-      feed: String
-      filter: String
-      heartbeat: Int
-      include_docs: Boolean
-      attachments: Boolean
-      att_encoding_info: Boolean
-      lastEventId: Int
-      limit: Int
-      since: String
-      timeout: Int
-      view: String
-      seq_interval: Int
-    ): ChangesResponse
-  }
-`
 
 export interface ChangesOptions {
   doc_ids?: string[]
@@ -59,10 +19,22 @@ export interface ChangesOptions {
   view?: string
   seq_interval?: number
 }
+
+export interface ChangesResponse {
+  last_seq: any
+  pending: number
+  results: Array<{
+    changes: Array<{ rev: string }>
+    id: string
+    seq: any
+    doc: any
+    deleted?: boolean
+  }>
+}
 export async function changes(
   context: CouchDbContext,
   options: ChangesOptions
-) {
+): Promise<ChangesResponse> {
   const hasArgs = Object.keys(options).length > 0
   let url = `${context.dbUrl}/${context.dbName}/_changes`
 
