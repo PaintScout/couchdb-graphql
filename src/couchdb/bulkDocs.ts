@@ -3,11 +3,11 @@ import { resolveConflicts } from '../util/resolveConflicts'
 import { CouchDbDocument, CouchDbContext } from '../util/createResolver'
 
 export interface BulkDocsResponseObject {
-  _id: String
-  _rev?: String
+  _id: string
+  _rev?: string
   document?: CouchDbDocument
-  error?: String
-  reason?: String
+  error?: string
+  reason?: string
 }
 
 export type BulkDocsResponse = Array<BulkDocsResponseObject>

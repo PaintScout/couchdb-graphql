@@ -29,7 +29,7 @@ export interface SearchResponse {
   total_rows: number
   bookmark: string
   rows: Array<{
-    id: String
+    id: string
     order: number[]
     fields: Record<string, any>
   }>

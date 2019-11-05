@@ -21,9 +21,9 @@ export interface QueryOptions {
   skip?: number
   sorted?: boolean
   stable?: boolean
-  stale: String
+  stale: string
   startkey?: any | any[]
-  update?: String
+  update?: string
   update_seq?: boolean
 }
 
@@ -32,7 +32,7 @@ export interface QueryResponse {
   update_seq: any | any[]
   total_rows: number
   rows: Array<{
-    id: String
+    id: string
     key?: any | any[]
     value?: any
   }>

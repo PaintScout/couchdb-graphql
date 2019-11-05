@@ -35,11 +35,11 @@ declare function put<T extends CouchDbDocument>(context: CouchDbContext, doc: T,
 declare const typeDefs: import("graphql").DocumentNode;
 declare const resolvers: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../../util/createResolver").CouchDbContext>;
 interface BulkDocsResponseObject {
-    _id: String;
-    _rev?: String;
+    _id: string;
+    _rev?: string;
     document?: CouchDbDocument;
-    error?: String;
-    reason?: String;
+    error?: string;
+    reason?: string;
 }
 declare type BulkDocsResponse = Array<BulkDocsResponseObject>;
 interface BulkDocsOptions {
@@ -205,9 +205,9 @@ interface QueryOptions {
     skip?: number;
     sorted?: boolean;
     stable?: boolean;
-    stale: String;
+    stale: string;
     startkey?: any | any[];
-    update?: String;
+    update?: string;
     update_seq?: boolean;
 }
 interface QueryResponse {
@@ -215,7 +215,7 @@ interface QueryResponse {
     update_seq: any | any[];
     total_rows: number;
     rows: Array<{
-        id: String;
+        id: string;
         key?: any | any[];
         value?: any;
     }>;
@@ -247,7 +247,7 @@ interface SearchResponse {
     total_rows: number;
     bookmark: string;
     rows: Array<{
-        id: String;
+        id: string;
         order: number[];
         fields: Record<string, any>;
     }>;
