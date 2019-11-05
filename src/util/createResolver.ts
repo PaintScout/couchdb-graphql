@@ -1,6 +1,6 @@
 import { GraphQLResolverMap } from '@apollographql/apollo-tools'
 
-interface CouchDbDocument {
+export interface CouchDbDocument {
   _id: string
   _rev?: string
   [key: string]: any
