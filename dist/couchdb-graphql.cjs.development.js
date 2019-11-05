@@ -288,9 +288,11 @@ createResolver({
             var _temp = function () {
               if (result && result.error) {
                 return function () {
-                  if (result.error === 'conflict' && result.id && context.onResolveConflict) {
+                  if (result.error === 'conflict' && result.id) {
                     return Promise.resolve(resolveConflicts([input], context)).then(function (resolved) {
-                      result = resolved[0];
+                      if (resolved) {
+                        result = resolved[0];
+                      }
 
                       if (result.error) {
                         throw new Error(result.reason);
@@ -409,18 +411,20 @@ var resolvers$1 = {
                     return conflict.id === doc._id;
                   });
                 }), context)).then(function (resolved) {
-                  // update any "conflict" results with the resolved result
-                  saveResults = saveResults.map(function (saveResult) {
-                    var resolvedDoc = resolved.find(function (resolvedResult) {
-                      return resolvedResult.id === saveResult.id;
+                  if (resolved) {
+                    // update any "conflict" results with the resolved result
+                    saveResults = saveResults.map(function (saveResult) {
+                      var resolvedDoc = resolved.find(function (resolvedResult) {
+                        return resolvedResult.id === saveResult.id;
+                      });
+
+                      if (saveResult.error === 'conflict' && resolvedDoc) {
+                        return resolvedDoc;
+                      }
+
+                      return saveResult;
                     });
-
-                    if (saveResult.error === 'conflict' && resolvedDoc) {
-                      return resolvedDoc;
-                    }
-
-                    return saveResult;
-                  });
+                  }
                 });
               }
             }();

@@ -54,13 +54,12 @@ export const resolvers = createResolver({
       let [result] = response.data
 
       if (result && result.error) {
-        if (
-          result.error === 'conflict' &&
-          result.id &&
-          context.onResolveConflict
-        ) {
+        if (result.error === 'conflict' && result.id) {
           const resolved = await resolveConflicts([input], context)
-          result = resolved[0]
+
+          if (resolved) {
+            result = resolved[0]
+          }
 
           if (result.error) {
             throw new Error(result.reason)

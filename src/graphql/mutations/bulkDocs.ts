@@ -68,17 +68,19 @@ export const resolvers = {
           context
         )
 
-        // update any "conflict" results with the resolved result
-        saveResults = saveResults.map(saveResult => {
-          const resolvedDoc = resolved.find(
-            resolvedResult => resolvedResult.id === saveResult.id
-          )
-          if (saveResult.error === 'conflict' && resolvedDoc) {
-            return resolvedDoc
-          }
+        if (resolved) {
+          // update any "conflict" results with the resolved result
+          saveResults = saveResults.map(saveResult => {
+            const resolvedDoc = resolved.find(
+              resolvedResult => resolvedResult.id === saveResult.id
+            )
+            if (saveResult.error === 'conflict' && resolvedDoc) {
+              return resolvedDoc
+            }
 
-          return saveResult
-        })
+            return saveResult
+          })
+        }
       }
 
       return saveResults.map((result, index) => {
