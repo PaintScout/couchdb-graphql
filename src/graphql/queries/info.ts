@@ -1,10 +1,7 @@
 import { gql } from 'apollo-server-core'
-import getAxios from '../../util/getAxios'
 import { createResolver } from '../../util/createResolver'
+import { info } from '../../couchdb/info'
 
-/**
- * Generic GET on a document
- */
 export const typeDefs = gql`
   type Sizes {
     file: Int
@@ -46,12 +43,8 @@ export const typeDefs = gql`
 
 export const resolvers = createResolver({
   Query: {
-    info: async (parent, args, context, info) => {
-      let url = `${context.dbUrl}`
-
-      const response = await getAxios(context).get(url)
-
-      return response.data
+    info: async (parent, args, context) => {
+      return info(context)
     },
   },
 })

@@ -1,6 +1,6 @@
 import { gql } from 'apollo-server-core'
-import getAxios from '../../util/getAxios'
 import { createResolver } from '../../util/createResolver'
+import { find } from '../../couchdb'
 
 export const typeDefs = gql`
   type FindResponse {
@@ -8,12 +8,6 @@ export const typeDefs = gql`
     bookmark: String
     warning: String
     docs: [JSON!]
-  }
-
-  type FindRow {
-    id: String
-    order: [Int!]
-    fields: JSON
   }
 
   extend type Query {
@@ -36,12 +30,8 @@ export const typeDefs = gql`
 
 export const resolvers = createResolver({
   Query: {
-    find: async (parent, { index, ddoc, ...args }, context, info) => {
-      let url = `${context.dbUrl}/${context.dbName}/_find`
-
-      const response = await getAxios(context).post(url, args)
-
-      return response.data
+    find: async (parent, args, context, info) => {
+      return find(context, args)
     },
   },
 })

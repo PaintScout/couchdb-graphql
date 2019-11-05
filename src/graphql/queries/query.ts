@@ -1,7 +1,6 @@
 import { gql } from 'apollo-server-core'
-import getAxios from '../../util/getAxios'
-import queryString from 'qs'
 import { createResolver } from '../../util/createResolver'
+import { query, QueryOptions } from '../../couchdb/query'
 
 export const typeDefs = gql`
   type QueryResponse {
@@ -47,17 +46,8 @@ export const typeDefs = gql`
 
 export const resolvers = createResolver({
   Query: {
-    query: async (parent, { view, ddoc, ...args }, context, info) => {
-      let url = `${context.dbUrl}/${context.dbName}/_design/${ddoc}/_view/${view}`
-
-      const hasArgs = Object.keys(args).length > 0
-      if (hasArgs) {
-        url += `?${queryString.stringify(args)}`
-      }
-
-      const response = await getAxios(context).get(url)
-
-      return response.data
+    query: async (parent, args, context, info) => {
+      return query(context, args as QueryOptions)
     },
   },
 })

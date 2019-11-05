@@ -1,7 +1,6 @@
 import { gql } from 'apollo-server-core'
-import getAxios from '../../util/getAxios'
-import queryString from 'qs'
 import { createResolver } from '../../util/createResolver'
+import { search, SearchOptions } from '../../couchdb/search'
 
 export const typeDefs = gql`
   type SearchResponse {
@@ -45,17 +44,8 @@ export const typeDefs = gql`
 
 export const resolvers = createResolver({
   Query: {
-    search: async (
-      parent,
-      { index, ddoc, typename, ...args },
-      context,
-      info
-    ) => {
-      let url = `${context.dbUrl}/${context.dbName}/_design/${ddoc}/_search/${index}`
-
-      const response = await getAxios(context).post(url, args)
-
-      return response.data
+    search: async (parent, args, context, info) => {
+      return search(context, args as SearchOptions)
     },
   },
 })
