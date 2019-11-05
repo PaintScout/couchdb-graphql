@@ -62,6 +62,10 @@ var base = {
   _templateObject())
 };
 
+function createResolver(resolver) {
+  return resolver;
+}
+
 // A type of promise-like that resolves synchronously and supports only one observer
 const _iteratorSymbol =
 /*#__PURE__*/
@@ -88,10 +92,6 @@ function getAxios(context) {
   return axios.create({
     headers: context.dbHeaders
   });
-}
-
-function createResolver(resolver) {
-  return resolver;
 }
 
 /**
@@ -229,6 +229,95 @@ var getConflictsByDocument = function getConflictsByDocument(documents, context)
   }
 };
 
+var put = function put(context, doc, options) {
+  if (options === void 0) {
+    options = {};
+  }
+
+  try {
+    var _temp3 = function _temp3(_result2) {
+      return _exit2 ? _result2 : Promise.resolve(getAxios(context).post(url, {
+        docs: [_extends({}, doc, {
+          _rev: rev
+        })],
+        new_edits: new_edits
+      }).then(function (res) {
+        try {
+          var _exit4 = false;
+          var _res$data = res.data,
+              result = _res$data[0]; // resolve conflicts
+
+          var _temp6 = function () {
+            if (result && result.id && result.error === 'conflict') {
+              return Promise.resolve(resolveConflicts([doc], context)).then(function (resolved) {
+                _exit4 = true;
+                return resolved[0];
+              });
+            }
+          }();
+
+          return Promise.resolve(_temp6 && _temp6.then ? _temp6.then(function (_result3) {
+            return _exit4 ? _result3 : result;
+          }) : _exit4 ? _temp6 : result);
+        } catch (e) {
+          return Promise.reject(e);
+        }
+      })).then(function (result) {
+        if (result && result.error) {
+          throw new Error(result.reason);
+        }
+
+        if (result) {
+          var savedDocument = _extends({}, doc, {
+            _id: result.id,
+            _rev: result.rev
+          });
+
+          if (context.onDocumentsSaved) {
+            context.onDocumentsSaved([savedDocument]);
+          }
+
+          return savedDocument;
+        } else {
+          // new_edits=false returns empty response
+          return null;
+        }
+      });
+    };
+
+    var _exit2 = false;
+    var _options = options,
+        upsert = _options.upsert,
+        _options$new_edits = _options.new_edits,
+        new_edits = _options$new_edits === void 0 ? true : _options$new_edits;
+    var url = context.dbUrl + "/" + context.dbName + "/_bulk_docs";
+    var rev = doc._rev; // get previous _rev for upsert
+
+    var _temp4 = function () {
+      if (upsert) {
+        if (!doc._id) {
+          throw Error('upsert option requires input to contain _id');
+        }
+
+        return _catch(function () {
+          return Promise.resolve(getAxios(context).get(context.dbUrl + "/" + context.dbName + "/" + encodeURIComponent(doc._id))).then(function (_ref) {
+            var _rev = _ref.data._rev;
+            rev = _rev;
+          });
+        }, function (e) {
+          if (!e.response || e.response.status !== 404) {
+            throw e;
+          }
+        });
+      }
+    }();
+
+    return Promise.resolve(_temp4 && _temp4.then ? _temp4.then(_temp3) : _temp3(_temp4));
+  } catch (e) {
+    return Promise.reject(e);
+  }
+};
+
 function _templateObject$1() {
   var data = _taggedTemplateLiteralLoose(["\n  type PutResponse {\n    _id: String!\n    _rev: String\n    document: JSON\n  }\n\n  extend type Mutation {\n    put(input: JSON, upsert: Boolean, new_edits: Boolean): PutResponse\n  }\n"]);
 
@@ -258,84 +347,16 @@ createResolver({
           new_edits = _ref$new_edits === void 0 ? true : _ref$new_edits;
 
       try {
-        var _temp3 = function _temp3(_result2) {
-          return _exit2 ? _result2 : Promise.resolve(getAxios(context).post(url, {
-            docs: [_extends({}, input, {
-              _rev: rev
-            })],
-            new_edits: new_edits
-          }).then(function (res) {
-            try {
-              var _exit4 = false;
-              var _res$data = res.data,
-                  result = _res$data[0]; // resolve conflicts
-
-              var _temp6 = function () {
-                if (result && result.id && result.error === 'conflict') {
-                  return Promise.resolve(resolveConflicts([input], context)).then(function (resolved) {
-                    _exit4 = true;
-                    return resolved[0];
-                  });
-                }
-              }();
-
-              return Promise.resolve(_temp6 && _temp6.then ? _temp6.then(function (_result3) {
-                return _exit4 ? _result3 : result;
-              }) : _exit4 ? _temp6 : result);
-            } catch (e) {
-              return Promise.reject(e);
-            }
-          })).then(function (result) {
-            if (result && result.error) {
-              throw new Error(result.reason);
-            }
-
-            if (result) {
-              var savedDocument = result && _extends({}, input, {
-                _id: result.id,
-                _rev: result.rev
-              });
-
-              if (context.onDocumentsSaved) {
-                context.onDocumentsSaved([savedDocument]);
-              }
-
-              return {
-                _id: result.id,
-                _rev: result.rev,
-                document: savedDocument
-              };
-            } else {
-              // new_edits=false returns empty response
-              return {};
-            }
-          });
-        };
-
-        var _exit2 = false;
-        var url = context.dbUrl + "/" + context.dbName + "/_bulk_docs";
-        var rev = input._rev; // get previous _rev for upsert
-
-        var _temp4 = function () {
-          if (upsert) {
-            if (!input._id) {
-              throw Error('upsert option requires input to contain _id');
-            }
-
-            return _catch(function () {
-              return Promise.resolve(getAxios(context).get(context.dbUrl + "/" + context.dbName + "/" + encodeURIComponent(input._id))).then(function (_ref2) {
-                var _rev = _ref2.data._rev;
-                rev = _rev;
-              });
-            }, function (e) {
-              if (!e.response || e.response.status !== 404) {
-                throw e;
-              }
-            });
-          }
-        }();
-
-        return Promise.resolve(_temp4 && _temp4.then ? _temp4.then(_temp3) : _temp3(_temp4));
+        return Promise.resolve(put(context, input, {
+          upsert: upsert,
+          new_edits: new_edits
+        })).then(function (document) {
+          return {
+            _id: document._id,
+            _rev: document._rev,
+            document: document
+          };
+        });
       } catch (e) {
         return Promise.reject(e);
       }
@@ -343,11 +364,130 @@ createResolver({
   }
 });
 
-var put = ({
+var put$1 = ({
   __proto__: null,
   typeDefs: typeDefs,
   resolvers: resolvers
 });
+
+var bulkDocs = function bulkDocs(context, docs, options) {
+  if (options === void 0) {
+    options = {};
+  }
+
+  try {
+    var _temp3 = function _temp3() {
+      return Promise.resolve(getAxios(context).post(url, {
+        docs: docs.map(function (doc) {
+          return _extends({}, doc, {
+            _rev: upsert && doc._id ? previousRevs[doc._id] : doc._rev
+          });
+        }),
+        new_edits: new_edits
+      }).then(function (res) {
+        try {
+          var _temp7 = function _temp7(_result) {
+            return _exit2 ? _result : res.data;
+          };
+
+          var _exit2 = false;
+          // resolve conflicts
+          var conflicts = res.data.filter(function (result) {
+            return result.error === 'conflict';
+          });
+
+          var _temp8 = function () {
+            if (conflicts.length > 0) {
+              return Promise.resolve(resolveConflicts(docs.filter(function (doc) {
+                return conflicts.find(function (conflict) {
+                  return conflict.id === doc._id;
+                });
+              }), context)).then(function (resolved) {
+                if (resolved) {
+                  // update any "conflict" results with the resolved result
+                  _exit2 = true;
+                  return res.data.map(function (saveResult) {
+                    var resolvedDoc = resolved.find(function (resolvedResult) {
+                      return resolvedResult.id === saveResult.id;
+                    });
+
+                    if (saveResult.error === 'conflict' && resolvedDoc) {
+                      return resolvedDoc;
+                    }
+
+                    return saveResult;
+                  });
+                }
+              });
+            }
+          }();
+
+          return Promise.resolve(_temp8 && _temp8.then ? _temp8.then(_temp7) : _temp7(_temp8)); // return bulkDocs data
+        } catch (e) {
+          return Promise.reject(e);
+        }
+      })).then(function (saveResults) {
+        var response = saveResults.map(function (result, index) {
+          var document = docs[index];
+
+          var _rev = result.error ? // if an error, return the last _rev
+          previousRevs[document._id] || document._rev : // otherwise result.rev will be populated
+          result.rev;
+
+          return {
+            _id: result.id,
+            _rev: _rev,
+            error: result.error,
+            reason: result.reason,
+            document: _extends({}, document, {
+              _id: result.id,
+              _rev: _rev
+            })
+          };
+        });
+
+        if (context.onDocumentsSaved) {
+          context.onDocumentsSaved(response.filter(function (res) {
+            return !res.error;
+          }).map(function (res) {
+            return res.document;
+          }));
+        }
+
+        return response;
+      });
+    };
+
+    var _options = options,
+        upsert = _options.upsert,
+        _options$new_edits = _options.new_edits,
+        new_edits = _options$new_edits === void 0 ? true : _options$new_edits;
+    var url = context.dbUrl + "/" + context.dbName + "/_bulk_docs";
+    var previousRevs = {}; // get previous _revs for upsert
+
+    var _temp4 = function () {
+      if (upsert) {
+        var ids = docs.map(function (i) {
+          return i._id;
+        }).filter(function (id) {
+          return !!id;
+        });
+        return Promise.resolve(getAxios(context).post(context.dbUrl + "/" + context.dbName + "/_all_docs", {
+          keys: ids
+        })).then(function (_ref) {
+          var allDocs = _ref.data;
+          allDocs.rows.forEach(function (row) {
+            previousRevs[row.id] = row.value ? row.value.rev : null;
+          });
+        });
+      }
+    }();
+
+    return Promise.resolve(_temp4 && _temp4.then ? _temp4.then(_temp3) : _temp3(_temp4));
+  } catch (e) {
+    return Promise.reject(e);
+  }
+};
 
 function _templateObject$2() {
   var data = _taggedTemplateLiteralLoose(["\n  type BulkDocsResponseObject {\n    _id: String\n    _rev: String\n    document: JSON\n    error: String\n    reason: String\n  }\n\n  extend type Mutation {\n    bulkDocs(\n      input: [JSON!]!\n      upsert: Boolean\n      new_edits: Boolean\n    ): [BulkDocsResponseObject]\n  }\n"]);
@@ -374,110 +514,10 @@ createResolver({
           new_edits = _ref$new_edits === void 0 ? true : _ref$new_edits;
 
       try {
-        var _temp3 = function _temp3() {
-          return Promise.resolve(getAxios(context).post(url, {
-            docs: input.map(function (doc) {
-              return _extends({}, doc, {
-                _rev: upsert && doc._id ? previousRevs[doc._id] : doc._rev
-              });
-            }),
-            new_edits: new_edits
-          }).then(function (res) {
-            try {
-              var _temp7 = function _temp7(_result) {
-                return _exit2 ? _result : res.data;
-              };
-
-              var _exit2 = false;
-              // resolve conflicts
-              var conflicts = res.data.filter(function (result) {
-                return result.error === 'conflict';
-              });
-
-              var _temp8 = function () {
-                if (conflicts.length > 0) {
-                  return Promise.resolve(resolveConflicts(input.filter(function (doc) {
-                    return conflicts.find(function (conflict) {
-                      return conflict.id === doc._id;
-                    });
-                  }), context)).then(function (resolved) {
-                    if (resolved) {
-                      // update any "conflict" results with the resolved result
-                      _exit2 = true;
-                      return res.data.map(function (saveResult) {
-                        var resolvedDoc = resolved.find(function (resolvedResult) {
-                          return resolvedResult.id === saveResult.id;
-                        });
-
-                        if (saveResult.error === 'conflict' && resolvedDoc) {
-                          return resolvedDoc;
-                        }
-
-                        return saveResult;
-                      });
-                    }
-                  });
-                }
-              }();
-
-              return Promise.resolve(_temp8 && _temp8.then ? _temp8.then(_temp7) : _temp7(_temp8)); // return bulkDocs data
-            } catch (e) {
-              return Promise.reject(e);
-            }
-          })).then(function (saveResults) {
-            var response = saveResults.map(function (result, index) {
-              var document = input[index];
-
-              var _rev = result.error ? // if an error, return the last _rev
-              previousRevs[document._id] || document._rev : // otherwise result.rev will be populated
-              result.rev;
-
-              return {
-                _id: result.id,
-                _rev: _rev,
-                error: result.error,
-                reason: result.reason,
-                document: _extends({}, document, {
-                  _id: result.id,
-                  _rev: _rev
-                })
-              };
-            });
-
-            if (context.onDocumentsSaved) {
-              context.onDocumentsSaved(response.filter(function (res) {
-                return !res.error;
-              }).map(function (res) {
-                return res.document;
-              }));
-            }
-
-            return response;
-          });
-        };
-
-        var url = context.dbUrl + "/" + context.dbName + "/_bulk_docs";
-        var previousRevs = {}; // get previous _revs for upsert
-
-        var _temp4 = function () {
-          if (upsert) {
-            var ids = input.map(function (i) {
-              return i._id;
-            }).filter(function (id) {
-              return !!id;
-            });
-            return Promise.resolve(getAxios(context).post(context.dbUrl + "/" + context.dbName + "/_all_docs", {
-              keys: ids
-            })).then(function (_ref2) {
-              var allDocs = _ref2.data;
-              allDocs.rows.forEach(function (row) {
-                previousRevs[row.id] = row.value ? row.value.rev : null;
-              });
-            });
-          }
-        }();
-
-        return Promise.resolve(_temp4 && _temp4.then ? _temp4.then(_temp3) : _temp3(_temp4));
+        return Promise.resolve(bulkDocs(context, input, {
+          upsert: upsert,
+          new_edits: new_edits
+        }));
       } catch (e) {
         return Promise.reject(e);
       }
@@ -485,7 +525,7 @@ createResolver({
   }
 });
 
-var bulkDocs = ({
+var bulkDocs$1 = ({
   __proto__: null,
   typeDefs: typeDefs$1,
   resolvers: resolvers$1
@@ -495,9 +535,37 @@ var bulkDocs = ({
 
 var mutations = ({
   __proto__: null,
-  put: put,
-  bulkDocs: bulkDocs
+  put: put$1,
+  bulkDocs: bulkDocs$1
 });
+
+var allDocs = function allDocs(context, _temp) {
+  var _ref = _temp === void 0 ? {} : _temp,
+      keys = _ref.keys,
+      key = _ref.key,
+      endkey = _ref.endkey,
+      startkey = _ref.startkey,
+      args = _objectWithoutPropertiesLoose(_ref, ["keys", "key", "endkey", "startkey"]);
+
+  try {
+    var url = context.dbUrl + "/" + context.dbName + "/_all_docs";
+
+    if (args) {
+      url += "?" + queryString.stringify(args);
+    }
+
+    return Promise.resolve(getAxios(context).post(url, {
+      keys: keys,
+      key: key,
+      endkey: endkey,
+      startkey: startkey
+    })).then(function (response) {
+      return response.data;
+    });
+  } catch (e) {
+    return Promise.reject(e);
+  }
+};
 
 function _templateObject$3() {
   var data = _taggedTemplateLiteralLoose(["\n  type AllDocsRow {\n    id: String!\n    rev: String\n    value: JSON\n    doc: JSON\n  }\n\n  type AllDocsResponse {\n    total_rows: Int!\n    offset: Int!\n    rows: [AllDocsRow!]!\n  }\n\n  extend type Query {\n    allDocs(\n      conflicts: Boolean\n      endkey: JSON\n      include_docs: Boolean\n      inclusive_end: Boolean\n      key: JSON\n      keys: [JSON!]\n      limit: Int\n      skip: Int\n      startkey: JSON\n      update_seq: Boolean\n    ): AllDocsResponse\n  }\n"]);
@@ -517,22 +585,9 @@ var resolvers$2 =
 /*#__PURE__*/
 createResolver({
   Query: {
-    allDocs: function (parent, _ref, context, info) {
-      var keys = _ref.keys,
-          args = _objectWithoutPropertiesLoose(_ref, ["keys"]);
-
+    allDocs: function (parent, args, context, info) {
       try {
-        var url = context.dbUrl + "/" + context.dbName + "/_all_docs";
-
-        if (args) {
-          url += "?" + queryString.stringify(args);
-        }
-
-        return Promise.resolve(getAxios(context).post(url, {
-          keys: keys
-        })).then(function (response) {
-          return response.data;
-        });
+        return Promise.resolve(allDocs(context, args));
       } catch (e) {
         return Promise.reject(e);
       }
@@ -540,11 +595,34 @@ createResolver({
   }
 });
 
-var allDocs = ({
+var allDocs$1 = ({
   __proto__: null,
   typeDefs: typeDefs$2,
   resolvers: resolvers$2
 });
+
+var bulkGet = function bulkGet(docs, context, _ref) {
+  var revs = _ref.revs;
+
+  try {
+    var url = context.dbUrl + "/" + context.dbName + "/_bulk_get";
+
+    if (revs) {
+      url += "?" + queryString.stringify({
+        revs: revs
+      });
+    }
+
+    return Promise.resolve(getAxios(context).post(url, {
+      docs: docs,
+      revs: revs
+    })).then(function (response) {
+      return response.data;
+    });
+  } catch (e) {
+    return Promise.reject(e);
+  }
+};
 
 function _templateObject$4() {
   var data = _taggedTemplateLiteralLoose(["\n  input BulkGetInput {\n    id: String!\n    rev: String\n  }\n\n  type BulkGetResponse {\n    results: [BulkGetResult!]!\n  }\n\n  type BulkGetResult {\n    id: String\n    docs: [BulkGetDocs!]!\n  }\n\n  type BulkGetDocs {\n    ok: JSON\n    error: BulkGetError\n  }\n\n  type BulkGetError {\n    id: String\n    rev: String\n    error: String\n    reason: String\n  }\n\n  extend type Query {\n    bulkGet(docs: [BulkGetInput!]!, revs: Boolean): BulkGetResponse\n  }\n"]);
@@ -573,20 +651,9 @@ createResolver({
           revs = _ref.revs;
 
       try {
-        var url = context.dbUrl + "/" + context.dbName + "/_bulk_get";
-
-        if (revs) {
-          url += "?" + queryString.stringify({
-            revs: revs
-          });
-        }
-
-        return Promise.resolve(getAxios(context).post(url, {
-          docs: docs,
+        return Promise.resolve(bulkGet(docs, context, {
           revs: revs
-        })).then(function (response) {
-          return response.data;
-        });
+        }));
       } catch (e) {
         return Promise.reject(e);
       }
@@ -594,11 +661,38 @@ createResolver({
   }
 });
 
-var bulkGet = ({
+var bulkGet$1 = ({
   __proto__: null,
   typeDefs: typeDefs$3,
   resolvers: resolvers$3
 });
+
+var changes = function changes(context, options) {
+  try {
+    var hasArgs = Object.keys(options).length > 0;
+    var url = context.dbUrl + "/" + context.dbName + "/_changes";
+
+    if (hasArgs) {
+      if (options.lastEventId) {
+        delete options.lastEventId;
+        options['last-event-id'] = options.lastEventId;
+      } // if options.since is not 'now', convert to number
+
+
+      if (options.since && options.since !== 'now') {
+        options.since = parseInt(options.since);
+      }
+
+      url += "?" + queryString.stringify(options);
+    }
+
+    return Promise.resolve(getAxios(context).get(url)).then(function (response) {
+      return response.data;
+    });
+  } catch (e) {
+    return Promise.reject(e);
+  }
+};
 
 function _templateObject$5() {
   var data = _taggedTemplateLiteralLoose(["\n  type Change {\n    rev: String\n  }\n  type ChangesResult {\n    changes: [Change]\n    id: String\n    seq: JSON\n    doc: JSON\n    deleted: Boolean\n  }\n\n  type ChangesResponse {\n    last_seq: JSON\n    pending: Int\n    results: [ChangesResult]\n  }\n\n  extend type Query {\n    changes(\n      doc_ids: [String!]\n      conflicts: Boolean\n      descending: Boolean\n      feed: String\n      filter: String\n      heartbeat: Int\n      include_docs: Boolean\n      attachments: Boolean\n      att_encoding_info: Boolean\n      lastEventId: Int\n      limit: Int\n      since: String\n      timeout: Int\n      view: String\n      seq_interval: Int\n    ): ChangesResponse\n  }\n"]);
@@ -620,28 +714,7 @@ createResolver({
   Query: {
     changes: function (parent, args, context, info) {
       try {
-        var hasArgs = Object.keys(args).length > 0;
-        var url = context.dbUrl + "/" + context.dbName + "/_changes";
-
-        if (hasArgs) {
-          if (args.lastEventId) {
-            delete args.lastEventId;
-            args['last-event-id'] = args.lastEventId;
-          } // if args.since is not 'now', convert to number
-
-
-          if (args.since) {
-            if (args.since !== 'now') {
-              args.since = parseInt(args.since);
-            }
-          }
-
-          url += "?" + queryString.stringify(args);
-        }
-
-        return Promise.resolve(getAxios(context).get(url)).then(function (response) {
-          return response.data;
-        });
+        return Promise.resolve(changes(context, args));
       } catch (e) {
         return Promise.reject(e);
       }
@@ -649,14 +722,93 @@ createResolver({
   }
 });
 
-var changes = ({
+var changes$1 = ({
   __proto__: null,
   typeDefs: typeDefs$4,
   resolvers: resolvers$4
 });
 
+var find = function find(context, options) {
+  try {
+    var url = context.dbUrl + "/" + context.dbName + "/_find";
+    return Promise.resolve(getAxios(context).post(url, options)).then(function (response) {
+      return response.data;
+    });
+  } catch (e) {
+    return Promise.reject(e);
+  }
+};
+
+var get = function get(context, id, options) {
+  if (options === void 0) {
+    options = {};
+  }
+
+  try {
+    var hasArgs = Object.keys(options).length > 0;
+    var url = context.dbUrl + "/" + context.dbName + "/" + encodeURIComponent(id);
+
+    if (hasArgs) {
+      url += "?" + queryString.stringify(options);
+    }
+
+    return Promise.resolve(getAxios(context).get(url)).then(function (response) {
+      return response.data;
+    });
+  } catch (e) {
+    return Promise.reject(e);
+  }
+};
+
+var info = function info(context) {
+  try {
+    var url = "" + context.dbUrl;
+    return Promise.resolve(getAxios(context).get(url)).then(function (response) {
+      return response.data;
+    });
+  } catch (e) {
+    return Promise.reject(e);
+  }
+};
+
+var query = function query(context, _ref) {
+  var view = _ref.view,
+      ddoc = _ref.ddoc,
+      options = _objectWithoutPropertiesLoose(_ref, ["view", "ddoc"]);
+
+  try {
+    var url = context.dbUrl + "/" + context.dbName + "/_design/" + ddoc + "/_view/" + view;
+    var hasArgs = Object.keys(options).length > 0;
+
+    if (hasArgs) {
+      url += "?" + queryString.stringify(options);
+    }
+
+    return Promise.resolve(getAxios(context).get(url)).then(function (response) {
+      return response.data;
+    });
+  } catch (e) {
+    return Promise.reject(e);
+  }
+};
+
+var search = function search(context, _ref) {
+  var index = _ref.index,
+      ddoc = _ref.ddoc,
+      options = _objectWithoutPropertiesLoose(_ref, ["index", "ddoc"]);
+
+  try {
+    var url = context.dbUrl + "/" + context.dbName + "/_design/" + ddoc + "/_search/" + index;
+    return Promise.resolve(getAxios(context).post(url, options)).then(function (response) {
+      return response.data;
+    });
+  } catch (e) {
+    return Promise.reject(e);
+  }
+};
+
 function _templateObject$6() {
-  var data = _taggedTemplateLiteralLoose(["\n  type FindResponse {\n    execution_stats: JSON\n    bookmark: String\n    warning: String\n    docs: [JSON!]\n  }\n\n  type FindRow {\n    id: String\n    order: [Int!]\n    fields: JSON\n  }\n\n  extend type Query {\n    find(\n      selector: JSON!\n      limit: Int\n      skip: Int\n      sort: Int\n      fields: [String!]\n      use_index: [String!]\n      r: Int\n      bookmark: String\n      update: Boolean\n      stable: Boolean\n      stale: String\n      execution_stats: Boolean\n    ): FindResponse\n  }\n"]);
+  var data = _taggedTemplateLiteralLoose(["\n  type FindResponse {\n    execution_stats: JSON\n    bookmark: String\n    warning: String\n    docs: [JSON!]\n  }\n\n  extend type Query {\n    find(\n      selector: JSON!\n      limit: Int\n      skip: Int\n      sort: Int\n      fields: [String!]\n      use_index: [String!]\n      r: Int\n      bookmark: String\n      update: Boolean\n      stable: Boolean\n      stale: String\n      execution_stats: Boolean\n    ): FindResponse\n  }\n"]);
 
   _templateObject$6 = function _templateObject() {
     return data;
@@ -673,16 +825,9 @@ var resolvers$5 =
 /*#__PURE__*/
 createResolver({
   Query: {
-    find: function (parent, _ref, context, info) {
-      var index = _ref.index,
-          ddoc = _ref.ddoc,
-          args = _objectWithoutPropertiesLoose(_ref, ["index", "ddoc"]);
-
+    find: function (parent, args, context, info) {
       try {
-        var url = context.dbUrl + "/" + context.dbName + "/_find";
-        return Promise.resolve(getAxios(context).post(url, args)).then(function (response) {
-          return response.data;
-        });
+        return Promise.resolve(find(context, args));
       } catch (e) {
         return Promise.reject(e);
       }
@@ -690,7 +835,7 @@ createResolver({
   }
 });
 
-var find = ({
+var find$1 = ({
   __proto__: null,
   typeDefs: typeDefs$5,
   resolvers: resolvers$5
@@ -723,18 +868,11 @@ createResolver({
           args = _objectWithoutPropertiesLoose(_ref, ["id"]);
 
       try {
-        var hasArgs = Object.keys(args).length > 0;
-        var url = context.dbUrl + "/" + context.dbName + "/" + encodeURIComponent(id);
-
-        if (hasArgs) {
-          url += "?" + queryString.stringify(args);
-        }
-
-        return Promise.resolve(getAxios(context).get(url)).then(function (response) {
+        return Promise.resolve(get(context, id, args)).then(function (document) {
           return {
-            _id: response.data._id,
-            _rev: response.data._rev,
-            document: response.data
+            _id: document._id,
+            _rev: document._rev,
+            document: document
           };
         });
       } catch (e) {
@@ -744,7 +882,7 @@ createResolver({
   }
 });
 
-var get = ({
+var get$1 = ({
   __proto__: null,
   typeDefs: typeDefs$6,
   resolvers: resolvers$6
@@ -759,10 +897,6 @@ function _templateObject$8() {
 
   return data;
 }
-/**
- * Generic GET on a document
- */
-
 var typeDefs$7 =
 /*#__PURE__*/
 gql(
@@ -772,12 +906,9 @@ var resolvers$7 =
 /*#__PURE__*/
 createResolver({
   Query: {
-    info: function (parent, args, context, _info) {
+    info: function (parent, args, context) {
       try {
-        var url = "" + context.dbUrl;
-        return Promise.resolve(getAxios(context).get(url)).then(function (response) {
-          return response.data;
-        });
+        return Promise.resolve(info(context));
       } catch (e) {
         return Promise.reject(e);
       }
@@ -785,7 +916,7 @@ createResolver({
   }
 });
 
-var info = ({
+var info$1 = ({
   __proto__: null,
   typeDefs: typeDefs$7,
   resolvers: resolvers$7
@@ -809,22 +940,9 @@ var resolvers$8 =
 /*#__PURE__*/
 createResolver({
   Query: {
-    query: function (parent, _ref, context, info) {
-      var view = _ref.view,
-          ddoc = _ref.ddoc,
-          args = _objectWithoutPropertiesLoose(_ref, ["view", "ddoc"]);
-
+    query: function (parent, args, context, info) {
       try {
-        var url = context.dbUrl + "/" + context.dbName + "/_design/" + ddoc + "/_view/" + view;
-        var hasArgs = Object.keys(args).length > 0;
-
-        if (hasArgs) {
-          url += "?" + queryString.stringify(args);
-        }
-
-        return Promise.resolve(getAxios(context).get(url)).then(function (response) {
-          return response.data;
-        });
+        return Promise.resolve(query(context, args));
       } catch (e) {
         return Promise.reject(e);
       }
@@ -832,7 +950,7 @@ createResolver({
   }
 });
 
-var query = ({
+var query$1 = ({
   __proto__: null,
   typeDefs: typeDefs$8,
   resolvers: resolvers$8
@@ -856,17 +974,9 @@ var resolvers$9 =
 /*#__PURE__*/
 createResolver({
   Query: {
-    search: function (parent, _ref, context, info) {
-      var index = _ref.index,
-          ddoc = _ref.ddoc,
-          typename = _ref.typename,
-          args = _objectWithoutPropertiesLoose(_ref, ["index", "ddoc", "typename"]);
-
+    search: function (parent, args, context, info) {
       try {
-        var url = context.dbUrl + "/" + context.dbName + "/_design/" + ddoc + "/_search/" + index;
-        return Promise.resolve(getAxios(context).post(url, args)).then(function (response) {
-          return response.data;
-        });
+        return Promise.resolve(search(context, args));
       } catch (e) {
         return Promise.reject(e);
       }
@@ -874,7 +984,7 @@ createResolver({
   }
 });
 
-var search = ({
+var search$1 = ({
   __proto__: null,
   typeDefs: typeDefs$9,
   resolvers: resolvers$9
@@ -884,14 +994,14 @@ var search = ({
 
 var queries = ({
   __proto__: null,
-  get: get,
-  info: info,
-  bulkGet: bulkGet,
-  changes: changes,
-  search: search,
-  find: find,
-  query: query,
-  allDocs: allDocs
+  get: get$1,
+  info: info$1,
+  bulkGet: bulkGet$1,
+  changes: changes$1,
+  search: search$1,
+  find: find$1,
+  query: query$1,
+  allDocs: allDocs$1
 });
 
 /**
@@ -914,5 +1024,5 @@ function createSchema(_temp) {
   }), schemas));
 }
 
-export { base, createResolver, createSchema, mutations, queries, resolveConflicts };
+export { allDocs, base, bulkDocs, bulkGet, changes, createResolver, createSchema, find, get, info, mutations, put, queries, query, resolveConflicts, search };
 //# sourceMappingURL=couchdb-graphql.esm.js.map

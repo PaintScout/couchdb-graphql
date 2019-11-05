@@ -3,30 +3,6 @@ import getAxios from '../util/getAxios'
 import queryString from 'qs'
 import { CouchDbContext, CouchDbDocument } from '../util/createResolver'
 
-/**
- * Generic GET on a document
- */
-export const typeDefs = gql`
-  type GetResponse {
-    _id: String!
-    _rev: String
-    document: JSON
-  }
-
-  extend type Query {
-    get(
-      id: String!
-      rev: String
-      revs: Boolean
-      revs_info: Boolean
-      open_revs: Boolean
-      conflicts: Boolean
-      attachments: Boolean
-      latest: Boolean
-    ): GetResponse
-  }
-`
-
 export interface GetOptions {
   rev?: string
   revs?: boolean
