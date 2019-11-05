@@ -1,30 +1,22 @@
 import { gql } from 'apollo-server-core'
-import {
-  createTestServer,
-  dbUrl,
-  dbName,
-} from '../../test/util/createTestServer'
+import { get } from '../../couchdb'
+import asJestMock from '../../test/util/asJestMock'
+import { createTestServer } from '../../test/util/createTestServer'
 
 const { query } = createTestServer()
 
-const axios = {
-  get: jest.fn(),
-}
-
-jest.mock('../../util/getAxios', () => () => axios)
+jest.mock('../../couchdb/get')
 
 describe('get', () => {
   afterEach(() => {
     jest.clearAllMocks()
   })
 
-  it('should get a doc', async () => {
-    axios.get.mockResolvedValueOnce({
-      data: {
-        _id: '1',
-        _rev: '1',
-        blah: 'blah',
-      },
+  it('should return with correct data', async () => {
+    asJestMock(get).mockResolvedValueOnce({
+      _id: '1',
+      _rev: '1',
+      blah: 'blah',
     })
 
     const result = await query({
@@ -40,7 +32,6 @@ describe('get', () => {
       variables: { id: '1' },
     })
 
-    expect(axios.get).toHaveBeenCalledWith(`${dbUrl}/${dbName}/1`)
     expect(result.data).toMatchObject({
       get: {
         _id: '1',
@@ -52,23 +43,5 @@ describe('get', () => {
         },
       },
     })
-  })
-
-  it('should get a doc with extra options', async () => {
-    await query({
-      query: gql`
-        query getMyDocument {
-          get(id: "1", conflicts: true, revs: true) {
-            _id
-            _rev
-            document
-          }
-        }
-      `,
-    })
-
-    expect(axios.get).toHaveBeenCalledWith(
-      `${dbUrl}/${dbName}/1?revs=true&conflicts=true`
-    )
   })
 })
