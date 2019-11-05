@@ -20,7 +20,7 @@ export const typeDefs = gql`
 export const resolvers = createResolver({
   Mutation: {
     put: async (parent, { input, upsert, new_edits = true }, context, info) => {
-      const document = await put(input, context, { upsert, new_edits })
+      const document = await put(context, input, { upsert, new_edits })
 
       return {
         _id: document._id,

@@ -8,8 +8,8 @@ interface PutOptions {
 }
 
 export async function put<T extends CouchDbDocument>(
-  doc: T,
   context: CouchDbContext,
+  doc: T,
   options: PutOptions = {}
 ): Promise<T | null> {
   const { upsert, new_edits = true } = options

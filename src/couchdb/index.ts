@@ -1,1 +1,5 @@
+export * from './allDocs'
+export * from './bulkDocs'
+export * from './bulkGet'
+export * from './changes'
 export * from './put'

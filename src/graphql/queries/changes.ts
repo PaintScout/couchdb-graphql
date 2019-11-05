@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core'
-import getAxios from '../../util/getAxios'
-import queryString from 'qs'
+
 import { createResolver } from '../../util/createResolver'
+import { changes } from '../../couchdb/changes'
 
 export const typeDefs = gql`
   type Change {
@@ -45,28 +45,7 @@ export const typeDefs = gql`
 export const resolvers = createResolver({
   Query: {
     changes: async (parent, args, context, info) => {
-      const hasArgs = Object.keys(args).length > 0
-      let url = `${context.dbUrl}/${context.dbName}/_changes`
-
-      if (hasArgs) {
-        if (args.lastEventId) {
-          delete args.lastEventId
-          args['last-event-id'] = args.lastEventId
-        }
-
-        // if args.since is not 'now', convert to number
-        if (args.since) {
-          if (args.since !== 'now') {
-            args.since = parseInt(args.since)
-          }
-        }
-
-        url += `?${queryString.stringify(args)}`
-      }
-
-      const response = await getAxios(context).get(url)
-
-      return response.data
+      return changes(context, args)
     },
   },
 })

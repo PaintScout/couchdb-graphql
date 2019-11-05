@@ -28,7 +28,7 @@ export const resolvers = createResolver({
       context,
       info
     ) => {
-      return bulkDocs(input, context, { upsert, new_edits })
+      return bulkDocs(context, input, { upsert, new_edits })
     },
   },
 })

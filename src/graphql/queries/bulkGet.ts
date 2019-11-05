@@ -1,7 +1,6 @@
 import { gql } from 'apollo-server-core'
-import getAxios from '../../util/getAxios'
-import queryString from 'qs'
 import { createResolver } from '../../util/createResolver'
+import { bulkGet } from '../../couchdb/bulkGet'
 
 /**
  * Generic GET on a document
@@ -41,18 +40,7 @@ export const typeDefs = gql`
 export const resolvers = createResolver({
   Query: {
     bulkGet: async (parent, { docs, revs }, context, info) => {
-      let url = `${context.dbUrl}/${context.dbName}/_bulk_get`
-
-      if (revs) {
-        url += `?${queryString.stringify({ revs })}`
-      }
-
-      const response = await getAxios(context).post(url, {
-        docs,
-        revs,
-      })
-
-      return response.data
+      return bulkGet(docs, context, { revs })
     },
   },
 })

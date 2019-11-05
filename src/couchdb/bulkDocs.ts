@@ -1,6 +1,6 @@
 import getAxios from '../util/getAxios'
 import { resolveConflicts } from '../util/resolveConflicts'
-import { CouchDbDocument } from '../util/createResolver'
+import { CouchDbDocument, CouchDbContext } from '../util/createResolver'
 
 export interface BulkDocsResponseObject {
   _id: String
@@ -17,8 +17,8 @@ export interface BulkDocsOptions {
   new_edits?: boolean
 }
 export async function bulkDocs(
-  docs,
-  context,
+  context: CouchDbContext,
+  docs: CouchDbDocument[],
   options: BulkDocsOptions = {}
 ): Promise<BulkDocsResponse> {
   const { upsert, new_edits = true } = options

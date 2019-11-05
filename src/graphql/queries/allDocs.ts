@@ -1,7 +1,6 @@
 import { gql } from 'apollo-server-core'
-import getAxios from '../../util/getAxios'
-import queryString from 'qs'
 import { createResolver } from '../../util/createResolver'
+import { allDocs } from '../../couchdb/allDocs'
 
 export const typeDefs = gql`
   type AllDocsRow {
@@ -35,16 +34,8 @@ export const typeDefs = gql`
 
 export const resolvers = createResolver({
   Query: {
-    allDocs: async (parent, { keys, ...args }, context, info) => {
-      let url = `${context.dbUrl}/${context.dbName}/_all_docs`
-
-      if (args) {
-        url += `?${queryString.stringify(args)}`
-      }
-
-      const response = await getAxios(context).post(url, { keys })
-
-      return response.data
+    allDocs: async (parent, args, context, info) => {
+      return allDocs(context, args)
     },
   },
 })
