@@ -15,10 +15,23 @@ export interface AllDocsOptions {
   update_seq?: boolean
 }
 
+export interface AllDocsResponse<T = any> {
+  total_rows: number
+  offset: number
+  rows: Array<{
+    id: string
+    rev?: string
+    value?: {
+      rev: string
+    }
+    doc?: T
+  }>
+}
+
 export async function allDocs(
   context: CouchDbContext,
   { keys, key, endkey, startkey, ...args }: AllDocsOptions = {}
-) {
+): Promise<AllDocsResponse> {
   let url = `${context.dbUrl}/${context.dbName}/_all_docs`
 
   if (args) {

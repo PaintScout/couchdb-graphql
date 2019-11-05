@@ -69,7 +69,19 @@ interface AllDocsOptions {
     startkey?: any | any[];
     update_seq?: boolean;
 }
-declare function allDocs(context: CouchDbContext, { keys, key, endkey, startkey, ...args }?: AllDocsOptions): Promise<any>;
+interface AllDocsResponse<T = any> {
+    total_rows: number;
+    offset: number;
+    rows: Array<{
+        id: string;
+        rev?: string;
+        value?: {
+            rev: string;
+        };
+        doc?: T;
+    }>;
+}
+declare function allDocs(context: CouchDbContext, { keys, key, endkey, startkey, ...args }?: AllDocsOptions): Promise<AllDocsResponse>;
 declare const typeDefs_$1: import("graphql").DocumentNode;
 declare const resolvers_$1: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../../util/createResolver").CouchDbContext>;
 interface BulkGetOptions {
@@ -312,4 +324,4 @@ interface CreateSchemaOptions {
  * Creates a GraphQL Schema for CouchDB
  */
 declare function createSchema({ schemas, cloudant, }?: CreateSchemaOptions): import("graphql").GraphQLSchema;
-export { put_$0, bulkDocs_$0, get_$0, info_$0, bulkGet_$0, changes_$0, search_$0, find_$0, query_$0, allDocs_$0, AllDocsOptions, allDocs, BulkDocsResponseObject, BulkDocsResponse, BulkDocsOptions, bulkDocs, BulkGetOptions, BulkGetResponse, bulkGet, ChangesOptions, ChangesResponse, changes, FindOptions, FindResponse, find, GetOptions, get, InfoResponse, info, put, QueryOptions, QueryResponse, query, SearchOptions, SearchResponse, search, CreateSchemaOptions, createSchema, resolveConflicts, CouchDbDocument, CouchDbContext, createResolver, queries, mutations, base };
+export { put_$0, bulkDocs_$0, get_$0, info_$0, bulkGet_$0, changes_$0, search_$0, find_$0, query_$0, allDocs_$0, AllDocsOptions, AllDocsResponse, allDocs, BulkDocsResponseObject, BulkDocsResponse, BulkDocsOptions, bulkDocs, BulkGetOptions, BulkGetResponse, bulkGet, ChangesOptions, ChangesResponse, changes, FindOptions, FindResponse, find, GetOptions, get, InfoResponse, info, put, QueryOptions, QueryResponse, query, SearchOptions, SearchResponse, search, CreateSchemaOptions, createSchema, resolveConflicts, CouchDbDocument, CouchDbContext, createResolver, queries, mutations, base };
