@@ -15,6 +15,7 @@ export interface CouchDbContext {
     context: CouchDbContext
   }) => T
   onConflictsResolved?: <T extends CouchDbDocument>(documents: T[]) => any
+  onDocumentsSaved?: <T extends CouchDbDocument>(documents: T[]) => any
 }
 
 export function createResolver(resolver: GraphQLResolverMap<CouchDbContext>) {

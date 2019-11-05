@@ -1,6 +1,7 @@
 import { gql } from 'apollo-server-core'
 import getAxios from '../../util/getAxios'
 import { resolveConflicts } from '../../util/resolveConflicts'
+import { createResolver } from '../../util/createResolver'
 
 export const typeDefs = gql`
   type BulkDocsResponseObject {
@@ -20,7 +21,7 @@ export const typeDefs = gql`
   }
 `
 
-export const resolvers = {
+export const resolvers = createResolver({
   Mutation: {
     bulkDocs: async (
       parent,
@@ -47,7 +48,7 @@ export const resolvers = {
         })
       }
 
-      const response = await getAxios(context).post(url, {
+      const saveResponse = await getAxios(context).post(url, {
         docs: input.map(doc => ({
           ...doc,
           _rev: upsert && doc._id ? previousRevs[doc._id] : doc._rev,
@@ -55,8 +56,8 @@ export const resolvers = {
         new_edits,
       })
 
-      let saveResults = response.data
-      const conflicts = response.data.filter(
+      let saveResults = saveResponse.data
+      const conflicts = saveResponse.data.filter(
         result => result.error === 'conflict'
       )
 
@@ -83,7 +84,7 @@ export const resolvers = {
         }
       }
 
-      return saveResults.map((result, index) => {
+      const response = saveResults.map((result, index) => {
         const document = input[index]
 
         const _rev = result.error
@@ -104,6 +105,14 @@ export const resolvers = {
           },
         }
       })
+
+      if (context.onDocumentsSaved) {
+        context.onDocumentsSaved(
+          response.filter(res => !res.error).map(res => res.document)
+        )
+      }
+
+      return response
     },
   },
-}
+})

@@ -17,6 +17,7 @@ interface CouchDbContext {
         context: CouchDbContext;
     }) => T;
     onConflictsResolved?: <T extends CouchDbDocument>(documents: T[]) => any;
+    onDocumentsSaved?: <T extends CouchDbDocument>(documents: T[]) => any;
 }
 declare function createResolver(resolver: GraphQLResolverMap<CouchDbContext>): GraphQLResolverMap<CouchDbContext>;
 /**
@@ -29,30 +30,14 @@ declare function resolveConflicts(documents: any[], context: CouchDbContext): Pr
 declare const typeDefs: import("graphql").DocumentNode;
 declare const resolvers: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../../util/createResolver").CouchDbContext>;
 declare const typeDefs_$0: import("graphql").DocumentNode;
-declare const resolvers_$0: {
-    Mutation: {
-        bulkDocs: (parent: any, { input, upsert, new_edits }: {
-            input: any;
-            upsert: any;
-            new_edits?: boolean | undefined;
-        }, context: any, info: any) => Promise<any>;
-    };
-};
+declare const resolvers_$0: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../../util/createResolver").CouchDbContext>;
 declare module put {
     const typeDefs: import("graphql").DocumentNode;
     const resolvers: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../../util/createResolver").CouchDbContext>;
 }
 declare module bulkDocs {
     const typeDefs_$0: import("graphql").DocumentNode;
-    const resolvers_$0: {
-        Mutation: {
-            bulkDocs: (parent: any, { input, upsert, new_edits }: {
-                input: any;
-                upsert: any;
-                new_edits?: boolean | undefined;
-            }, context: any, info: any) => Promise<any>;
-        };
-    };
+    const resolvers_$0: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../../util/createResolver").CouchDbContext>;
 }
 declare const typeDefs_$1: import("graphql").DocumentNode;
 declare const resolvers_$1: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../../util/createResolver").CouchDbContext>;

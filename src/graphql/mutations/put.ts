@@ -69,17 +69,26 @@ export const resolvers = createResolver({
         }
       }
 
-      return result
-        ? {
-            _id: result.id,
-            _rev: result.rev,
-            document: {
-              ...input,
-              _id: result.id,
-              _rev: result.rev,
-            },
-          }
-        : {}
+      if (result) {
+        const savedDocument = result && {
+          ...input,
+          _id: result.id,
+          _rev: result.rev,
+        }
+
+        if (context.onDocumentsSaved) {
+          context.onDocumentsSaved([savedDocument])
+        }
+
+        return {
+          _id: result.id,
+          _rev: result.rev,
+          document: savedDocument,
+        }
+      } else {
+        // new_edits=false returns empty response
+        return {}
+      }
     },
   },
 })

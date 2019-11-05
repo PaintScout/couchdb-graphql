@@ -172,4 +172,44 @@ describe('put', () => {
       },
     })
   })
+
+  it('should call context.onDocumentsSaved with result', async () => {
+    mockAxios.onPost(`${dbUrl}/${dbName}/_bulk_docs`).reply(200, [
+      {
+        id: '1',
+        rev: '1',
+      },
+    ])
+
+    const onDocumentsSaved = jest.fn()
+    const server = createTestServer({
+      onDocumentsSaved,
+    })
+
+    await server.query({
+      query: gql`
+        mutation save($input: JSON!) {
+          put(input: $input) {
+            _id
+            _rev
+            document
+          }
+        }
+      `,
+      variables: {
+        input: {
+          _id: '1',
+          blah: 'blah',
+        },
+      },
+    })
+
+    expect(onDocumentsSaved).toHaveBeenCalledWith([
+      {
+        _id: '1',
+        _rev: '1',
+        blah: 'blah',
+      },
+    ])
+  })
 })

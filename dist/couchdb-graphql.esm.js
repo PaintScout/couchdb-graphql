@@ -268,14 +268,27 @@ createResolver({
             var _exit2 = false;
 
             function _temp2(_result4) {
-              return _exit2 ? _result4 : result ? {
-                _id: result.id,
-                _rev: result.rev,
-                document: _extends({}, input, {
+              if (_exit2) return _result4;
+
+              if (result) {
+                var savedDocument = result && _extends({}, input, {
                   _id: result.id,
                   _rev: result.rev
-                })
-              } : {};
+                });
+
+                if (context.onDocumentsSaved) {
+                  context.onDocumentsSaved([savedDocument]);
+                }
+
+                return {
+                  _id: result.id,
+                  _rev: result.rev,
+                  document: savedDocument
+                };
+              } else {
+                // new_edits=false returns empty response
+                return {};
+              }
             }
 
             var _response$data = response.data,
@@ -356,7 +369,9 @@ var typeDefs$1 =
 gql(
 /*#__PURE__*/
 _templateObject$2());
-var resolvers$1 = {
+var resolvers$1 =
+/*#__PURE__*/
+createResolver({
   Mutation: {
     bulkDocs: function (parent, _ref, context, info) {
       var input = _ref.input,
@@ -373,9 +388,9 @@ var resolvers$1 = {
               });
             }),
             new_edits: new_edits
-          })).then(function (response) {
+          })).then(function (saveResponse) {
             function _temp2() {
-              return saveResults.map(function (result, index) {
+              var response = saveResults.map(function (result, index) {
                 var document = input[index];
 
                 var _rev = result.error ? // if an error, return the last _rev
@@ -393,10 +408,20 @@ var resolvers$1 = {
                   })
                 };
               });
+
+              if (context.onDocumentsSaved) {
+                context.onDocumentsSaved(response.filter(function (res) {
+                  return !res.error;
+                }).map(function (res) {
+                  return res.document;
+                }));
+              }
+
+              return response;
             }
 
-            var saveResults = response.data;
-            var conflicts = response.data.filter(function (result) {
+            var saveResults = saveResponse.data;
+            var conflicts = saveResponse.data.filter(function (result) {
               return result.error === 'conflict';
             });
 
@@ -456,7 +481,7 @@ var resolvers$1 = {
       }
     }
   }
-};
+});
 
 var bulkDocs = ({
   __proto__: null,

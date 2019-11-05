@@ -353,4 +353,59 @@ describe('bulkDocs', () => {
       ],
     })
   })
+
+  it('should call context.onDocumentsSaved with result', async () => {
+    mockAxios.onPost(`${dbUrl}/${dbName}/_bulk_docs`).reply(200, [
+      {
+        id: '1',
+        rev: '1',
+      },
+      {
+        id: '2',
+        rev: '1',
+      },
+    ])
+
+    const onDocumentsSaved = jest.fn()
+    const server = createTestServer({
+      onDocumentsSaved,
+    })
+
+    await server.query({
+      query: gql`
+        mutation save($input: [JSON!]!) {
+          bulkDocs(input: $input) {
+            _id
+            _rev
+            document
+          }
+        }
+      `,
+      variables: {
+        input: [
+          {
+            _id: '1',
+            blah: 'blah',
+          },
+          {
+            _id: '2',
+            blah2: 'blah2',
+          },
+        ],
+      },
+    })
+
+    expect(onDocumentsSaved).toHaveBeenCalledWith([
+      {
+        _id: '1',
+        _rev: '1',
+        blah: 'blah',
+      },
+      {
+        _id: '2',
+        _rev: '1',
+        blah2: 'blah2',
+      },
+    ])
+  })
 })
