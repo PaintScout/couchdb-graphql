@@ -60,7 +60,7 @@ export const resolvers = {
         result => result.error === 'conflict'
       )
 
-      if (conflicts) {
+      if (conflicts.length > 0) {
         const resolved = await resolveConflicts(
           input.filter(doc =>
             conflicts.find(conflict => conflict.id === doc._id)

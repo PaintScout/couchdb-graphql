@@ -108,6 +108,10 @@ function createResolver(resolver) {
  */
 var resolveConflicts = function resolveConflicts(documents, context) {
   try {
+    if (!context.onResolveConflict) {
+      return Promise.resolve(null);
+    }
+
     return Promise.resolve(getConflictsByDocument(documents, context)).then(function (conflictingDocuments) {
       return Promise.resolve(Promise.all(Object.keys(conflictingDocuments).map(function (id) {
         try {
@@ -399,7 +403,7 @@ var resolvers$1 = {
             });
 
             var _temp = function () {
-              if (conflicts) {
+              if (conflicts.length > 0) {
                 return Promise.resolve(resolveConflicts(input.filter(function (doc) {
                   return conflicts.find(function (conflict) {
                     return conflict.id === doc._id;
