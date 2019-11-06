@@ -126,14 +126,18 @@ describe('resolveConflicts', () => {
       ])
 
     const onConflictsResolved = jest.fn()
-    await resolveConflicts([savingDocument], {
+    const context = {
       dbUrl,
       dbName,
       onResolveConflict: () => resolvedDocument as any,
       onConflictsResolved,
-    })
+    }
+    await resolveConflicts([savingDocument], context)
 
-    expect(onConflictsResolved).toHaveBeenCalledWith([resolvedDocument])
+    expect(onConflictsResolved).toHaveBeenCalledWith({
+      documents: [resolvedDocument],
+      context,
+    })
   })
 
   it('should resolve a conflict caused by mismatched rev', async () => {

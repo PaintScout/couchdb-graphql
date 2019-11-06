@@ -128,15 +128,16 @@ export async function resolveConflicts(
   )
 
   if (context.onConflictsResolved) {
-    context.onConflictsResolved(
-      response.data
+    context.onConflictsResolved({
+      documents: response.data
         .filter(result => result.ok)
         .map(result => ({
           ...docsToSave.find(doc => doc._id === result.id),
           _rev: result.rev,
           _id: result.id,
-        }))
-    )
+        })),
+      context,
+    })
   }
   return response.data
 }

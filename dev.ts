@@ -10,7 +10,7 @@ const server = new ApolloServer({
       onResolveConflict({ document, conflicts, context }) {
         return document
       },
-      onConflictsResolved(documents) {
+      onConflictsResolved({ documents }) {
         console.log('Documents resolved:')
         console.log(documents)
       },

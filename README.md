@@ -28,8 +28,14 @@ const server = new ApolloServer({
       },
 
       // optional - called when documents have been successfully resolved
-      onConflictsResolved(documents) {
+      onConflictsResolved({ documents, context }) {
         console.log('Documents resolved:')
+        console.log(documents)
+      },
+
+      // optional - called after documents are saved
+      onDocumentsSaved({ documents, context }) {
+        console.log('Documents saved:')
         console.log(documents)
       },
     }

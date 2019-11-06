@@ -103,9 +103,10 @@ export async function bulkDocs(
   })
 
   if (context.onDocumentsSaved) {
-    context.onDocumentsSaved(
-      response.filter(res => !res.error).map(res => res.document)
-    )
+    context.onDocumentsSaved({
+      documents: response.filter(res => !res.error).map(res => res.document),
+      context,
+    })
   }
 
   return response

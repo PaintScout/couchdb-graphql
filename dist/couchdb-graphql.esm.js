@@ -140,16 +140,19 @@ var resolveConflicts = function resolveConflicts(documents, context) {
           docs: docsToSave
         })).then(function (response) {
           if (context.onConflictsResolved) {
-            context.onConflictsResolved(response.data.filter(function (result) {
-              return result.ok;
-            }).map(function (result) {
-              return _extends({}, docsToSave.find(function (doc) {
-                return doc._id === result.id;
-              }), {
-                _rev: result.rev,
-                _id: result.id
-              });
-            }));
+            context.onConflictsResolved({
+              documents: response.data.filter(function (result) {
+                return result.ok;
+              }).map(function (result) {
+                return _extends({}, docsToSave.find(function (doc) {
+                  return doc._id === result.id;
+                }), {
+                  _rev: result.rev,
+                  _id: result.id
+                });
+              }),
+              context: context
+            });
           }
 
           return response.data;
@@ -274,7 +277,10 @@ var put = function put(context, doc, options) {
           });
 
           if (context.onDocumentsSaved) {
-            context.onDocumentsSaved([savedDocument]);
+            context.onDocumentsSaved({
+              documents: [savedDocument],
+              context: context
+            });
           }
 
           return savedDocument;
@@ -447,11 +453,14 @@ var bulkDocs = function bulkDocs(context, docs, options) {
         });
 
         if (context.onDocumentsSaved) {
-          context.onDocumentsSaved(response.filter(function (res) {
-            return !res.error;
-          }).map(function (res) {
-            return res.document;
-          }));
+          context.onDocumentsSaved({
+            documents: response.filter(function (res) {
+              return !res.error;
+            }).map(function (res) {
+              return res.document;
+            }),
+            context: context
+          });
         }
 
         return response;

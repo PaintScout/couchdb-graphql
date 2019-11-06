@@ -37,19 +37,16 @@ describe('bulkDocs', () => {
         },
       ])
 
-    const result = await bulkDocs(
-      [
-        {
-          _id: '1',
-          blah: 'blah',
-        },
-        {
-          _id: '2',
-          blah2: 'blah2',
-        },
-      ],
-      context
-    )
+    const result = await bulkDocs(context, [
+      {
+        _id: '1',
+        blah: 'blah',
+      },
+      {
+        _id: '2',
+        blah2: 'blah2',
+      },
+    ])
 
     expect(result).toMatchObject([
       {
@@ -87,21 +84,18 @@ describe('bulkDocs', () => {
         },
       ])
 
-    const result = await bulkDocs(
-      [
-        {
-          _id: '1',
-          _rev: '1',
-          blah: 'blah',
-        },
-        {
-          _id: '2',
-          _rev: '1',
-          blah2: 'blah2',
-        },
-      ],
-      context
-    )
+    const result = await bulkDocs(context, [
+      {
+        _id: '1',
+        _rev: '1',
+        blah: 'blah',
+      },
+      {
+        _id: '2',
+        _rev: '1',
+        blah2: 'blah2',
+      },
+    ])
 
     expect(result).toMatchObject([
       {
@@ -156,19 +150,16 @@ describe('bulkDocs', () => {
         },
       ])
 
-    const result = await bulkDocs(
-      [
-        {
-          _id: '1',
-          blah: 'blah',
-        },
-        {
-          _id: '2',
-          blah2: 'blah2',
-        },
-      ],
-      context
-    )
+    const result = await bulkDocs(context, [
+      {
+        _id: '1',
+        blah: 'blah',
+      },
+      {
+        _id: '2',
+        blah2: 'blah2',
+      },
+    ])
 
     expect(result).toMatchObject([
       {
@@ -207,21 +198,18 @@ describe('bulkDocs', () => {
         },
       ])
 
-    const result = await bulkDocs(
-      [
-        {
-          _id: '1',
-          _rev: '1',
-          blah: 'blah',
-        },
-        {
-          _id: '2',
-          _rev: '1',
-          blah2: 'blah2',
-        },
-      ],
-      context
-    )
+    const result = await bulkDocs(context, [
+      {
+        _id: '1',
+        _rev: '1',
+        blah: 'blah',
+      },
+      {
+        _id: '2',
+        _rev: '1',
+        blah2: 'blah2',
+      },
+    ])
 
     expect(result).toMatchObject([
       {
@@ -266,16 +254,13 @@ describe('bulkDocs', () => {
       },
     ])
 
-    const result = await bulkDocs(
-      [
-        {
-          _id: '1',
-          _rev: '1',
-          blah: 'blah',
-        },
-      ],
-      context
-    )
+    const result = await bulkDocs(context, [
+      {
+        _id: '1',
+        _rev: '1',
+        blah: 'blah',
+      },
+    ])
 
     expect(resolveConflicts).toHaveBeenCalledWith(
       [
@@ -317,30 +302,30 @@ describe('bulkDocs', () => {
 
     const onDocumentsSaved = jest.fn()
 
-    await bulkDocs(
-      [
-        {
-          _id: '1',
-          blah: 'blah',
-        },
-        {
-          _id: '2',
-          blah2: 'blah2',
-        },
-      ],
-      { ...context, onDocumentsSaved }
-    )
-    expect(onDocumentsSaved).toHaveBeenCalledWith([
+    await bulkDocs({ ...context, onDocumentsSaved }, [
       {
         _id: '1',
-        _rev: '1',
         blah: 'blah',
       },
       {
         _id: '2',
-        _rev: '1',
         blah2: 'blah2',
       },
     ])
+    expect(onDocumentsSaved).toHaveBeenCalledWith({
+      documents: [
+        {
+          _id: '1',
+          _rev: '1',
+          blah: 'blah',
+        },
+        {
+          _id: '2',
+          _rev: '1',
+          blah2: 'blah2',
+        },
+      ],
+      context: { ...context, onDocumentsSaved },
+    })
   })
 })

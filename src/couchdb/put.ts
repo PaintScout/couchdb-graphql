@@ -66,7 +66,7 @@ export async function put<T extends CouchDbDocument>(
     }
 
     if (context.onDocumentsSaved) {
-      context.onDocumentsSaved([savedDocument])
+      context.onDocumentsSaved({ documents: [savedDocument], context })
     }
 
     return savedDocument

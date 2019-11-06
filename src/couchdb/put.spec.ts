@@ -32,13 +32,10 @@ describe('put', () => {
         },
       ])
 
-    const result = await put(
-      {
-        _id: '1',
-        blah: 'blah',
-      },
-      context
-    )
+    const result = await put(context, {
+      _id: '1',
+      blah: 'blah',
+    })
 
     expect(result).toMatchObject({
       _id: '1',
@@ -68,13 +65,10 @@ describe('put', () => {
         },
       ])
 
-    const result = await put(
-      {
-        _id: '1',
-        blah: 'blah',
-      },
-      context
-    )
+    const result = await put(context, {
+      _id: '1',
+      blah: 'blah',
+    })
 
     expect(result).toMatchObject({
       _id: '1',
@@ -102,14 +96,11 @@ describe('put', () => {
       },
     ])
 
-    const result = await put(
-      {
-        _id: '1',
-        _rev: '1',
-        blah: 'blah',
-      },
-      context
-    )
+    const result = await put(context, {
+      _id: '1',
+      _rev: '1',
+      blah: 'blah',
+    })
     expect(resolveConflicts).toHaveBeenCalledWith(
       [
         {
@@ -141,19 +132,22 @@ describe('put', () => {
     const onDocumentsSaved = jest.fn()
 
     const result = await put(
+      { ...context, onDocumentsSaved },
       {
         _id: '1',
         blah: 'blah',
-      },
-      { ...context, onDocumentsSaved }
+      }
     )
 
-    expect(onDocumentsSaved).toHaveBeenCalledWith([
-      {
-        _id: '1',
-        _rev: '1',
-        blah: 'blah',
-      },
-    ])
+    expect(onDocumentsSaved).toHaveBeenCalledWith({
+      documents: [
+        {
+          _id: '1',
+          _rev: '1',
+          blah: 'blah',
+        },
+      ],
+      context: { ...context, onDocumentsSaved },
+    })
   })
 })
