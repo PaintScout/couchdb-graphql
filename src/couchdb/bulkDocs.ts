@@ -2,25 +2,27 @@ import getAxios from '../util/getAxios'
 import { resolveConflicts } from '../util/resolveConflicts'
 import { CouchDbDocument, CouchDbContext } from '../util/createResolver'
 
-export interface BulkDocsResponseObject {
+export interface BulkDocsResponseObject<T extends CouchDbDocument> {
   _id: string
   _rev?: string
-  document?: CouchDbDocument
+  document?: T
   error?: string
   reason?: string
 }
 
-export type BulkDocsResponse = Array<BulkDocsResponseObject>
+export type BulkDocsResponse<
+  T extends CouchDbDocument
+> = BulkDocsResponseObject<T>[]
 
 export interface BulkDocsOptions {
   upsert?: boolean
   new_edits?: boolean
 }
-export async function bulkDocs(
+export async function bulkDocs<T extends CouchDbDocument>(
   context: CouchDbContext,
   docs: CouchDbDocument[],
   options: BulkDocsOptions = {}
-): Promise<BulkDocsResponse> {
+): Promise<BulkDocsResponse<T>> {
   const { upsert, new_edits = true } = options
   let url = `${context.dbUrl}/${context.dbName}/_bulk_docs`
   let previousRevs: Record<string, string> = {}

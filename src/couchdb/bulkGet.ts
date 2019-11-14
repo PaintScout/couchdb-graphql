@@ -6,9 +6,9 @@ export interface BulkGetOptions {
   revs?: boolean
 }
 
-export interface BulkGetResponse {
+export interface BulkGetResponse<T extends CouchDbDocument> {
   results: Array<{
-    ok?: CouchDbDocument
+    ok?: T
     error?: {
       id: string
       rev?: string
@@ -18,11 +18,11 @@ export interface BulkGetResponse {
   }>
 }
 
-export async function bulkGet(
+export async function bulkGet<T extends CouchDbDocument>(
   docs: Array<{ id: string; rev: string }>,
   context: CouchDbContext,
   { revs }: BulkGetOptions
-): Promise<BulkGetResponse> {
+): Promise<BulkGetResponse<T>> {
   let url = `${context.dbUrl}/${context.dbName}/_bulk_get`
 
   if (revs) {

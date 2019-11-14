@@ -40,19 +40,19 @@ declare function put<T extends CouchDbDocument>(context: CouchDbContext, doc: T,
  */
 declare const typeDefs: import("graphql").DocumentNode;
 declare const resolvers: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../../util/createResolver").CouchDbContext>;
-interface BulkDocsResponseObject {
+interface BulkDocsResponseObject<T extends CouchDbDocument> {
     _id: string;
     _rev?: string;
-    document?: CouchDbDocument;
+    document?: T;
     error?: string;
     reason?: string;
 }
-declare type BulkDocsResponse = Array<BulkDocsResponseObject>;
+declare type BulkDocsResponse<T extends CouchDbDocument> = BulkDocsResponseObject<T>[];
 interface BulkDocsOptions {
     upsert?: boolean;
     new_edits?: boolean;
 }
-declare function bulkDocs(context: CouchDbContext, docs: CouchDbDocument[], options?: BulkDocsOptions): Promise<BulkDocsResponse>;
+declare function bulkDocs<T extends CouchDbDocument>(context: CouchDbContext, docs: CouchDbDocument[], options?: BulkDocsOptions): Promise<BulkDocsResponse<T>>;
 declare const typeDefs_$0: import("graphql").DocumentNode;
 declare const resolvers_$0: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../../util/createResolver").CouchDbContext>;
 declare module put_$0 {
@@ -93,9 +93,9 @@ declare const resolvers_$1: import("@apollographql/apollo-tools").GraphQLResolve
 interface BulkGetOptions {
     revs?: boolean;
 }
-interface BulkGetResponse {
+interface BulkGetResponse<T extends CouchDbDocument> {
     results: Array<{
-        ok?: CouchDbDocument;
+        ok?: T;
         error?: {
             id: string;
             rev?: string;
@@ -104,10 +104,10 @@ interface BulkGetResponse {
         };
     }>;
 }
-declare function bulkGet(docs: Array<{
+declare function bulkGet<T extends CouchDbDocument>(docs: Array<{
     id: string;
     rev: string;
-}>, context: CouchDbContext, { revs }: BulkGetOptions): Promise<BulkGetResponse>;
+}>, context: CouchDbContext, { revs }: BulkGetOptions): Promise<BulkGetResponse<T>>;
 /**
  * Generic GET on a document
  */
@@ -176,7 +176,7 @@ interface GetOptions {
     attachments?: boolean;
     latest?: boolean;
 }
-declare function get(context: CouchDbContext, id: string, options?: GetOptions): Promise<CouchDbDocument>;
+declare function get<T extends CouchDbDocument>(context: CouchDbContext, id: string, options?: GetOptions): Promise<T>;
 interface InfoResponse {
     db_name: string;
     update_seq: string;
@@ -228,17 +228,17 @@ interface QueryOptions {
     update?: string;
     update_seq?: boolean;
 }
-interface QueryResponse {
+interface QueryResponse<T> {
     offset: number;
     update_seq: any | any[];
     total_rows: number;
     rows: Array<{
         id: string;
         key?: any | any[];
-        value?: any;
+        value?: T;
     }>;
 }
-declare function query(context: CouchDbContext, { view, ddoc, ...options }: QueryOptions): Promise<QueryResponse>;
+declare function query<T = any>(context: CouchDbContext, { view, ddoc, ...options }: QueryOptions): Promise<QueryResponse<T>>;
 interface SearchOptions {
     index: string;
     ddoc: string;

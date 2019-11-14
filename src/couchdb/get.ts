@@ -13,11 +13,11 @@ export interface GetOptions {
   latest?: boolean
 }
 
-export async function get(
+export async function get<T extends CouchDbDocument>(
   context: CouchDbContext,
   id: string,
   options: GetOptions = {}
-): Promise<CouchDbDocument> {
+): Promise<T> {
   const hasArgs = Object.keys(options).length > 0
   let url = `${context.dbUrl}/${context.dbName}/${encodeURIComponent(id)}`
 

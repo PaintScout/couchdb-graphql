@@ -27,20 +27,20 @@ export interface QueryOptions {
   update_seq?: boolean
 }
 
-export interface QueryResponse {
+export interface QueryResponse<T> {
   offset: number
   update_seq: any | any[]
   total_rows: number
   rows: Array<{
     id: string
     key?: any | any[]
-    value?: any
+    value?: T
   }>
 }
-export async function query(
+export async function query<T = any>(
   context: CouchDbContext,
   { view, ddoc, ...options }: QueryOptions
-): Promise<QueryResponse> {
+): Promise<QueryResponse<T>> {
   let url = `${context.dbUrl}/${context.dbName}/_design/${ddoc}/_view/${view}`
 
   const hasArgs = Object.keys(options).length > 0
