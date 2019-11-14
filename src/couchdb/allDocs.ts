@@ -28,10 +28,10 @@ export interface AllDocsResponse<T = any> {
   }>
 }
 
-export async function allDocs(
+export async function allDocs<T = any>(
   context: CouchDbContext,
   { keys, key, endkey, startkey, ...args }: AllDocsOptions = {}
-): Promise<AllDocsResponse> {
+): Promise<AllDocsResponse<T>> {
   let url = `${context.dbUrl}/${context.dbName}/_all_docs`
 
   if (args) {

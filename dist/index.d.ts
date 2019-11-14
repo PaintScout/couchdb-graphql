@@ -87,7 +87,7 @@ interface AllDocsResponse<T = any> {
         doc?: T;
     }>;
 }
-declare function allDocs(context: CouchDbContext, { keys, key, endkey, startkey, ...args }?: AllDocsOptions): Promise<AllDocsResponse>;
+declare function allDocs<T = any>(context: CouchDbContext, { keys, key, endkey, startkey, ...args }?: AllDocsOptions): Promise<AllDocsResponse<T>>;
 declare const typeDefs_$1: import("graphql").DocumentNode;
 declare const resolvers_$1: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../../util/createResolver").CouchDbContext>;
 interface BulkGetOptions {
