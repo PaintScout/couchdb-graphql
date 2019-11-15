@@ -1,6 +1,5 @@
-import { gql } from 'apollo-server-core'
-import getAxios from '../util/getAxios'
-import { CouchDbContext } from '../util/createResolver'
+import { CouchDbContext } from '../createContext'
+import parseFetchResponse from '../util/parseFetchResponse'
 
 export interface SearchOptions {
   index: string
@@ -40,9 +39,17 @@ export async function search(
   context: CouchDbContext,
   { index, ddoc, ...options }: SearchOptions
 ): Promise<SearchResponse> {
-  let url = `${context.dbUrl}/${context.dbName}/_design/${ddoc}/_search/${index}`
+  const { fetch, dbUrl, dbName } = context.couchDb
 
-  const response = await getAxios(context).post(url, options)
+  let url = `${dbUrl}/${dbName}/_design/${ddoc}/_search/${index}`
 
-  return response.data
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(options),
+  }).then(parseFetchResponse)
+
+  return response
 }

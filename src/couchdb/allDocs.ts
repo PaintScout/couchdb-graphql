@@ -1,6 +1,6 @@
 import queryString from 'qs'
-import getAxios from '../util/getAxios'
-import { CouchDbContext } from '../util/createResolver'
+import { CouchDbContext } from '../createContext'
+import parseFetchResponse from '../util/parseFetchResponse'
 
 export interface AllDocsOptions {
   conflicts?: boolean
@@ -32,18 +32,25 @@ export async function allDocs<T = any>(
   context: CouchDbContext,
   { keys, key, endkey, startkey, ...args }: AllDocsOptions = {}
 ): Promise<AllDocsResponse<T>> {
-  let url = `${context.dbUrl}/${context.dbName}/_all_docs`
+  const { fetch } = context.couchDb
+  let url = `${context.couchDb.dbUrl}/${context.couchDb.dbName}/_all_docs`
 
   if (args) {
     url += `?${queryString.stringify(args)}`
   }
 
-  const response = await getAxios(context).post(url, {
-    keys,
-    key,
-    endkey,
-    startkey,
-  })
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      keys,
+      key,
+      endkey,
+      startkey,
+    }),
+  }).then(parseFetchResponse)
 
-  return response.data
+  return response
 }

@@ -1,5 +1,5 @@
-import { CouchDbContext } from '../util/createResolver'
-import getAxios from '../util/getAxios'
+import parseFetchResponse from '../util/parseFetchResponse'
+import { CouchDbContext } from '../createContext'
 
 export interface FindOptions {
   selector?: any
@@ -27,9 +27,16 @@ export async function find<T = any>(
   context: CouchDbContext,
   options: FindOptions
 ): Promise<FindResponse<T>> {
-  let url = `${context.dbUrl}/${context.dbName}/_find`
+  const { fetch, dbUrl, dbName } = context.couchDb
+  let url = `${dbUrl}/${dbName}/_find`
 
-  const response = await getAxios(context).post(url, options)
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(options),
+  }).then(parseFetchResponse)
 
-  return response.data
+  return response
 }

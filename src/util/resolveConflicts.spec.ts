@@ -1,16 +1,13 @@
-import MockAdapter from 'axios-mock-adapter'
-import getAxios from './getAxios'
 import { resolveConflicts } from './resolveConflicts'
-jest.mock('./getAxios')
-
-const mockAxios = new MockAdapter(getAxios(null))
+import fetchMock from 'fetch-mock'
+import { createContext } from '../createContext'
 
 const dbUrl = 'my-url'
 const dbName = 'my-db'
 
 describe('resolveConflicts', () => {
   afterEach(() => {
-    mockAxios.resetHistory()
+    fetchMock.restore()
   })
 
   it('should call context.onResolveConflict', async () => {
@@ -33,36 +30,42 @@ describe('resolveConflicts', () => {
       _rev: '3-a',
     }
 
-    mockAxios
-      .onPost(`${dbUrl}/${dbName}/_all_docs?conflicts=true&include_docs=true`)
-      .replyOnce(200, {
-        rows: [
-          {
-            doc: storedDocument,
-          },
-        ],
+    fetchMock
+      .post(`${dbUrl}/${dbName}/_all_docs?conflicts=true&include_docs=true`, {
+        status: 200,
+        body: JSON.stringify({
+          rows: [
+            {
+              doc: storedDocument,
+            },
+          ],
+        }),
       })
-      .onPost(`${dbUrl}/${dbName}/_bulk_get`)
-      .replyOnce(200, {
-        results: [
-          {
-            docs: [
-              {
-                ok: conflictingDocument,
-              },
-            ],
-          },
-        ],
+      .post(`${dbUrl}/${dbName}/_bulk_get`, {
+        status: 200,
+        body: JSON.stringify({
+          results: [
+            {
+              docs: [
+                {
+                  ok: conflictingDocument,
+                },
+              ],
+            },
+          ],
+        }),
       })
-      .onPost(`${dbUrl}/${dbName}/_bulk_docs`)
-      .replyOnce(200, 'good')
+      .post(`${dbUrl}/${dbName}/_bulk_docs`, {
+        status: 200,
+        body: JSON.stringify('good'),
+      })
 
     const onResolveConflict = jest.fn(() => savingDocument as any)
-    const context = {
+    const context = createContext({
       dbUrl,
       dbName,
       onResolveConflict,
-    }
+    })
 
     await resolveConflicts([savingDocument], context)
 
@@ -95,43 +98,50 @@ describe('resolveConflicts', () => {
 
     const resolvedDocument = { _id: '123', _rev: '3', blah: true }
 
-    mockAxios
-      .onPost(`${dbUrl}/${dbName}/_all_docs?conflicts=true&include_docs=true`)
-      .replyOnce(200, {
-        rows: [
-          {
-            doc: storedDocument,
-          },
-        ],
+    fetchMock
+      .post(`${dbUrl}/${dbName}/_all_docs?conflicts=true&include_docs=true`, {
+        status: 200,
+        body: JSON.stringify({
+          rows: [
+            {
+              doc: storedDocument,
+            },
+          ],
+        }),
       })
-      .onPost(`${dbUrl}/${dbName}/_bulk_get`)
-      .replyOnce(200, {
-        results: [
-          {
-            docs: [
-              {
-                ok: conflictingDocument,
-              },
-            ],
-          },
-        ],
+      .post(`${dbUrl}/${dbName}/_bulk_get`, {
+        status: 200,
+        body: JSON.stringify({
+          results: [
+            {
+              docs: [
+                {
+                  ok: conflictingDocument,
+                },
+              ],
+            },
+          ],
+        }),
       })
-      .onPost(`${dbUrl}/${dbName}/_bulk_docs`)
-      .replyOnce(200, [
-        {
-          id: '123',
-          rev: '3',
-          ok: true,
-        },
-      ])
+      .post(`${dbUrl}/${dbName}/_bulk_docs`, {
+        status: 200,
+        body: JSON.stringify([
+          {
+            id: '123',
+            rev: '3',
+            ok: true,
+          },
+        ]),
+      })
 
     const onConflictsResolved = jest.fn()
-    const context = {
+    const context = createContext({
       dbUrl,
       dbName,
       onResolveConflict: () => resolvedDocument as any,
       onConflictsResolved,
-    }
+    })
+
     await resolveConflicts([savingDocument], context)
 
     expect(onConflictsResolved).toHaveBeenCalledWith({
@@ -158,43 +168,56 @@ describe('resolveConflicts', () => {
       resolved: true,
     }
 
-    mockAxios
-      .onPost(`${dbUrl}/${dbName}/_all_docs?conflicts=true&include_docs=true`)
-      .replyOnce(200, {
-        rows: [
-          {
-            doc: storedDocument,
-          },
-        ],
+    fetchMock
+      .post(`${dbUrl}/${dbName}/_all_docs?conflicts=true&include_docs=true`, {
+        status: 200,
+        body: JSON.stringify({
+          rows: [
+            {
+              doc: storedDocument,
+            },
+          ],
+        }),
       })
-      .onPost(`${dbUrl}/${dbName}/_bulk_get`)
-      .replyOnce(200, {
-        results: [
-          {
-            docs: [
-              {
-                ok: storedDocument,
-              },
-            ],
-          },
-        ],
+      .post(`${dbUrl}/${dbName}/_bulk_get`, {
+        status: 200,
+        body: JSON.stringify({
+          results: [
+            {
+              docs: [
+                {
+                  ok: storedDocument,
+                },
+              ],
+            },
+          ],
+        }),
       })
-      .onPost(`${dbUrl}/${dbName}/_bulk_docs`)
-      .replyOnce(200, 'good')
+      .post(`${dbUrl}/${dbName}/_bulk_docs`, {
+        status: 200,
+        body: JSON.stringify('good'),
+      })
 
-    const result = await resolveConflicts([savingDocument], {
-      dbUrl,
-      dbName,
-      onResolveConflict: () => {
-        return resolvedDocument as any
-      },
-    })
+    const result = await resolveConflicts(
+      [savingDocument],
+      createContext({
+        dbUrl,
+        dbName,
+        onResolveConflict: () => {
+          return resolvedDocument as any
+        },
+      })
+    )
 
     // expect _bulk_docs to have been called with resolved document
-    expect(mockAxios.history.post).toHaveLength(3)
-    expect(mockAxios.history.post[2].data).toEqual(
-      JSON.stringify({ docs: [resolvedDocument] })
-    )
+    expect(fetchMock.calls()).toHaveLength(3)
+
+    const bulkGetPost = fetchMock.calls(/_bulk_docs/)[0]
+    expect(bulkGetPost[1]).toEqual({
+      headers: expect.anything(),
+      method: 'POST',
+      body: JSON.stringify({ docs: [resolvedDocument] }),
+    })
     expect(result).toEqual('good')
   })
 
@@ -222,42 +245,56 @@ describe('resolveConflicts', () => {
       ...savingDocument,
     }
 
-    mockAxios
-      .onPost(`${dbUrl}/${dbName}/_all_docs?conflicts=true&include_docs=true`)
-      .replyOnce(200, {
-        rows: [
-          {
-            doc: storedDocument,
-          },
-        ],
+    fetchMock
+      .post(`${dbUrl}/${dbName}/_all_docs?conflicts=true&include_docs=true`, {
+        status: 200,
+        body: JSON.stringify({
+          rows: [
+            {
+              doc: storedDocument,
+            },
+          ],
+        }),
       })
-      .onPost(`${dbUrl}/${dbName}/_bulk_get`)
-      .replyOnce(200, {
-        results: [
-          {
-            docs: [
-              {
-                ok: conflictingDocument,
-              },
-            ],
-          },
-        ],
+      .post(`${dbUrl}/${dbName}/_bulk_get`, {
+        status: 200,
+        body: JSON.stringify({
+          results: [
+            {
+              docs: [
+                {
+                  ok: conflictingDocument,
+                },
+              ],
+            },
+          ],
+        }),
       })
-      .onPost(`${dbUrl}/${dbName}/_bulk_docs`)
-      .replyOnce(200, 'good')
+      .post(`${dbUrl}/${dbName}/_bulk_docs`, {
+        status: 200,
+        body: JSON.stringify('good'),
+      })
 
-    const result = await resolveConflicts([savingDocument], {
-      dbUrl,
-      dbName,
-      onResolveConflict: () => {
-        return resolvedDocument as any
-      },
-    })
+    const result = await resolveConflicts(
+      [savingDocument],
+      createContext({
+        dbUrl,
+        dbName,
+        onResolveConflict: () => {
+          return resolvedDocument as any
+        },
+      })
+    )
 
     // expect _bulk_docs to have been called with resolved document and deleted conflict
-    expect(mockAxios.history.post).toHaveLength(3)
-    expect(mockAxios.history.post[2].data).toEqual(
-      JSON.stringify({
+    expect(fetchMock.calls()).toHaveLength(3)
+
+    const bulkDocsCall = fetchMock.calls(/_bulk_docs/)[0]
+    expect(bulkDocsCall[1]).toEqual({
+      headers: expect.anything(),
+      method: 'POST',
+
+      body: JSON.stringify({
         docs: [
           resolvedDocument,
           {
@@ -265,8 +302,8 @@ describe('resolveConflicts', () => {
             _deleted: true,
           },
         ],
-      })
-    )
+      }),
+    })
     expect(result).toEqual('good')
   })
 })

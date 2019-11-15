@@ -1,5 +1,5 @@
-import getAxios from '../util/getAxios'
-import { CouchDbContext } from '../util/createResolver'
+import { CouchDbContext } from '../createContext'
+import parseFetchResponse from '../util/parseFetchResponse'
 
 export interface InfoResponse {
   db_name: string
@@ -29,9 +29,10 @@ export interface InfoResponse {
 }
 
 export async function info(context: CouchDbContext): Promise<InfoResponse> {
-  let url = `${context.dbUrl}`
+  const { fetch, dbUrl } = context.couchDb
+  let url = `${dbUrl}`
 
-  const response = await getAxios(context).get(url)
+  const response = await fetch(url).then(parseFetchResponse)
 
-  return response.data
+  return response
 }

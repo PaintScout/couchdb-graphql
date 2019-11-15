@@ -1,6 +1,7 @@
-import getAxios from '../util/getAxios'
 import { resolveConflicts } from '../util/resolveConflicts'
-import { CouchDbContext, CouchDbDocument } from '../util/createResolver'
+import { CouchDbDocument } from '../util/createResolver'
+import { CouchDbContext } from '../createContext'
+import parseFetchResponse from '../util/parseFetchResponse'
 
 interface PutOptions {
   upsert?: boolean
@@ -12,8 +13,10 @@ export async function put<T extends CouchDbDocument>(
   doc: T,
   options: PutOptions = {}
 ): Promise<T | null> {
+  const { fetch, dbUrl, dbName, onDocumentsSaved } = context.couchDb
+
   const { upsert, new_edits = true } = options
-  let url = `${context.dbUrl}/${context.dbName}/_bulk_docs`
+  let url = `${dbUrl}/${dbName}/_bulk_docs`
   let rev = doc._rev
 
   // get previous _rev for upsert
@@ -23,11 +26,9 @@ export async function put<T extends CouchDbDocument>(
     }
 
     try {
-      const {
-        data: { _rev },
-      } = await getAxios(context).get(
-        `${context.dbUrl}/${context.dbName}/${encodeURIComponent(doc._id)}`
-      )
+      const { _rev } = await fetch(
+        `${dbUrl}/${dbName}/${encodeURIComponent(doc._id)}`
+      ).then(parseFetchResponse)
       rev = _rev
     } catch (e) {
       if (!e.response || e.response.status !== 404) {
@@ -36,13 +37,19 @@ export async function put<T extends CouchDbDocument>(
     }
   }
 
-  const result = await getAxios(context)
-    .post(url, {
+  const result = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
       docs: [{ ...doc, _rev: rev }],
       new_edits,
-    })
+    }),
+  })
+    .then(parseFetchResponse)
     .then(async res => {
-      const [result] = res.data
+      const [result] = res
 
       // resolve conflicts
       if (result && result.id && result.error === 'conflict') {
@@ -65,8 +72,8 @@ export async function put<T extends CouchDbDocument>(
       _rev: result.rev,
     }
 
-    if (context.onDocumentsSaved) {
-      context.onDocumentsSaved({ documents: [savedDocument], context })
+    if (onDocumentsSaved) {
+      onDocumentsSaved({ documents: [savedDocument], context })
     }
 
     return savedDocument

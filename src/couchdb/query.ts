@@ -1,6 +1,6 @@
 import queryString from 'qs'
-import { CouchDbContext } from '../util/createResolver'
-import getAxios from '../util/getAxios'
+import { CouchDbContext } from '../createContext'
+import parseFetchResponse from '../util/parseFetchResponse'
 
 export interface QueryOptions {
   ddoc: string
@@ -41,14 +41,16 @@ export async function query<T = any>(
   context: CouchDbContext,
   { view, ddoc, ...options }: QueryOptions
 ): Promise<QueryResponse<T>> {
-  let url = `${context.dbUrl}/${context.dbName}/_design/${ddoc}/_view/${view}`
+  const { fetch, dbUrl, dbName, onDocumentsSaved } = context.couchDb
+
+  let url = `${dbUrl}/${dbName}/_design/${ddoc}/_view/${view}`
 
   const hasArgs = Object.keys(options).length > 0
   if (hasArgs) {
     url += `?${queryString.stringify(options)}`
   }
 
-  const response = await getAxios(context).get(url)
+  const response = await fetch(url).then(parseFetchResponse)
 
-  return response.data
+  return response
 }
