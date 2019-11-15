@@ -1,6 +1,7 @@
-import getAxios from '../util/getAxios'
 import { resolveConflicts } from '../util/resolveConflicts'
-import { CouchDbDocument, CouchDbContext } from '../util/createResolver'
+import { CouchDbDocument } from '../types'
+import { CouchDbContext } from '../createContext'
+import parseFetchResponse from '../util/parseFetchResponse'
 
 export interface BulkDocsResponseObject<T extends CouchDbDocument> {
   _id: string
@@ -23,37 +24,47 @@ export async function bulkDocs<T extends CouchDbDocument>(
   docs: CouchDbDocument[],
   options: BulkDocsOptions = {}
 ): Promise<BulkDocsResponse<T>> {
+  const { fetch, dbUrl, dbName, onDocumentsSaved } = context.couchDb
   const { upsert, new_edits = true } = options
-  let url = `${context.dbUrl}/${context.dbName}/_bulk_docs`
+  let url = `${dbUrl}/${dbName}/_bulk_docs`
   let previousRevs: Record<string, string> = {}
 
   // get previous _revs for upsert
   if (upsert) {
     const ids: string[] = docs.map(i => i._id).filter(id => !!id)
 
-    const { data: allDocs } = await getAxios(context).post(
-      `${context.dbUrl}/${context.dbName}/_all_docs`,
-      {
+    const { data: allDocs } = await fetch(`${dbUrl}/${dbName}/_all_docs`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
         keys: ids,
-      }
-    )
+      }),
+    }).then(parseFetchResponse)
 
     allDocs.rows.forEach(row => {
       previousRevs[row.id] = row.value ? row.value.rev : null
     })
   }
 
-  const saveResults = await getAxios(context)
-    .post(url, {
+  const saveResults = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
       docs: docs.map(doc => ({
         ...doc,
         _rev: upsert && doc._id ? previousRevs[doc._id] : doc._rev,
       })),
       new_edits,
-    })
+    }),
+  })
+    .then(parseFetchResponse)
     .then(async res => {
       // resolve conflicts
-      const conflicts = res.data.filter(result => result.error === 'conflict')
+      const conflicts = res.filter(result => result.error === 'conflict')
 
       if (conflicts.length > 0) {
         const resolved = await resolveConflicts(
@@ -65,7 +76,7 @@ export async function bulkDocs<T extends CouchDbDocument>(
 
         if (resolved) {
           // update any "conflict" results with the resolved result
-          return res.data.map(saveResult => {
+          return res.map(saveResult => {
             const resolvedDoc = resolved.find(
               resolvedResult => resolvedResult.id === saveResult.id
             )
@@ -79,7 +90,7 @@ export async function bulkDocs<T extends CouchDbDocument>(
       }
 
       // return bulkDocs data
-      return res.data
+      return res
     })
 
   const response = saveResults.map((result, index) => {
@@ -104,8 +115,8 @@ export async function bulkDocs<T extends CouchDbDocument>(
     }
   })
 
-  if (context.onDocumentsSaved) {
-    context.onDocumentsSaved({
+  if (onDocumentsSaved) {
+    onDocumentsSaved({
       documents: response.filter(res => !res.error).map(res => res.document),
       context,
     })

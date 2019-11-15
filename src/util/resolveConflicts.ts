@@ -1,5 +1,5 @@
-import { CouchDbContext } from './createResolver'
-import getAxios from './getAxios'
+import { CouchDbContext } from '../createContext'
+import parseFetchResponse from './parseFetchResponse'
 
 /**
  * Returns an object where the key is the doc id and the value is the rejected document
@@ -11,19 +11,31 @@ async function getConflictsByDocument(
 ): Promise<
   Record<string, { document: any; conflicts: any[]; revToSave: string }>
 > {
+  const { fetch, dbUrl, dbName } = context.couchDb
+
   // get _conflicts for each document
-  const documentsWithConflictRevs = await getAxios(context)
-    .post(
-      `${context.dbUrl}/${context.dbName}/_all_docs?conflicts=true&include_docs=true`,
-      {
+  const documentsWithConflictRevs = await fetch(
+    `${dbUrl}/${dbName}/_all_docs?conflicts=true&include_docs=true`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
         keys: documents.map(doc => doc._id),
-      }
-    )
-    .then(res => res.data.rows.map(row => row.doc))
+      }),
+    }
+  )
+    .then(parseFetchResponse)
+    .then(res => res.rows.map(row => row.doc))
 
   // get full document for each _conflict
-  const conflictingDocuments = await getAxios(context)
-    .post(`${context.dbUrl}/${context.dbName}/_bulk_get`, {
+  const conflictingDocuments = await fetch(`${dbUrl}/${dbName}/_bulk_get`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
       docs: documentsWithConflictRevs.reduce(
         (conflicts, doc) => [
           ...conflicts,
@@ -34,10 +46,10 @@ async function getConflictsByDocument(
         ],
         []
       ),
-    })
-    .then(res =>
-      res.data.results.map(row => row.docs[0].ok).filter(doc => !!doc)
-    )
+    }),
+  })
+    .then(parseFetchResponse)
+    .then(res => res.results.map(row => row.docs[0].ok).filter(doc => !!doc))
 
   const result = documentsWithConflictRevs.reduce((result, doc) => {
     if (!result[doc._id]) {
@@ -80,7 +92,14 @@ export async function resolveConflicts(
   documents: any[],
   context: CouchDbContext
 ) {
-  if (!context.onResolveConflict) {
+  const {
+    fetch,
+    dbName,
+    dbUrl,
+    onResolveConflict,
+    onConflictsResolved,
+  } = context.couchDb
+  if (!onResolveConflict) {
     return null
   }
 
@@ -88,7 +107,7 @@ export async function resolveConflicts(
 
   const resolvedDocs = await Promise.all(
     Object.keys(conflictingDocuments).map(async id => {
-      const { _conflicts, ...resolved } = await context.onResolveConflict!({
+      const { _conflicts, ...resolved } = await onResolveConflict!({
         document: conflictingDocuments[id].document,
         conflicts: conflictingDocuments[id].conflicts,
         context,
@@ -120,16 +139,19 @@ export async function resolveConflicts(
     ),
   ]
 
-  const response = await getAxios(context).post(
-    `${context.dbUrl}/${context.dbName}/_bulk_docs`,
-    {
+  const response = await fetch(`${dbUrl}/${dbName}/_bulk_docs`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
       docs: docsToSave,
-    }
-  )
+    }),
+  }).then(parseFetchResponse)
 
-  if (context.onConflictsResolved) {
-    context.onConflictsResolved({
-      documents: response.data
+  if (onConflictsResolved) {
+    onConflictsResolved({
+      documents: response
         .filter(result => result.ok)
         .map(result => ({
           ...docsToSave.find(doc => doc._id === result.id),
@@ -139,5 +161,5 @@ export async function resolveConflicts(
       context,
     })
   }
-  return response.data
+  return response
 }

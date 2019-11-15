@@ -3,7 +3,7 @@
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
 var apolloServerCore = require('apollo-server-core');
-var axios = _interopDefault(require('axios'));
+require('isomorphic-fetch');
 var queryString = _interopDefault(require('qs'));
 var federation = require('@apollo/federation');
 
@@ -66,6 +66,14 @@ var base = {
   _templateObject())
 };
 
+function createContext(args) {
+  return {
+    couchDb: _extends({
+      fetch: fetch
+    }, args)
+  };
+}
+
 function createResolver(resolver) {
   return resolver;
 }
@@ -92,10 +100,15 @@ function _catch(body, recover) {
   return result;
 } // Asynchronously await a promise and pass the result to a finally continuation
 
-function getAxios(context) {
-  return axios.create({
-    headers: context.dbHeaders
-  });
+function parseFetchResponse(response) {
+  if (response.status >= 200 && response.status < 300) {
+    return response.json();
+  } else {
+    var error = new Error(response.statusText); // @ts-ignore
+
+    error.response = response;
+    throw error;
+  }
 }
 
 /**
@@ -108,14 +121,21 @@ function getAxios(context) {
  */
 var resolveConflicts = function resolveConflicts(documents, context) {
   try {
-    if (!context.onResolveConflict) {
+    var _context$couchDb2 = context.couchDb,
+        fetch = _context$couchDb2.fetch,
+        dbName = _context$couchDb2.dbName,
+        dbUrl = _context$couchDb2.dbUrl,
+        onResolveConflict = _context$couchDb2.onResolveConflict,
+        onConflictsResolved = _context$couchDb2.onConflictsResolved;
+
+    if (!onResolveConflict) {
       return Promise.resolve(null);
     }
 
     return Promise.resolve(getConflictsByDocument(documents, context)).then(function (conflictingDocuments) {
       return Promise.resolve(Promise.all(Object.keys(conflictingDocuments).map(function (id) {
         try {
-          return Promise.resolve(context.onResolveConflict({
+          return Promise.resolve(onResolveConflict({
             document: conflictingDocuments[id].document,
             conflicts: conflictingDocuments[id].conflicts,
             context: context
@@ -140,12 +160,18 @@ var resolveConflicts = function resolveConflicts(documents, context) {
             return conflict._rev !== conflictingDocuments[docId].revToSave;
           }));
         }, []));
-        return Promise.resolve(getAxios(context).post(context.dbUrl + "/" + context.dbName + "/_bulk_docs", {
-          docs: docsToSave
-        })).then(function (response) {
-          if (context.onConflictsResolved) {
-            context.onConflictsResolved({
-              documents: response.data.filter(function (result) {
+        return Promise.resolve(fetch(dbUrl + "/" + dbName + "/_bulk_docs", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            docs: docsToSave
+          })
+        }).then(parseFetchResponse)).then(function (response) {
+          if (onConflictsResolved) {
+            onConflictsResolved({
+              documents: response.filter(function (result) {
                 return result.ok;
               }).map(function (result) {
                 return _extends({}, docsToSave.find(function (doc) {
@@ -159,7 +185,7 @@ var resolveConflicts = function resolveConflicts(documents, context) {
             });
           }
 
-          return response.data;
+          return response;
         });
       });
     });
@@ -170,28 +196,44 @@ var resolveConflicts = function resolveConflicts(documents, context) {
 
 var getConflictsByDocument = function getConflictsByDocument(documents, context) {
   try {
-    // get _conflicts for each document
-    return Promise.resolve(getAxios(context).post(context.dbUrl + "/" + context.dbName + "/_all_docs?conflicts=true&include_docs=true", {
-      keys: documents.map(function (doc) {
-        return doc._id;
+    var _context$couchDb = context.couchDb,
+        fetch = _context$couchDb.fetch,
+        dbUrl = _context$couchDb.dbUrl,
+        dbName = _context$couchDb.dbName; // get _conflicts for each document
+
+    return Promise.resolve(fetch(dbUrl + "/" + dbName + "/_all_docs?conflicts=true&include_docs=true", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        keys: documents.map(function (doc) {
+          return doc._id;
+        })
       })
-    }).then(function (res) {
-      return res.data.rows.map(function (row) {
+    }).then(parseFetchResponse).then(function (res) {
+      return res.rows.map(function (row) {
         return row.doc;
       });
     })).then(function (documentsWithConflictRevs) {
       // get full document for each _conflict
-      return Promise.resolve(getAxios(context).post(context.dbUrl + "/" + context.dbName + "/_bulk_get", {
-        docs: documentsWithConflictRevs.reduce(function (conflicts, doc) {
-          return [].concat(conflicts, (doc._conflicts || []).map(function (rev) {
-            return {
-              id: doc._id,
-              rev: rev
-            };
-          }));
-        }, [])
-      }).then(function (res) {
-        return res.data.results.map(function (row) {
+      return Promise.resolve(fetch(dbUrl + "/" + dbName + "/_bulk_get", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          docs: documentsWithConflictRevs.reduce(function (conflicts, doc) {
+            return [].concat(conflicts, (doc._conflicts || []).map(function (rev) {
+              return {
+                id: doc._id,
+                rev: rev
+              };
+            }));
+          }, [])
+        })
+      }).then(parseFetchResponse).then(function (res) {
+        return res.results.map(function (row) {
           return row.docs[0].ok;
         }).filter(function (doc) {
           return !!doc;
@@ -243,16 +285,21 @@ var put = function put(context, doc, options) {
 
   try {
     var _temp3 = function _temp3(_result2) {
-      return _exit2 ? _result2 : Promise.resolve(getAxios(context).post(url, {
-        docs: [_extends({}, doc, {
-          _rev: rev
-        })],
-        new_edits: new_edits
-      }).then(function (res) {
+      return _exit2 ? _result2 : Promise.resolve(fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          docs: [_extends({}, doc, {
+            _rev: rev
+          })],
+          new_edits: new_edits
+        })
+      }).then(parseFetchResponse).then(function (res) {
         try {
           var _exit4 = false;
-          var _res$data = res.data,
-              result = _res$data[0]; // resolve conflicts
+          var result = res[0]; // resolve conflicts
 
           var _temp6 = function () {
             if (result && result.id && result.error === 'conflict') {
@@ -280,8 +327,8 @@ var put = function put(context, doc, options) {
             _rev: result.rev
           });
 
-          if (context.onDocumentsSaved) {
-            context.onDocumentsSaved({
+          if (onDocumentsSaved) {
+            onDocumentsSaved({
               documents: [savedDocument],
               context: context
             });
@@ -296,11 +343,16 @@ var put = function put(context, doc, options) {
     };
 
     var _exit2 = false;
+    var _context$couchDb = context.couchDb,
+        fetch = _context$couchDb.fetch,
+        dbUrl = _context$couchDb.dbUrl,
+        dbName = _context$couchDb.dbName,
+        onDocumentsSaved = _context$couchDb.onDocumentsSaved;
     var _options = options,
         upsert = _options.upsert,
         _options$new_edits = _options.new_edits,
         new_edits = _options$new_edits === void 0 ? true : _options$new_edits;
-    var url = context.dbUrl + "/" + context.dbName + "/_bulk_docs";
+    var url = dbUrl + "/" + dbName + "/_bulk_docs";
     var rev = doc._rev; // get previous _rev for upsert
 
     var _temp4 = function () {
@@ -310,8 +362,8 @@ var put = function put(context, doc, options) {
         }
 
         return _catch(function () {
-          return Promise.resolve(getAxios(context).get(context.dbUrl + "/" + context.dbName + "/" + encodeURIComponent(doc._id))).then(function (_ref) {
-            var _rev = _ref.data._rev;
+          return Promise.resolve(fetch(dbUrl + "/" + dbName + "/" + encodeURIComponent(doc._id)).then(parseFetchResponse)).then(function (_ref) {
+            var _rev = _ref._rev;
             rev = _rev;
           });
         }, function (e) {
@@ -387,26 +439,28 @@ var bulkDocs = function bulkDocs(context, docs, options) {
 
   try {
     var _temp3 = function _temp3() {
-      return Promise.resolve(getAxios(context).post(url, {
-        docs: docs.map(function (doc) {
-          return _extends({}, doc, {
-            _rev: upsert && doc._id ? previousRevs[doc._id] : doc._rev
-          });
-        }),
-        new_edits: new_edits
-      }).then(function (res) {
+      return Promise.resolve(fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          docs: docs.map(function (doc) {
+            return _extends({}, doc, {
+              _rev: upsert && doc._id ? previousRevs[doc._id] : doc._rev
+            });
+          }),
+          new_edits: new_edits
+        })
+      }).then(parseFetchResponse).then(function (res) {
         try {
-          var _temp7 = function _temp7(_result) {
-            return _exit2 ? _result : res.data;
-          };
-
           var _exit2 = false;
           // resolve conflicts
-          var conflicts = res.data.filter(function (result) {
+          var conflicts = res.filter(function (result) {
             return result.error === 'conflict';
           });
 
-          var _temp8 = function () {
+          var _temp6 = function () {
             if (conflicts.length > 0) {
               return Promise.resolve(resolveConflicts(docs.filter(function (doc) {
                 return conflicts.find(function (conflict) {
@@ -416,7 +470,7 @@ var bulkDocs = function bulkDocs(context, docs, options) {
                 if (resolved) {
                   // update any "conflict" results with the resolved result
                   _exit2 = true;
-                  return res.data.map(function (saveResult) {
+                  return res.map(function (saveResult) {
                     var resolvedDoc = resolved.find(function (resolvedResult) {
                       return resolvedResult.id === saveResult.id;
                     });
@@ -432,7 +486,9 @@ var bulkDocs = function bulkDocs(context, docs, options) {
             }
           }();
 
-          return Promise.resolve(_temp8 && _temp8.then ? _temp8.then(_temp7) : _temp7(_temp8)); // return bulkDocs data
+          return Promise.resolve(_temp6 && _temp6.then ? _temp6.then(function (_result) {
+            return _exit2 ? _result : res;
+          }) : _exit2 ? _temp6 : res); // return bulkDocs data
         } catch (e) {
           return Promise.reject(e);
         }
@@ -456,8 +512,8 @@ var bulkDocs = function bulkDocs(context, docs, options) {
           };
         });
 
-        if (context.onDocumentsSaved) {
-          context.onDocumentsSaved({
+        if (onDocumentsSaved) {
+          onDocumentsSaved({
             documents: response.filter(function (res) {
               return !res.error;
             }).map(function (res) {
@@ -471,11 +527,16 @@ var bulkDocs = function bulkDocs(context, docs, options) {
       });
     };
 
+    var _context$couchDb = context.couchDb,
+        fetch = _context$couchDb.fetch,
+        dbUrl = _context$couchDb.dbUrl,
+        dbName = _context$couchDb.dbName,
+        onDocumentsSaved = _context$couchDb.onDocumentsSaved;
     var _options = options,
         upsert = _options.upsert,
         _options$new_edits = _options.new_edits,
         new_edits = _options$new_edits === void 0 ? true : _options$new_edits;
-    var url = context.dbUrl + "/" + context.dbName + "/_bulk_docs";
+    var url = dbUrl + "/" + dbName + "/_bulk_docs";
     var previousRevs = {}; // get previous _revs for upsert
 
     var _temp4 = function () {
@@ -485,9 +546,15 @@ var bulkDocs = function bulkDocs(context, docs, options) {
         }).filter(function (id) {
           return !!id;
         });
-        return Promise.resolve(getAxios(context).post(context.dbUrl + "/" + context.dbName + "/_all_docs", {
-          keys: ids
-        })).then(function (_ref) {
+        return Promise.resolve(fetch(dbUrl + "/" + dbName + "/_all_docs", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            keys: ids
+          })
+        }).then(parseFetchResponse)).then(function (_ref) {
           var allDocs = _ref.data;
           allDocs.rows.forEach(function (row) {
             previousRevs[row.id] = row.value ? row.value.rev : null;
@@ -561,20 +628,25 @@ var allDocs = function allDocs(context, _temp) {
       args = _objectWithoutPropertiesLoose(_ref, ["keys", "key", "endkey", "startkey"]);
 
   try {
-    var url = context.dbUrl + "/" + context.dbName + "/_all_docs";
+    var fetch = context.couchDb.fetch;
+    var url = context.couchDb.dbUrl + "/" + context.couchDb.dbName + "/_all_docs";
 
     if (args) {
       url += "?" + queryString.stringify(args);
     }
 
-    return Promise.resolve(getAxios(context).post(url, {
-      keys: keys,
-      key: key,
-      endkey: endkey,
-      startkey: startkey
-    })).then(function (response) {
-      return response.data;
-    });
+    return Promise.resolve(fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        keys: keys,
+        key: key,
+        endkey: endkey,
+        startkey: startkey
+      })
+    }).then(parseFetchResponse));
   } catch (e) {
     return Promise.reject(e);
   }
@@ -618,7 +690,11 @@ var bulkGet = function bulkGet(docs, context, _ref) {
   var revs = _ref.revs;
 
   try {
-    var url = context.dbUrl + "/" + context.dbName + "/_bulk_get";
+    var _context$couchDb = context.couchDb,
+        fetch = _context$couchDb.fetch,
+        dbUrl = _context$couchDb.dbUrl,
+        dbName = _context$couchDb.dbName;
+    var url = dbUrl + "/" + dbName + "/_bulk_get";
 
     if (revs) {
       url += "?" + queryString.stringify({
@@ -626,12 +702,16 @@ var bulkGet = function bulkGet(docs, context, _ref) {
       });
     }
 
-    return Promise.resolve(getAxios(context).post(url, {
-      docs: docs,
-      revs: revs
-    })).then(function (response) {
-      return response.data;
-    });
+    return Promise.resolve(fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        docs: docs,
+        revs: revs
+      })
+    }).then(parseFetchResponse));
   } catch (e) {
     return Promise.reject(e);
   }
@@ -682,8 +762,12 @@ var bulkGet$1 = ({
 
 var changes = function changes(context, options) {
   try {
+    var _context$couchDb = context.couchDb,
+        fetch = _context$couchDb.fetch,
+        dbUrl = _context$couchDb.dbUrl,
+        dbName = _context$couchDb.dbName;
     var hasArgs = Object.keys(options).length > 0;
-    var url = context.dbUrl + "/" + context.dbName + "/_changes";
+    var url = context + "/" + context + "/_changes";
 
     if (hasArgs) {
       if (options.lastEventId) {
@@ -699,9 +783,7 @@ var changes = function changes(context, options) {
       url += "?" + queryString.stringify(options);
     }
 
-    return Promise.resolve(getAxios(context).get(url)).then(function (response) {
-      return response.data;
-    });
+    return Promise.resolve(fetch(url).then(parseFetchResponse));
   } catch (e) {
     return Promise.reject(e);
   }
@@ -743,10 +825,18 @@ var changes$1 = ({
 
 var find = function find(context, options) {
   try {
-    var url = context.dbUrl + "/" + context.dbName + "/_find";
-    return Promise.resolve(getAxios(context).post(url, options)).then(function (response) {
-      return response.data;
-    });
+    var _context$couchDb = context.couchDb,
+        fetch = _context$couchDb.fetch,
+        dbUrl = _context$couchDb.dbUrl,
+        dbName = _context$couchDb.dbName;
+    var url = dbUrl + "/" + dbName + "/_find";
+    return Promise.resolve(fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(options)
+    }).then(parseFetchResponse));
   } catch (e) {
     return Promise.reject(e);
   }
@@ -758,16 +848,18 @@ var get = function get(context, id, options) {
   }
 
   try {
+    var _context$couchDb = context.couchDb,
+        fetch = _context$couchDb.fetch,
+        dbUrl = _context$couchDb.dbUrl,
+        dbName = _context$couchDb.dbName;
     var hasArgs = Object.keys(options).length > 0;
-    var url = context.dbUrl + "/" + context.dbName + "/" + encodeURIComponent(id);
+    var url = dbUrl + "/" + dbName + "/" + encodeURIComponent(id);
 
     if (hasArgs) {
       url += "?" + queryString.stringify(options);
     }
 
-    return Promise.resolve(getAxios(context).get(url)).then(function (response) {
-      return response.data;
-    });
+    return Promise.resolve(fetch(url).then(parseFetchResponse));
   } catch (e) {
     return Promise.reject(e);
   }
@@ -775,10 +867,11 @@ var get = function get(context, id, options) {
 
 var info = function info(context) {
   try {
-    var url = "" + context.dbUrl;
-    return Promise.resolve(getAxios(context).get(url)).then(function (response) {
-      return response.data;
-    });
+    var _context$couchDb = context.couchDb,
+        fetch = _context$couchDb.fetch,
+        dbUrl = _context$couchDb.dbUrl;
+    var url = "" + dbUrl;
+    return Promise.resolve(fetch(url).then(parseFetchResponse));
   } catch (e) {
     return Promise.reject(e);
   }
@@ -790,16 +883,19 @@ var query = function query(context, _ref) {
       options = _objectWithoutPropertiesLoose(_ref, ["view", "ddoc"]);
 
   try {
-    var url = context.dbUrl + "/" + context.dbName + "/_design/" + ddoc + "/_view/" + view;
+    var _context$couchDb = context.couchDb,
+        fetch = _context$couchDb.fetch,
+        dbUrl = _context$couchDb.dbUrl,
+        dbName = _context$couchDb.dbName,
+        onDocumentsSaved = _context$couchDb.onDocumentsSaved;
+    var url = dbUrl + "/" + dbName + "/_design/" + ddoc + "/_view/" + view;
     var hasArgs = Object.keys(options).length > 0;
 
     if (hasArgs) {
       url += "?" + queryString.stringify(options);
     }
 
-    return Promise.resolve(getAxios(context).get(url)).then(function (response) {
-      return response.data;
-    });
+    return Promise.resolve(fetch(url).then(parseFetchResponse));
   } catch (e) {
     return Promise.reject(e);
   }
@@ -811,10 +907,18 @@ var search = function search(context, _ref) {
       options = _objectWithoutPropertiesLoose(_ref, ["index", "ddoc"]);
 
   try {
-    var url = context.dbUrl + "/" + context.dbName + "/_design/" + ddoc + "/_search/" + index;
-    return Promise.resolve(getAxios(context).post(url, options)).then(function (response) {
-      return response.data;
-    });
+    var _context$couchDb = context.couchDb,
+        fetch = _context$couchDb.fetch,
+        dbUrl = _context$couchDb.dbUrl,
+        dbName = _context$couchDb.dbName;
+    var url = dbUrl + "/" + dbName + "/_design/" + ddoc + "/_search/" + index;
+    return Promise.resolve(fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(options)
+    }).then(parseFetchResponse));
   } catch (e) {
     return Promise.reject(e);
   }
@@ -1042,6 +1146,7 @@ exports.base = base;
 exports.bulkDocs = bulkDocs;
 exports.bulkGet = bulkGet;
 exports.changes = changes;
+exports.createContext = createContext;
 exports.createResolver = createResolver;
 exports.createSchema = createSchema;
 exports.find = find;

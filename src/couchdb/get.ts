@@ -1,7 +1,7 @@
-import { gql } from 'apollo-server-core'
-import getAxios from '../util/getAxios'
 import queryString from 'qs'
-import { CouchDbContext, CouchDbDocument } from '../util/createResolver'
+import { CouchDbDocument } from '../types'
+import { CouchDbContext } from '../createContext'
+import parseFetchResponse from '../util/parseFetchResponse'
 
 export interface GetOptions {
   rev?: string
@@ -18,14 +18,15 @@ export async function get<T extends CouchDbDocument>(
   id: string,
   options: GetOptions = {}
 ): Promise<T> {
+  const { fetch, dbUrl, dbName } = context.couchDb
   const hasArgs = Object.keys(options).length > 0
-  let url = `${context.dbUrl}/${context.dbName}/${encodeURIComponent(id)}`
+  let url = `${dbUrl}/${dbName}/${encodeURIComponent(id)}`
 
   if (hasArgs) {
     url += `?${queryString.stringify(options)}`
   }
 
-  const response = await getAxios(context).get(url)
+  const response = await fetch(url).then(parseFetchResponse)
 
-  return response.data
+  return response
 }

@@ -1,36 +1,40 @@
-import MockAdapter from 'axios-mock-adapter'
-import getAxios from '../util/getAxios'
-import { gql } from 'apollo-server-core'
+import fetchMock from 'fetch-mock'
 import { resolveConflicts } from '../util/resolveConflicts'
 import asJestMock from '../test/util/asJestMock'
-import { CouchDbContext } from '../util/createResolver'
 import { put } from './put'
+import { createContext, CouchDbContext } from '../createContext'
 
-jest.mock('../util/getAxios')
 jest.mock('../util/resolveConflicts')
 
-const mockAxios = new MockAdapter(getAxios(null))
-
-const context: CouchDbContext = {
-  dbName: 'test',
-  dbUrl: 'http://my-url/',
-}
-
 describe('put', () => {
+  let context: CouchDbContext
+
+  beforeEach(() => {
+    fetchMock.mock()
+    context = createContext({
+      dbName: 'test',
+      dbUrl: 'my-url',
+    })
+  })
+
   afterEach(() => {
+    fetchMock.restore()
     jest.clearAllMocks()
-    mockAxios.resetHistory()
   })
 
   it('should create a document', async () => {
-    mockAxios
-      .onPost(`${context.dbUrl}/${context.dbName}/_bulk_docs`)
-      .reply(200, [
-        {
-          id: '1',
-          rev: '1',
-        },
-      ])
+    fetchMock.post(
+      `${context.couchDb.dbUrl}/${context.couchDb.dbName}/_bulk_docs`,
+      {
+        status: 200,
+        body: JSON.stringify([
+          {
+            id: '1',
+            rev: '1',
+          },
+        ]),
+      }
+    )
 
     const result = await put(context, {
       _id: '1',
@@ -45,25 +49,29 @@ describe('put', () => {
   })
 
   it('should upsert a document', async () => {
-    mockAxios
-      .onPost(`${context.dbUrl}/${context.dbName}/_all_docs`)
-      .reply(200, {
-        rows: [
+    fetchMock
+      .post(`${context.couchDb.dbUrl}/${context.couchDb.dbName}/_all_docs`, {
+        status: 200,
+        body: JSON.stringify({
+          rows: [
+            {
+              id: '1',
+              value: {
+                rev: '1',
+              },
+            },
+          ],
+        }),
+      })
+      .post(`${context.couchDb.dbUrl}/${context.couchDb.dbName}/_bulk_docs`, {
+        status: 200,
+        body: JSON.stringify([
           {
             id: '1',
-            value: {
-              rev: '1',
-            },
+            rev: '2',
           },
-        ],
+        ]),
       })
-      .onPost(`${context.dbUrl}/${context.dbName}/_bulk_docs`)
-      .reply(200, [
-        {
-          id: '1',
-          rev: '2',
-        },
-      ])
 
     const result = await put(context, {
       _id: '1',
@@ -78,15 +86,19 @@ describe('put', () => {
   })
 
   it('should call resolveConflicts for conflict', async () => {
-    mockAxios
-      .onPost(`${context.dbUrl}/${context.dbName}/_bulk_docs`)
-      .reply(200, [
-        {
-          id: '1',
-          rev: '2',
-          error: 'conflict',
-        },
-      ])
+    fetchMock.post(
+      `${context.couchDb.dbUrl}/${context.couchDb.dbName}/_bulk_docs`,
+      {
+        status: 200,
+        body: JSON.stringify([
+          {
+            id: '1',
+            rev: '2',
+            error: 'conflict',
+          },
+        ]),
+      }
+    )
 
     asJestMock(resolveConflicts).mockResolvedValue([
       {
@@ -119,20 +131,24 @@ describe('put', () => {
     })
   })
 
-  it('should call context.onDocumentsSaved with result', async () => {
-    mockAxios
-      .onPost(`${context.dbUrl}/${context.dbName}/_bulk_docs`)
-      .reply(200, [
-        {
-          id: '1',
-          rev: '1',
-        },
-      ])
+  it('should call context.couchDb.onDocumentsSaved with result', async () => {
+    fetchMock.post(
+      `${context.couchDb.dbUrl}/${context.couchDb.dbName}/_bulk_docs`,
+      {
+        status: 200,
+        body: JSON.stringify([
+          {
+            id: '1',
+            rev: '1',
+          },
+        ]),
+      }
+    )
 
     const onDocumentsSaved = jest.fn()
 
-    const result = await put(
-      { ...context, onDocumentsSaved },
+    await put(
+      { couchDb: { ...context.couchDb, onDocumentsSaved } },
       {
         _id: '1',
         blah: 'blah',
@@ -147,7 +163,7 @@ describe('put', () => {
           blah: 'blah',
         },
       ],
-      context: { ...context, onDocumentsSaved },
+      context: { couchDb: { ...context.couchDb, onDocumentsSaved } },
     })
   })
 })

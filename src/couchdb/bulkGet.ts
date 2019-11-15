@@ -1,6 +1,7 @@
-import getAxios from '../util/getAxios'
 import queryString from 'qs'
-import { CouchDbContext, CouchDbDocument } from '../util/createResolver'
+import { CouchDbDocument } from '../types'
+import { CouchDbContext } from '../createContext'
+import parseFetchResponse from '../util/parseFetchResponse'
 
 export interface BulkGetOptions {
   revs?: boolean
@@ -23,16 +24,23 @@ export async function bulkGet<T extends CouchDbDocument>(
   context: CouchDbContext,
   { revs }: BulkGetOptions
 ): Promise<BulkGetResponse<T>> {
-  let url = `${context.dbUrl}/${context.dbName}/_bulk_get`
+  const { fetch, dbUrl, dbName } = context.couchDb
+  let url = `${dbUrl}/${dbName}/_bulk_get`
 
   if (revs) {
     url += `?${queryString.stringify({ revs })}`
   }
 
-  const response = await getAxios(context).post(url, {
-    docs,
-    revs,
-  })
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      docs,
+      revs,
+    }),
+  }).then(parseFetchResponse)
 
-  return response.data
+  return response
 }

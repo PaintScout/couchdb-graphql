@@ -3,7 +3,6 @@ import { put } from '../../couchdb'
 import asJestMock from '../../test/util/asJestMock'
 import { createTestServer } from '../../test/util/createTestServer'
 
-jest.mock('../../util/getAxios')
 jest.mock('../../util/resolveConflicts')
 jest.mock('../../couchdb/put')
 

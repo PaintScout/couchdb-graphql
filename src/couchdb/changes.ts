@@ -1,6 +1,6 @@
-import getAxios from '../util/getAxios'
 import queryString from 'qs'
-import { CouchDbContext } from '../util/createResolver'
+import { CouchDbContext } from '../createContext'
+import parseFetchResponse from '../util/parseFetchResponse'
 
 export interface ChangesOptions {
   doc_ids?: string[]
@@ -35,8 +35,9 @@ export async function changes(
   context: CouchDbContext,
   options: ChangesOptions
 ): Promise<ChangesResponse> {
+  const { fetch, dbUrl, dbName } = context.couchDb
   const hasArgs = Object.keys(options).length > 0
-  let url = `${context.dbUrl}/${context.dbName}/_changes`
+  let url = `${context}/${context}/_changes`
 
   if (hasArgs) {
     if (options.lastEventId) {
@@ -52,7 +53,7 @@ export async function changes(
     url += `?${queryString.stringify(options)}`
   }
 
-  const response = await getAxios(context).get(url)
+  const response = await fetch(url).then(parseFetchResponse)
 
-  return response.data
+  return response
 }
