@@ -1,27 +1,28 @@
-import MockAdapter from 'axios-mock-adapter'
-import getAxios from '../util/getAxios'
-import { CouchDbContext } from '../util/createResolver'
 import { get } from './get'
-
-jest.mock('../util/getAxios')
-
-const mockAxios = new MockAdapter(getAxios(null))
-
-const context: CouchDbContext = {
-  dbName: 'test',
-  dbUrl: 'http://my-url/',
-}
+import { CouchDbContext, createContext } from '../createContext'
+import fetchMock from 'fetch-mock'
 
 describe('get', () => {
+  let context: CouchDbContext
+
+  beforeEach(() => {
+    fetchMock.mock()
+    context = createContext({
+      dbName: 'test',
+      dbUrl: 'my-url',
+    })
+  })
+
   afterEach(() => {
+    fetchMock.restore()
     jest.clearAllMocks()
-    mockAxios.resetHistory()
   })
 
   it('should get a doc', async () => {
-    mockAxios
-      .onGet(`${context.dbUrl}/${context.dbName}/1`)
-      .replyOnce(200, { _id: '1', _rev: '1', blah: 'blah' })
+    fetchMock.get(`${context.couchDb.dbUrl}/${context.couchDb.dbName}/1`, {
+      status: 200,
+      body: JSON.stringify({ _id: '1', _rev: '1', blah: 'blah' }),
+    })
 
     const result = await get(context, '1')
 
@@ -33,9 +34,13 @@ describe('get', () => {
   })
 
   it('should get a doc with extra options', async () => {
-    mockAxios
-      .onGet(`${context.dbUrl}/${context.dbName}/1?revs=true&conflicts=true`)
-      .replyOnce(200, { _id: '1', _rev: '1', blah: 'blah' })
+    fetchMock.get(
+      `${context.couchDb.dbUrl}/${context.couchDb.dbName}/1?revs=true&conflicts=true`,
+      {
+        status: 200,
+        body: JSON.stringify({ _id: '1', _rev: '1', blah: 'blah' }),
+      }
+    )
 
     const result = await get(context, '1', { revs: true, conflicts: true })
 
