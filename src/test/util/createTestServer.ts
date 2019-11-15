@@ -1,19 +1,18 @@
 import { createTestClient } from 'apollo-server-testing'
 import { ApolloServer } from 'apollo-server'
 import { createSchema } from '../../createSchema'
-import { CouchDbContext } from '../../util/createResolver'
+import { createContext } from '../../createContext'
 
 export const dbName = 'test'
 export const dbUrl = 'https://fakeeeeeee.url'
 
-export function createTestServer(context: Partial<CouchDbContext> = {}) {
+export function createTestServer() {
   return createTestClient(
     new ApolloServer({
       schema: createSchema(),
-      context: () => ({
+      context: createContext({
         dbName,
         dbUrl,
-        ...context,
       }),
     })
   )
