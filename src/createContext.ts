@@ -1,5 +1,5 @@
 import 'isomorphic-fetch'
-import { CouchDbDocument } from './util/createResolver'
+import { CouchDbDocument } from './types'
 
 export interface CouchDbContext {
   couchDb: {

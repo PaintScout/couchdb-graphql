@@ -1,5 +1,5 @@
 import queryString from 'qs'
-import { CouchDbDocument } from '../util/createResolver'
+import { CouchDbDocument } from '../types'
 import { CouchDbContext } from '../createContext'
 import parseFetchResponse from '../util/parseFetchResponse'
 
