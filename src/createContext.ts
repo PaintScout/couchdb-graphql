@@ -17,7 +17,7 @@ export interface CouchDbContext {
       document: T
       conflicts: T[]
       context: CouchDbContext
-    }) => T
+    }) => T | Promise<T>
     onConflictsResolved?: <T extends CouchDbDocument>(args: {
       documents: T[]
       context: CouchDbContext
