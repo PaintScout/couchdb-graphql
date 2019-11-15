@@ -6,6 +6,10 @@ const dbUrl = 'my-url'
 const dbName = 'my-db'
 
 describe('resolveConflicts', () => {
+  beforeEach(() => {
+    fetchMock.mock()
+  })
+
   afterEach(() => {
     fetchMock.restore()
   })
