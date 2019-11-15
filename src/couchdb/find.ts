@@ -16,14 +16,17 @@ export interface FindOptions {
   execution_stats?: boolean
 }
 
-export interface FindResponse {
+export interface FindResponse<T = any> {
   execution_stats: any
   bookmark: any
   warning: string
-  docs: any[]
+  docs: T[]
 }
 
-export async function find(context: CouchDbContext, options: FindOptions) {
+export async function find<T = any>(
+  context: CouchDbContext,
+  options: FindOptions
+): Promise<FindResponse<T>> {
   let url = `${context.dbUrl}/${context.dbName}/_find`
 
   const response = await getAxios(context).post(url, options)

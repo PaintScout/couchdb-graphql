@@ -160,13 +160,13 @@ interface FindOptions {
     stale?: string;
     execution_stats?: boolean;
 }
-interface FindResponse {
+interface FindResponse<T = any> {
     execution_stats: any;
     bookmark: any;
     warning: string;
-    docs: any[];
+    docs: T[];
 }
-declare function find(context: CouchDbContext, options: FindOptions): Promise<any>;
+declare function find<T = any>(context: CouchDbContext, options: FindOptions): Promise<FindResponse<T>>;
 interface GetOptions {
     rev?: string;
     revs?: boolean;
