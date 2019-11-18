@@ -282,17 +282,18 @@ interface SearchOptions {
     sort?: string | string[];
     stale?: string;
 }
-interface SearchResponse {
+interface SearchResponse<T> {
     total_rows: number;
     bookmark: string;
     rows: Array<{
         id: string;
         order: number[];
         fields: Record<string, any>;
+        doc?: T;
     }>;
     counts?: any;
 }
-declare function search(context: CouchDbContext, { index, ddoc, ...options }: SearchOptions): Promise<SearchResponse>;
+declare function search<T = any>(context: CouchDbContext, { index, ddoc, ...options }: SearchOptions): Promise<SearchResponse<T>>;
 declare const typeDefs_$4: import("graphql").DocumentNode;
 declare const resolvers_$4: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
 /**

@@ -24,21 +24,22 @@ export interface SearchOptions {
   stale?: string
 }
 
-export interface SearchResponse {
+export interface SearchResponse<T> {
   total_rows: number
   bookmark: string
   rows: Array<{
     id: string
     order: number[]
     fields: Record<string, any>
+    doc?: T
   }>
   counts?: any
 }
 
-export async function search(
+export async function search<T = any>(
   context: CouchDbContext,
   { index, ddoc, ...options }: SearchOptions
-): Promise<SearchResponse> {
+): Promise<SearchResponse<T>> {
   const { fetch, dbUrl, dbName } = context.couchDb
 
   let url = `${dbUrl}/${dbName}/_design/${ddoc}/_search/${index}`

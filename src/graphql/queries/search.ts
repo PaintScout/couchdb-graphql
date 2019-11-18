@@ -4,16 +4,17 @@ import { search, SearchOptions } from '../../couchdb/search'
 
 export const typeDefs = gql`
   type SearchResponse {
-    total_rows: Int
-    bookmark: String
-    rows: [SearchRow]
+    total_rows: Int!
+    bookmark: String!
+    rows: [SearchRow]!
     counts: JSON
   }
 
   type SearchRow {
-    id: String
-    order: [Int]
-    fields: JSON
+    id: String!
+    order: [Int!]!
+    fields: JSON!
+    doc: JSON
   }
 
   extend type Query {
