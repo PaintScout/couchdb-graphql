@@ -869,8 +869,9 @@ var info = function info(context) {
   try {
     var _context$couchDb = context.couchDb,
         fetch = _context$couchDb.fetch,
-        dbUrl = _context$couchDb.dbUrl;
-    var url = "" + dbUrl;
+        dbUrl = _context$couchDb.dbUrl,
+        dbName = _context$couchDb.dbName;
+    var url = dbUrl + "/" + dbName;
     return Promise.resolve(fetch(url).then(parseFetchResponse));
   } catch (e) {
     return Promise.reject(e);

@@ -29,8 +29,8 @@ export interface InfoResponse {
 }
 
 export async function info(context: CouchDbContext): Promise<InfoResponse> {
-  const { fetch, dbUrl } = context.couchDb
-  let url = `${dbUrl}`
+  const { fetch, dbUrl, dbName } = context.couchDb
+  let url = `${dbUrl}/${dbName}`
 
   const response = await fetch(url).then(parseFetchResponse)
 
