@@ -21,7 +21,7 @@ export interface BulkDocsOptions {
 }
 export async function bulkDocs<T extends CouchDbDocument>(
   context: CouchDbContext,
-  docs: CouchDbDocument[],
+  docs: any[],
   options: BulkDocsOptions = {}
 ): Promise<BulkDocsResponse<T>> {
   const { fetch, dbUrl, dbName, onDocumentsSaved } = context.couchDb

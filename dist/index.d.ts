@@ -73,7 +73,7 @@ interface BulkDocsOptions {
     upsert?: boolean;
     new_edits?: boolean;
 }
-declare function bulkDocs<T extends CouchDbDocument>(context: CouchDbContext, docs: CouchDbDocument[], options?: BulkDocsOptions): Promise<BulkDocsResponse<T>>;
+declare function bulkDocs<T extends CouchDbDocument>(context: CouchDbContext, docs: any[], options?: BulkDocsOptions): Promise<BulkDocsResponse<T>>;
 declare const typeDefs_$0: import("graphql").DocumentNode;
 declare const resolvers_$0: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
 declare module put_$0 {
