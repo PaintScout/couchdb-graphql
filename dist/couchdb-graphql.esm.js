@@ -135,9 +135,13 @@ var resolveConflicts = function resolveConflicts(documents, context) {
             document: conflictingDocuments[id].document,
             conflicts: conflictingDocuments[id].conflicts,
             context: context
-          })).then(function (_ref) {
-            var _conflicts = _ref._conflicts,
-                resolved = _objectWithoutPropertiesLoose(_ref, ["_conflicts"]);
+          })).then(function (resolvedDocument) {
+            if (!resolvedDocument) {
+              throw new Error('onResolveConflict must return a document');
+            }
+
+            var _conflicts = resolvedDocument._conflicts,
+                resolved = _objectWithoutPropertiesLoose(resolvedDocument, ["_conflicts"]);
 
             return _extends({}, resolved, {
               _rev: conflictingDocuments[id].revToSave

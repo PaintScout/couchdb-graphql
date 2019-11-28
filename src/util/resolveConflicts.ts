@@ -107,11 +107,17 @@ export async function resolveConflicts(
 
   const resolvedDocs = await Promise.all(
     Object.keys(conflictingDocuments).map(async id => {
-      const { _conflicts, ...resolved } = await onResolveConflict!({
+      const resolvedDocument = await onResolveConflict!({
         document: conflictingDocuments[id].document,
         conflicts: conflictingDocuments[id].conflicts,
         context,
       })
+
+      if (!resolvedDocument) {
+        throw new Error('onResolveConflict must return a document')
+      }
+
+      const { _conflicts, ...resolved } = resolvedDocument
 
       return {
         ...resolved,
