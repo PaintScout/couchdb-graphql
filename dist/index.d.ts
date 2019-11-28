@@ -238,13 +238,13 @@ interface QueryOptions {
     att_encoding_info?: boolean;
     inclusive_end?: boolean;
     key?: any | any[];
-    keys: any | any[];
+    keys?: any | any[];
     limit?: number;
     reduce?: boolean;
     skip?: number;
     sorted?: boolean;
     stable?: boolean;
-    stale: string;
+    stale?: string;
     startkey?: any | any[];
     update?: string;
     update_seq?: boolean;
