@@ -27,7 +27,9 @@ async function getConflictsByDocument(
     }
   )
     .then(parseFetchResponse)
-    .then(res => res.rows.map(row => row.doc))
+    .then(res => {
+      return res.rows.map(row => row.doc).filter(doc => !!doc)
+    })
 
   // get full document for each _conflict
   const conflictingDocuments = await fetch(`${dbUrl}/${dbName}/_bulk_get`, {
@@ -39,7 +41,7 @@ async function getConflictsByDocument(
       docs: documentsWithConflictRevs.reduce(
         (conflicts, doc) => [
           ...conflicts,
-          ...(doc._conflicts || []).map(rev => ({
+          ...((doc && doc._conflicts) || []).map(rev => ({
             id: doc._id,
             rev,
           })),
@@ -118,7 +120,6 @@ export async function resolveConflicts(
       }
 
       const { _conflicts, ...resolved } = resolvedDocument
-
       return {
         ...resolved,
         _rev: conflictingDocuments[id].revToSave,

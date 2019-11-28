@@ -218,6 +218,8 @@ var getConflictsByDocument = function getConflictsByDocument(documents, context)
     }).then(parseFetchResponse).then(function (res) {
       return res.rows.map(function (row) {
         return row.doc;
+      }).filter(function (doc) {
+        return !!doc;
       });
     })).then(function (documentsWithConflictRevs) {
       // get full document for each _conflict
@@ -228,7 +230,7 @@ var getConflictsByDocument = function getConflictsByDocument(documents, context)
         },
         body: JSON.stringify({
           docs: documentsWithConflictRevs.reduce(function (conflicts, doc) {
-            return [].concat(conflicts, (doc._conflicts || []).map(function (rev) {
+            return [].concat(conflicts, (doc && doc._conflicts || []).map(function (rev) {
               return {
                 id: doc._id,
                 rev: rev
