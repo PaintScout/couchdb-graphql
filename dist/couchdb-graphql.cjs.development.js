@@ -896,6 +896,9 @@ var query = function query(context, _ref) {
         dbName = _context$couchDb.dbName,
         onDocumentsSaved = _context$couchDb.onDocumentsSaved;
     var url = dbUrl + "/" + dbName + "/_design/" + ddoc + "/_view/" + view;
+    var stringifyKeys = ['key', 'keys'].forEach(function (key) {
+      options[key] = JSON.stringify(options[key]);
+    });
     var hasArgs = Object.keys(options).length > 0;
 
     if (hasArgs) {

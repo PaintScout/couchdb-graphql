@@ -45,6 +45,10 @@ export async function query<T = any>(
 
   let url = `${dbUrl}/${dbName}/_design/${ddoc}/_view/${view}`
 
+  const stringifyKeys = ['key', 'keys'].forEach(key => {
+    options[key] = JSON.stringify(options[key])
+  })
+
   const hasArgs = Object.keys(options).length > 0
   if (hasArgs) {
     url += `?${queryString.stringify(options)}`
