@@ -896,16 +896,19 @@ var query = function query(context, _ref) {
         dbName = _context$couchDb.dbName,
         onDocumentsSaved = _context$couchDb.onDocumentsSaved;
     var url = dbUrl + "/" + dbName + "/_design/" + ddoc + "/_view/" + view;
-    var stringifyKeys = ['key', 'keys'].forEach(function (key) {
-      options[key] = JSON.stringify(options[key]);
-    });
     var hasArgs = Object.keys(options).length > 0;
+    var fetchOptions = {};
 
     if (hasArgs) {
-      url += "?" + queryString.stringify(options);
+      fetchOptions.method = 'POST';
+      fetchOptions.body = JSON.stringify(options);
+      fetchOptions.headers = {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      };
     }
 
-    return Promise.resolve(fetch(url).then(parseFetchResponse));
+    return Promise.resolve(fetch(url, fetchOptions).then(parseFetchResponse));
   } catch (e) {
     return Promise.reject(e);
   }

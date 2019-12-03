@@ -45,16 +45,18 @@ export async function query<T = any>(
 
   let url = `${dbUrl}/${dbName}/_design/${ddoc}/_view/${view}`
 
-  const stringifyKeys = ['key', 'keys'].forEach(key => {
-    options[key] = JSON.stringify(options[key])
-  })
-
   const hasArgs = Object.keys(options).length > 0
+  const fetchOptions: any = {}
   if (hasArgs) {
-    url += `?${queryString.stringify(options)}`
+    fetchOptions.method = 'POST'
+    fetchOptions.body = JSON.stringify(options)
+    fetchOptions.headers = {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    }
   }
 
-  const response = await fetch(url).then(parseFetchResponse)
+  const response = await fetch(url, fetchOptions).then(parseFetchResponse)
 
   return response
 }
