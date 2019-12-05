@@ -887,7 +887,9 @@ var info = function info(context) {
 var query = function query(context, _ref) {
   var view = _ref.view,
       ddoc = _ref.ddoc,
-      options = _objectWithoutPropertiesLoose(_ref, ["view", "ddoc"]);
+      key = _ref.key,
+      keys = _ref.keys,
+      options = _objectWithoutPropertiesLoose(_ref, ["view", "ddoc", "key", "keys"]);
 
   try {
     var _context$couchDb = context.couchDb,
@@ -895,13 +897,22 @@ var query = function query(context, _ref) {
         dbUrl = _context$couchDb.dbUrl,
         dbName = _context$couchDb.dbName,
         onDocumentsSaved = _context$couchDb.onDocumentsSaved;
+    var postOptions = {
+      key: key,
+      keys: keys
+    };
     var url = dbUrl + "/" + dbName + "/_design/" + ddoc + "/_view/" + view;
-    var hasArgs = Object.keys(options).length > 0;
+
+    if (options) {
+      url += "?" + queryString.stringify(options);
+    }
+
+    var hasArgs = Object.keys(postOptions).length > 0;
     var fetchOptions = {};
 
     if (hasArgs) {
       fetchOptions.method = 'POST';
-      fetchOptions.body = JSON.stringify(options);
+      fetchOptions.body = JSON.stringify(postOptions);
       fetchOptions.headers = {
         Accept: 'application/json',
         'Content-Type': 'application/json'

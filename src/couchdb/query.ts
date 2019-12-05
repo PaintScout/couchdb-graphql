@@ -34,22 +34,28 @@ export interface QueryResponse<T> {
   rows: Array<{
     id: string
     key?: any | any[]
-    value?: T
+    value?: any
+    doc?: T
   }>
 }
 export async function query<T = any>(
   context: CouchDbContext,
-  { view, ddoc, ...options }: QueryOptions
+  { view, ddoc, key, keys, ...options }: QueryOptions
 ): Promise<QueryResponse<T>> {
   const { fetch, dbUrl, dbName, onDocumentsSaved } = context.couchDb
+  const postOptions = { key, keys }
 
   let url = `${dbUrl}/${dbName}/_design/${ddoc}/_view/${view}`
 
-  const hasArgs = Object.keys(options).length > 0
+  if (options) {
+    url += `?${queryString.stringify(options)}`
+  }
+
+  const hasArgs = Object.keys(postOptions).length > 0
   const fetchOptions: any = {}
   if (hasArgs) {
     fetchOptions.method = 'POST'
-    fetchOptions.body = JSON.stringify(options)
+    fetchOptions.body = JSON.stringify(postOptions)
     fetchOptions.headers = {
       Accept: 'application/json',
       'Content-Type': 'application/json',

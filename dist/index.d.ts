@@ -256,10 +256,11 @@ interface QueryResponse<T> {
     rows: Array<{
         id: string;
         key?: any | any[];
-        value?: T;
+        value?: any;
+        doc?: T;
     }>;
 }
-declare function query<T = any>(context: CouchDbContext, { view, ddoc, ...options }: QueryOptions): Promise<QueryResponse<T>>;
+declare function query<T = any>(context: CouchDbContext, { view, ddoc, key, keys, ...options }: QueryOptions): Promise<QueryResponse<T>>;
 interface SearchOptions {
     index: string;
     ddoc: string;
