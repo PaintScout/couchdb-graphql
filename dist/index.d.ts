@@ -1,4 +1,4 @@
-import { GraphQLResolverMap } from "@apollographql/apollo-tools";
+import { GraphQLFieldResolver } from "graphql";
 import { GraphQLSchemaModule } from "apollo-server-core";
 interface CouchDbDocument {
     _id: string;
@@ -46,7 +46,7 @@ declare function createContext(args: {
     onConflictsResolved?: CouchDbContext['couchDb']['onConflictsResolved'];
     onDocumentsSaved?: CouchDbContext['couchDb']['onDocumentsSaved'];
 }): CouchDbContext;
-declare function createResolver(resolver: GraphQLResolverMap<CouchDbContext>): GraphQLResolverMap<CouchDbContext>;
+declare function createResolverFunction<T = any>(resolver: GraphQLFieldResolver<any, CouchDbContext, T>): GraphQLFieldResolver<any, CouchDbContext, T>;
 /**
  * Resolves conflicts by calling context.onResolveConflict and saving its result
  */
@@ -60,7 +60,11 @@ declare function put<T extends CouchDbDocument>(context: CouchDbContext, doc: T,
  * PUTs a document using _bulk_docs endpoint
  */
 declare const typeDefs: import("graphql").DocumentNode;
-declare const resolvers: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
+declare const resolvers: {
+    Mutation: {
+        put: import("graphql").GraphQLFieldResolver<any, import("../..").CouchDbContext, any>;
+    };
+};
 interface BulkDocsResponseObject<T extends CouchDbDocument> {
     _id: string;
     _rev?: string;
@@ -75,14 +79,26 @@ interface BulkDocsOptions {
 }
 declare function bulkDocs<T extends CouchDbDocument>(context: CouchDbContext, docs: any[], options?: BulkDocsOptions): Promise<BulkDocsResponse<T>>;
 declare const typeDefs_$0: import("graphql").DocumentNode;
-declare const resolvers_$0: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
+declare const resolvers_$0: {
+    Mutation: {
+        bulkDocs: import("graphql").GraphQLFieldResolver<any, import("../..").CouchDbContext, any>;
+    };
+};
 declare module put_$0 {
     const typeDefs: import("graphql").DocumentNode;
-    const resolvers: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
+    const resolvers: {
+        Mutation: {
+            put: import("graphql").GraphQLFieldResolver<any, import("../..").CouchDbContext, any>;
+        };
+    };
 }
 declare module bulkDocs_$0 {
     const typeDefs_$0: import("graphql").DocumentNode;
-    const resolvers_$0: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
+    const resolvers_$0: {
+        Mutation: {
+            bulkDocs: import("graphql").GraphQLFieldResolver<any, import("../..").CouchDbContext, any>;
+        };
+    };
 }
 interface AllDocsOptions {
     conflicts?: boolean;
@@ -110,7 +126,11 @@ interface AllDocsResponse<T = any> {
 }
 declare function allDocs<T = any>(context: CouchDbContext, { keys, key, endkey, startkey, ...args }?: AllDocsOptions): Promise<AllDocsResponse<T>>;
 declare const typeDefs_$1: import("graphql").DocumentNode;
-declare const resolvers_$1: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
+declare const resolvers_$1: {
+    Query: {
+        allDocs: import("graphql").GraphQLFieldResolver<any, import("../..").CouchDbContext, any>;
+    };
+};
 interface BulkGetOptions {
     revs?: boolean;
 }
@@ -133,7 +153,11 @@ declare function bulkGet<T extends CouchDbDocument>(docs: Array<{
  * Generic GET on a document
  */
 declare const typeDefs_$2: import("graphql").DocumentNode;
-declare const resolvers_$2: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
+declare const resolvers_$2: {
+    Query: {
+        bulkGet: import("graphql").GraphQLFieldResolver<any, import("../..").CouchDbContext, any>;
+    };
+};
 interface ChangesOptions {
     doc_ids?: string[];
     conflicts?: boolean;
@@ -166,7 +190,11 @@ interface ChangesResponse {
 }
 declare function changes(context: CouchDbContext, options: ChangesOptions): Promise<ChangesResponse>;
 declare const typeDefs_$3: import("graphql").DocumentNode;
-declare const resolvers_$3: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
+declare const resolvers_$3: {
+    Query: {
+        changes: import("graphql").GraphQLFieldResolver<any, import("../..").CouchDbContext, any>;
+    };
+};
 interface FindOptions {
     selector?: any;
     limit?: number;
@@ -296,49 +324,101 @@ interface SearchResponse<T> {
 }
 declare function search<T = any>(context: CouchDbContext, { index, ddoc, ...options }: SearchOptions): Promise<SearchResponse<T>>;
 declare const typeDefs_$4: import("graphql").DocumentNode;
-declare const resolvers_$4: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
+declare const resolvers_$4: {
+    Query: {
+        find: import("graphql").GraphQLFieldResolver<any, import("../..").CouchDbContext, any>;
+    };
+};
 /**
  * Generic GET on a document
  */
 declare const typeDefs_$5: import("graphql").DocumentNode;
-declare const resolvers_$5: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
+declare const resolvers_$5: {
+    Query: {
+        get: import("graphql").GraphQLFieldResolver<any, import("../..").CouchDbContext, any>;
+    };
+};
 declare const typeDefs_$6: import("graphql").DocumentNode;
-declare const resolvers_$6: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
+declare const resolvers_$6: {
+    Query: {
+        info: import("graphql").GraphQLFieldResolver<any, import("../..").CouchDbContext, any>;
+    };
+};
 declare const typeDefs_$7: import("graphql").DocumentNode;
-declare const resolvers_$7: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
+declare const resolvers_$7: {
+    Query: {
+        query: import("graphql").GraphQLFieldResolver<any, import("../..").CouchDbContext, QueryOptions>;
+    };
+};
 declare const typeDefs_$8: import("graphql").DocumentNode;
-declare const resolvers_$8: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
+declare const resolvers_$8: {
+    Query: {
+        search: import("graphql").GraphQLFieldResolver<any, import("../..").CouchDbContext, SearchOptions>;
+    };
+};
 declare module allDocs_$0 {
     const typeDefs_$1: import("graphql").DocumentNode;
-    const resolvers_$1: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
+    const resolvers_$1: {
+        Query: {
+            allDocs: import("graphql").GraphQLFieldResolver<any, import("../..").CouchDbContext, any>;
+        };
+    };
 }
 declare module bulkGet_$0 {
     const typeDefs_$2: import("graphql").DocumentNode;
-    const resolvers_$2: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
+    const resolvers_$2: {
+        Query: {
+            bulkGet: import("graphql").GraphQLFieldResolver<any, import("../..").CouchDbContext, any>;
+        };
+    };
 }
 declare module changes_$0 {
     const typeDefs_$3: import("graphql").DocumentNode;
-    const resolvers_$3: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
+    const resolvers_$3: {
+        Query: {
+            changes: import("graphql").GraphQLFieldResolver<any, import("../..").CouchDbContext, any>;
+        };
+    };
 }
 declare module find_$0 {
     const typeDefs_$4: import("graphql").DocumentNode;
-    const resolvers_$4: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
+    const resolvers_$4: {
+        Query: {
+            find: import("graphql").GraphQLFieldResolver<any, import("../..").CouchDbContext, any>;
+        };
+    };
 }
 declare module get_$0 {
     const typeDefs_$5: import("graphql").DocumentNode;
-    const resolvers_$5: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
+    const resolvers_$5: {
+        Query: {
+            get: import("graphql").GraphQLFieldResolver<any, import("../..").CouchDbContext, any>;
+        };
+    };
 }
 declare module info_$0 {
     const typeDefs_$6: import("graphql").DocumentNode;
-    const resolvers_$6: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
+    const resolvers_$6: {
+        Query: {
+            info: import("graphql").GraphQLFieldResolver<any, import("../..").CouchDbContext, any>;
+        };
+    };
 }
 declare module query_$0 {
     const typeDefs_$7: import("graphql").DocumentNode;
-    const resolvers_$7: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
+    const resolvers_$7: {
+        Query: {
+            query: import("graphql").GraphQLFieldResolver<any, import("../..").CouchDbContext, QueryOptions>;
+        };
+    };
 }
 declare module search_$0 {
     const typeDefs_$8: import("graphql").DocumentNode;
-    const resolvers_$8: import("@apollographql/apollo-tools").GraphQLResolverMap<import("../..").CouchDbContext>;
+    const resolvers_$8: {
+        Query: {
+            search: import("graphql").GraphQLFieldResolver<any, import("../..").CouchDbContext, SearchOptions>;
+        };
+    };
 }
 interface CreateSchemaOptions {
     /**
@@ -353,4 +433,4 @@ interface CreateSchemaOptions {
  * Creates a GraphQL Schema for CouchDB
  */
 declare function createSchema({ schemas, cloudant, }?: CreateSchemaOptions): import("graphql").GraphQLSchema;
-export { put_$0, bulkDocs_$0, get_$0, info_$0, bulkGet_$0, changes_$0, search_$0, find_$0, query_$0, allDocs_$0, AllDocsOptions, AllDocsResponse, allDocs, BulkDocsResponseObject, BulkDocsResponse, BulkDocsOptions, bulkDocs, BulkGetOptions, BulkGetResponse, bulkGet, ChangesOptions, ChangesResponse, changes, FindOptions, FindResponse, find, GetOptions, get, InfoResponse, info, put, QueryOptions, QueryResponse, query, SearchOptions, SearchResponse, search, CreateSchemaOptions, createSchema, CouchDbContext, createContext, resolveConflicts, createResolver, CouchDbDocument, queries, mutations, base };
+export { put_$0, bulkDocs_$0, get_$0, info_$0, bulkGet_$0, changes_$0, search_$0, find_$0, query_$0, allDocs_$0, AllDocsOptions, AllDocsResponse, allDocs, BulkDocsResponseObject, BulkDocsResponse, BulkDocsOptions, bulkDocs, BulkGetOptions, BulkGetResponse, bulkGet, ChangesOptions, ChangesResponse, changes, FindOptions, FindResponse, find, GetOptions, get, InfoResponse, info, put, QueryOptions, QueryResponse, query, SearchOptions, SearchResponse, search, CreateSchemaOptions, createSchema, CouchDbContext, createContext, resolveConflicts, createResolverFunction, CouchDbDocument, queries, mutations, base };

@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-core'
-import { createResolver } from '../../util/createResolver'
+import { createResolverFunction } from '../../util/createResolverFunction'
 import { put } from '../../couchdb/put'
 
 /**
@@ -17,16 +17,18 @@ export const typeDefs = gql`
   }
 `
 
-export const resolvers = createResolver({
+export const resolvers = {
   Mutation: {
-    put: async (parent, { input, upsert, new_edits = true }, context, info) => {
-      const document = await put(context, input, { upsert, new_edits })
+    put: createResolverFunction(
+      async (parent, { input, upsert, new_edits = true }, context, info) => {
+        const document = await put(context, input, { upsert, new_edits })
 
-      return {
-        _id: document._id,
-        _rev: document._rev,
-        document,
+        return {
+          _id: document._id,
+          _rev: document._rev,
+          document,
+        }
       }
-    },
+    ),
   },
-})
+}

@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-core'
-import { createResolver } from '../../util/createResolver'
+import { createResolverFunction } from '../../util/createResolverFunction'
 import { allDocs } from '../../couchdb/allDocs'
 
 export const typeDefs = gql`
@@ -32,10 +32,10 @@ export const typeDefs = gql`
   }
 `
 
-export const resolvers = createResolver({
+export const resolvers = {
   Query: {
-    allDocs: async (parent, args, context, info) => {
+    allDocs: createResolverFunction((parent, args, context, info) => {
       return allDocs(context, args)
-    },
+    }),
   },
-})
+}

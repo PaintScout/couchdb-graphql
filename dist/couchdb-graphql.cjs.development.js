@@ -74,7 +74,7 @@ function createContext(args) {
   };
 }
 
-function createResolver(resolver) {
+function createResolverFunction(resolver) {
   return resolver;
 }
 
@@ -404,11 +404,11 @@ var typeDefs =
 apolloServerCore.gql(
 /*#__PURE__*/
 _templateObject$1());
-var resolvers =
-/*#__PURE__*/
-createResolver({
+var resolvers = {
   Mutation: {
-    put: function (parent, _ref, context, info) {
+    put:
+    /*#__PURE__*/
+    createResolverFunction(function (parent, _ref, context, info) {
       var input = _ref.input,
           upsert = _ref.upsert,
           _ref$new_edits = _ref.new_edits,
@@ -428,9 +428,9 @@ createResolver({
       } catch (e) {
         return Promise.reject(e);
       }
-    }
+    })
   }
-});
+};
 
 var put$1 = ({
   __proto__: null,
@@ -589,27 +589,22 @@ var typeDefs$1 =
 apolloServerCore.gql(
 /*#__PURE__*/
 _templateObject$2());
-var resolvers$1 =
-/*#__PURE__*/
-createResolver({
+var resolvers$1 = {
   Mutation: {
-    bulkDocs: function (parent, _ref, context, info) {
+    bulkDocs:
+    /*#__PURE__*/
+    createResolverFunction(function (parent, _ref, context, info) {
       var input = _ref.input,
           upsert = _ref.upsert,
           _ref$new_edits = _ref.new_edits,
           new_edits = _ref$new_edits === void 0 ? true : _ref$new_edits;
-
-      try {
-        return Promise.resolve(bulkDocs(context, input, {
-          upsert: upsert,
-          new_edits: new_edits
-        }));
-      } catch (e) {
-        return Promise.reject(e);
-      }
-    }
+      return bulkDocs(context, input, {
+        upsert: upsert,
+        new_edits: new_edits
+      });
+    })
   }
-});
+};
 
 var bulkDocs$1 = ({
   __proto__: null,
@@ -672,19 +667,15 @@ var typeDefs$2 =
 apolloServerCore.gql(
 /*#__PURE__*/
 _templateObject$3());
-var resolvers$2 =
-/*#__PURE__*/
-createResolver({
+var resolvers$2 = {
   Query: {
-    allDocs: function (parent, args, context, info) {
-      try {
-        return Promise.resolve(allDocs(context, args));
-      } catch (e) {
-        return Promise.reject(e);
-      }
-    }
+    allDocs:
+    /*#__PURE__*/
+    createResolverFunction(function (parent, args, context, info) {
+      return allDocs(context, args);
+    })
   }
-});
+};
 
 var allDocs$1 = ({
   __proto__: null,
@@ -724,7 +715,7 @@ var bulkGet = function bulkGet(docs, context, _ref) {
 };
 
 function _templateObject$4() {
-  var data = _taggedTemplateLiteralLoose(["\n  input BulkGetInput {\n    id: String!\n    rev: String\n  }\n\n  type BulkGetResponse {\n    results: [BulkGetResult!]!\n  }\n\n  type BulkGetResult {\n    id: String\n    docs: [BulkGetDocs!]!\n  }\n\n  type BulkGetDocs {\n    ok: JSON\n    error: BulkGetError\n  }\n\n  type BulkGetError {\n    id: String\n    rev: String\n    error: String\n    reason: String\n  }\n\n  extend type Query {\n    bulkGet(docs: [BulkGetInput!]!, revs: Boolean): BulkGetResponse\n  }\n"]);
+  var data = _taggedTemplateLiteralLoose(["\n  input BulkGetInput {\n    id: String!\n    rev?: String\n  }\n\n  type BulkGetResponse {\n    results: [BulkGetResult!]!\n  }\n\n  type BulkGetResult {\n    id: String\n    docs: [BulkGetDocs!]!\n  }\n\n  type BulkGetDocs {\n    ok: JSON\n    error: BulkGetError\n  }\n\n  type BulkGetError {\n    id: String\n    rev: String\n    error: String\n    reason: String\n  }\n\n  extend type Query {\n    bulkGet(docs: [BulkGetInput!]!, revs: Boolean): BulkGetResponse\n  }\n"]);
 
   _templateObject$4 = function _templateObject() {
     return data;
@@ -741,24 +732,19 @@ var typeDefs$3 =
 apolloServerCore.gql(
 /*#__PURE__*/
 _templateObject$4());
-var resolvers$3 =
-/*#__PURE__*/
-createResolver({
+var resolvers$3 = {
   Query: {
-    bulkGet: function (parent, _ref, context, info) {
+    bulkGet:
+    /*#__PURE__*/
+    createResolverFunction(function (parent, _ref, context, info) {
       var docs = _ref.docs,
           revs = _ref.revs;
-
-      try {
-        return Promise.resolve(bulkGet(docs, context, {
-          revs: revs
-        }));
-      } catch (e) {
-        return Promise.reject(e);
-      }
-    }
+      return bulkGet(docs, context, {
+        revs: revs
+      });
+    })
   }
-});
+};
 
 var bulkGet$1 = ({
   __proto__: null,
@@ -809,19 +795,15 @@ var typeDefs$4 =
 apolloServerCore.gql(
 /*#__PURE__*/
 _templateObject$5());
-var resolvers$4 =
-/*#__PURE__*/
-createResolver({
+var resolvers$4 = {
   Query: {
-    changes: function (parent, args, context, info) {
-      try {
-        return Promise.resolve(changes(context, args));
-      } catch (e) {
-        return Promise.reject(e);
-      }
-    }
+    changes:
+    /*#__PURE__*/
+    createResolverFunction(function (parent, args, context, info) {
+      return changes(context, args);
+    })
   }
-});
+};
 
 var changes$1 = ({
   __proto__: null,
@@ -962,19 +944,15 @@ var typeDefs$5 =
 apolloServerCore.gql(
 /*#__PURE__*/
 _templateObject$6());
-var resolvers$5 =
-/*#__PURE__*/
-createResolver({
+var resolvers$5 = {
   Query: {
-    find: function (parent, args, context, info) {
-      try {
-        return Promise.resolve(find(context, args));
-      } catch (e) {
-        return Promise.reject(e);
-      }
-    }
+    find:
+    /*#__PURE__*/
+    createResolverFunction(function (parent, args, context, info) {
+      return find(context, args);
+    })
   }
-});
+};
 
 var find$1 = ({
   __proto__: null,
@@ -1000,11 +978,11 @@ var typeDefs$6 =
 apolloServerCore.gql(
 /*#__PURE__*/
 _templateObject$7());
-var resolvers$6 =
-/*#__PURE__*/
-createResolver({
+var resolvers$6 = {
   Query: {
-    get: function (parent, _ref, context, info) {
+    get:
+    /*#__PURE__*/
+    createResolverFunction(function (parent, _ref, context, info) {
       var id = _ref.id,
           args = _objectWithoutPropertiesLoose(_ref, ["id"]);
 
@@ -1019,9 +997,9 @@ createResolver({
       } catch (e) {
         return Promise.reject(e);
       }
-    }
+    })
   }
-});
+};
 
 var get$1 = ({
   __proto__: null,
@@ -1043,19 +1021,15 @@ var typeDefs$7 =
 apolloServerCore.gql(
 /*#__PURE__*/
 _templateObject$8());
-var resolvers$7 =
-/*#__PURE__*/
-createResolver({
+var resolvers$7 = {
   Query: {
-    info: function (parent, args, context) {
-      try {
-        return Promise.resolve(info(context));
-      } catch (e) {
-        return Promise.reject(e);
-      }
-    }
+    info:
+    /*#__PURE__*/
+    createResolverFunction(function (parent, args, context) {
+      return info(context);
+    })
   }
-});
+};
 
 var info$1 = ({
   __proto__: null,
@@ -1077,19 +1051,19 @@ var typeDefs$8 =
 apolloServerCore.gql(
 /*#__PURE__*/
 _templateObject$9());
-var resolvers$8 =
-/*#__PURE__*/
-createResolver({
+var resolvers$8 = {
   Query: {
-    query: function (parent, args, context, info) {
+    query:
+    /*#__PURE__*/
+    createResolverFunction(function (parent, args, context, info) {
       try {
         return Promise.resolve(query(context, args));
       } catch (e) {
         return Promise.reject(e);
       }
-    }
+    })
   }
-});
+};
 
 var query$1 = ({
   __proto__: null,
@@ -1111,19 +1085,19 @@ var typeDefs$9 =
 apolloServerCore.gql(
 /*#__PURE__*/
 _templateObject$a());
-var resolvers$9 =
-/*#__PURE__*/
-createResolver({
+var resolvers$9 = {
   Query: {
-    search: function (parent, args, context, info) {
+    search:
+    /*#__PURE__*/
+    createResolverFunction(function (parent, args, context, info) {
       try {
         return Promise.resolve(search(context, args));
       } catch (e) {
         return Promise.reject(e);
       }
-    }
+    })
   }
-});
+};
 
 var search$1 = ({
   __proto__: null,
@@ -1171,7 +1145,7 @@ exports.bulkDocs = bulkDocs;
 exports.bulkGet = bulkGet;
 exports.changes = changes;
 exports.createContext = createContext;
-exports.createResolver = createResolver;
+exports.createResolverFunction = createResolverFunction;
 exports.createSchema = createSchema;
 exports.find = find;
 exports.get = get;

@@ -7,7 +7,7 @@ export * from './couchdb'
 export * from './createSchema'
 export * from './createContext'
 export * from './util/resolveConflicts'
-export * from './util/createResolver'
+export * from './util/createResolverFunction'
 export * from './types'
 
 export { queries, mutations, base }
