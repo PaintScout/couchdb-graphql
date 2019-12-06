@@ -679,8 +679,9 @@ var allDocs$1 = ({
   resolvers: resolvers$2
 });
 
-var bulkGet = function bulkGet(docs, context, _ref) {
-  var revs = _ref.revs;
+var bulkGet = function bulkGet(docs, context, _temp) {
+  var _ref = _temp === void 0 ? {} : _temp,
+      revs = _ref.revs;
 
   try {
     var _context$couchDb = context.couchDb,
@@ -711,7 +712,7 @@ var bulkGet = function bulkGet(docs, context, _ref) {
 };
 
 function _templateObject$4() {
-  var data = _taggedTemplateLiteralLoose(["\n  input BulkGetInput {\n    id: String!\n    rev?: String\n  }\n\n  type BulkGetResponse {\n    results: [BulkGetResult!]!\n  }\n\n  type BulkGetResult {\n    id: String\n    docs: [BulkGetDocs!]!\n  }\n\n  type BulkGetDocs {\n    ok: JSON\n    error: BulkGetError\n  }\n\n  type BulkGetError {\n    id: String\n    rev: String\n    error: String\n    reason: String\n  }\n\n  extend type Query {\n    bulkGet(docs: [BulkGetInput!]!, revs: Boolean): BulkGetResponse\n  }\n"]);
+  var data = _taggedTemplateLiteralLoose(["\n  input BulkGetInput {\n    id: String!\n    rev: String\n  }\n\n  type BulkGetResponse {\n    results: [BulkGetResult!]!\n  }\n\n  type BulkGetResult {\n    id: String\n    docs: [BulkGetDocs!]!\n  }\n\n  type BulkGetDocs {\n    ok: JSON\n    error: BulkGetError\n  }\n\n  type BulkGetError {\n    id: String\n    rev: String\n    error: String\n    reason: String\n  }\n\n  extend type Query {\n    bulkGet(docs: [BulkGetInput!]!, revs: Boolean): BulkGetResponse\n  }\n"]);
 
   _templateObject$4 = function _templateObject() {
     return data;

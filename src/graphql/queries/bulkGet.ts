@@ -8,7 +8,7 @@ import { bulkGet } from '../../couchdb/bulkGet'
 export const typeDefs = gql`
   input BulkGetInput {
     id: String!
-    rev?: String
+    rev: String
   }
 
   type BulkGetResponse {

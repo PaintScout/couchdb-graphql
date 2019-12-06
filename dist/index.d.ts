@@ -147,8 +147,8 @@ interface BulkGetResponse<T extends CouchDbDocument> {
 }
 declare function bulkGet<T extends CouchDbDocument>(docs: Array<{
     id: string;
-    rev: string;
-}>, context: CouchDbContext, { revs }: BulkGetOptions): Promise<BulkGetResponse<T>>;
+    rev?: string;
+}>, context: CouchDbContext, { revs }?: BulkGetOptions): Promise<BulkGetResponse<T>>;
 /**
  * Generic GET on a document
  */

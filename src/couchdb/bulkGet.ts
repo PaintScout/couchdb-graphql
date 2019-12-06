@@ -20,9 +20,9 @@ export interface BulkGetResponse<T extends CouchDbDocument> {
 }
 
 export async function bulkGet<T extends CouchDbDocument>(
-  docs: Array<{ id: string; rev: string }>,
+  docs: Array<{ id: string; rev?: string }>,
   context: CouchDbContext,
-  { revs }: BulkGetOptions
+  { revs }: BulkGetOptions = {}
 ): Promise<BulkGetResponse<T>> {
   const { fetch, dbUrl, dbName } = context.couchDb
   let url = `${dbUrl}/${dbName}/_bulk_get`
