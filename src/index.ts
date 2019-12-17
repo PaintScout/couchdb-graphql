@@ -7,7 +7,7 @@ export * from './couchdb'
 export * from './createCouchDbModule'
 export * from './createContext'
 export * from './util/resolveConflicts'
-export * from './util/createResolverFunction'
+export * from './util/createResolver'
 export * from './types'
 
 export { queries, mutations, base }

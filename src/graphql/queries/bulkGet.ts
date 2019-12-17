@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-core'
-import { createResolverFunction } from '../../util/createResolverFunction'
+import { createResolver } from '../../util/createResolver'
 import { bulkGet } from '../../couchdb/bulkGet'
 
 /**
@@ -39,7 +39,7 @@ export const typeDefs = gql`
 
 export const resolvers = {
   Query: {
-    bulkGet: createResolverFunction((parent, { docs, revs }, context, info) => {
+    bulkGet: createResolver((parent, { docs, revs }, context, info) => {
       return bulkGet(docs, context, { revs })
     }),
   },
