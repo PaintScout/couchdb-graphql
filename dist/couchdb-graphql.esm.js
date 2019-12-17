@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core';
 import 'isomorphic-fetch';
 import queryString from 'qs';
-import { buildFederatedSchema } from '@apollo/federation';
+import { GraphQLModule } from '@graphql-modules/core';
 
 function _extends() {
   _extends = Object.assign || function (target) {
@@ -46,7 +46,7 @@ function _taggedTemplateLiteralLoose(strings, raw) {
 }
 
 function _templateObject() {
-  var data = _taggedTemplateLiteralLoose(["\n    scalar JSON\n  "]);
+  var data = _taggedTemplateLiteralLoose(["\n    scalar JSON\n\n    type Query\n    type Mutation\n  "]);
 
   _templateObject = function _templateObject() {
     return data;
@@ -1116,25 +1116,31 @@ var queries = ({
   allDocs: allDocs$1
 });
 
-/**
- * Creates a GraphQL Schema for CouchDB
- */
-
-function createSchema(_temp) {
-  var _ref = _temp === void 0 ? {} : _temp,
-      _ref$schemas = _ref.schemas,
-      schemas = _ref$schemas === void 0 ? [] : _ref$schemas,
-      _ref$cloudant = _ref.cloudant,
-      cloudant = _ref$cloudant === void 0 ? true : _ref$cloudant;
+function createCouchDbModule(_ref, moduleConfig) {
+  var cloudant = _ref.cloudant,
+      options = _objectWithoutPropertiesLoose(_ref, ["cloudant"]);
 
   var couchdbQueries = _objectWithoutPropertiesLoose(queries, ["search"]);
 
-  return buildFederatedSchema([base].concat(Object.keys(cloudant ? queries : couchdbQueries).map(function (key) {
-    return queries[key];
+  var typeDefs = [base.typeDefs].concat(Object.keys(cloudant ? queries : couchdbQueries).map(function (key) {
+    return queries[key].typeDefs;
   }), Object.keys(mutations).map(function (key) {
-    return mutations[key];
-  }), schemas));
+    return mutations[key].typeDefs;
+  }));
+  var queryResolvers = Object.keys(cloudant ? queries : couchdbQueries).reduce(function (resolvers, key) {
+    return _extends({}, resolvers, {}, queries[key].resolvers.Query);
+  }, {});
+  var mutationResolvers = Object.keys(mutations).reduce(function (resolvers, key) {
+    return _extends({}, resolvers, {}, mutations[key].resolvers.Mutation);
+  }, {});
+  return new GraphQLModule(_extends({}, options, {
+    typeDefs: typeDefs,
+    resolvers: {
+      Query: queryResolvers,
+      Mutation: mutationResolvers
+    }
+  }), moduleConfig);
 }
 
-export { allDocs, base, bulkDocs, bulkGet, changes, createContext, createResolverFunction, createSchema, find, get, info, mutations, put, queries, query, resolveConflicts, search };
+export { allDocs, base, bulkDocs, bulkGet, changes, createContext, createCouchDbModule, createResolverFunction, find, get, info, mutations, put, queries, query, resolveConflicts, search };
 //# sourceMappingURL=couchdb-graphql.esm.js.map

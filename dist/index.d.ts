@@ -1,5 +1,5 @@
 import { GraphQLFieldResolver } from "graphql";
-import { GraphQLSchemaModule } from "apollo-server-core";
+import { GraphQLModule, GraphQLModuleOptions } from "@graphql-modules/core";
 interface CouchDbDocument {
     _id: string;
     _rev?: string;
@@ -420,17 +420,11 @@ declare module search_$0 {
         };
     };
 }
-interface CreateSchemaOptions {
-    /**
-     * Includes schemas for cloudant endpoints
-     *
-     * defaults to true
-     */
+interface CreateCouchDbModuleArgs<Config, Session extends object, Context extends CouchDbContext = CouchDbContext, SelfResolvers = {}> extends Omit<GraphQLModuleOptions<Config, Session, Context, SelfResolvers>, 'typeDefs' | 'resolvers'> {
     cloudant?: boolean;
-    schemas?: GraphQLSchemaModule[];
 }
-/**
- * Creates a GraphQL Schema for CouchDB
- */
-declare function createSchema({ schemas, cloudant, }?: CreateSchemaOptions): import("graphql").GraphQLSchema;
-export { put_$0, bulkDocs_$0, get_$0, info_$0, bulkGet_$0, changes_$0, search_$0, find_$0, query_$0, allDocs_$0, AllDocsOptions, AllDocsResponse, allDocs, BulkDocsResponseObject, BulkDocsResponse, BulkDocsOptions, bulkDocs, BulkGetOptions, BulkGetResponse, bulkGet, ChangesOptions, ChangesResponse, changes, FindOptions, FindResponse, find, GetOptions, get, InfoResponse, info, put, QueryOptions, QueryResponse, query, SearchOptions, SearchResponse, search, CreateSchemaOptions, createSchema, CouchDbContext, createContext, resolveConflicts, createResolverFunction, CouchDbDocument, queries, mutations, base };
+declare function createCouchDbModule<Config, Session extends object, Context extends CouchDbContext = CouchDbContext, SelfResolvers = {}>({ cloudant, ...options }: CreateCouchDbModuleArgs<Config, Session, Context, SelfResolvers>, moduleConfig?: Config): GraphQLModule<Config, Session, Context, {
+    Query: {};
+    Mutation: {};
+}>;
+export { put_$0, bulkDocs_$0, get_$0, info_$0, bulkGet_$0, changes_$0, search_$0, find_$0, query_$0, allDocs_$0, AllDocsOptions, AllDocsResponse, allDocs, BulkDocsResponseObject, BulkDocsResponse, BulkDocsOptions, bulkDocs, BulkGetOptions, BulkGetResponse, bulkGet, ChangesOptions, ChangesResponse, changes, FindOptions, FindResponse, find, GetOptions, get, InfoResponse, info, put, QueryOptions, QueryResponse, query, SearchOptions, SearchResponse, search, CreateCouchDbModuleArgs, createCouchDbModule, CouchDbContext, createContext, resolveConflicts, createResolverFunction, CouchDbDocument, queries, mutations, base };
