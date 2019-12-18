@@ -25,6 +25,12 @@ function _extends() {
   return _extends.apply(this, arguments);
 }
 
+function _inheritsLoose(subClass, superClass) {
+  subClass.prototype = Object.create(superClass.prototype);
+  subClass.prototype.constructor = subClass;
+  subClass.__proto__ = superClass;
+}
+
 function _objectWithoutPropertiesLoose(source, excluded) {
   if (source == null) return {};
   var target = {};
@@ -74,7 +80,7 @@ function createContext(args) {
   };
 }
 
-function createResolverFunction(resolver) {
+function createResolver(resolver) {
   return resolver;
 }
 
@@ -408,7 +414,7 @@ var resolvers = {
   Mutation: {
     put:
     /*#__PURE__*/
-    createResolverFunction(function (parent, _ref, context, info) {
+    createResolver(function (parent, _ref, context, info) {
       var input = _ref.input,
           upsert = _ref.upsert,
           _ref$new_edits = _ref.new_edits,
@@ -593,7 +599,7 @@ var resolvers$1 = {
   Mutation: {
     bulkDocs:
     /*#__PURE__*/
-    createResolverFunction(function (parent, _ref, context, info) {
+    createResolver(function (parent, _ref, context, info) {
       var input = _ref.input,
           upsert = _ref.upsert,
           _ref$new_edits = _ref.new_edits,
@@ -671,7 +677,7 @@ var resolvers$2 = {
   Query: {
     allDocs:
     /*#__PURE__*/
-    createResolverFunction(function (parent, args, context, info) {
+    createResolver(function (parent, args, context, info) {
       return allDocs(context, args);
     })
   }
@@ -737,7 +743,7 @@ var resolvers$3 = {
   Query: {
     bulkGet:
     /*#__PURE__*/
-    createResolverFunction(function (parent, _ref, context, info) {
+    createResolver(function (parent, _ref, context, info) {
       var docs = _ref.docs,
           revs = _ref.revs;
       return bulkGet(docs, context, {
@@ -800,7 +806,7 @@ var resolvers$4 = {
   Query: {
     changes:
     /*#__PURE__*/
-    createResolverFunction(function (parent, args, context, info) {
+    createResolver(function (parent, args, context, info) {
       return changes(context, args);
     })
   }
@@ -949,7 +955,7 @@ var resolvers$5 = {
   Query: {
     find:
     /*#__PURE__*/
-    createResolverFunction(function (parent, args, context, info) {
+    createResolver(function (parent, args, context, info) {
       return find(context, args);
     })
   }
@@ -983,7 +989,7 @@ var resolvers$6 = {
   Query: {
     get:
     /*#__PURE__*/
-    createResolverFunction(function (parent, _ref, context, info) {
+    createResolver(function (parent, _ref, context, info) {
       var id = _ref.id,
           args = _objectWithoutPropertiesLoose(_ref, ["id"]);
 
@@ -1026,7 +1032,7 @@ var resolvers$7 = {
   Query: {
     info:
     /*#__PURE__*/
-    createResolverFunction(function (parent, args, context) {
+    createResolver(function (parent, args, context) {
       return info(context);
     })
   }
@@ -1056,7 +1062,7 @@ var resolvers$8 = {
   Query: {
     query:
     /*#__PURE__*/
-    createResolverFunction(function (parent, args, context, info) {
+    createResolver(function (parent, args, context, info) {
       try {
         return Promise.resolve(query(context, args));
       } catch (e) {
@@ -1090,7 +1096,7 @@ var resolvers$9 = {
   Query: {
     search:
     /*#__PURE__*/
-    createResolverFunction(function (parent, args, context, info) {
+    createResolver(function (parent, args, context, info) {
       try {
         return Promise.resolve(search(context, args));
       } catch (e) {
@@ -1120,40 +1126,53 @@ var queries = ({
   allDocs: allDocs$1
 });
 
-function createCouchDbModule(_ref, moduleConfig) {
-  var cloudant = _ref.cloudant,
-      options = _objectWithoutPropertiesLoose(_ref, ["cloudant"]);
+var CouchDBModule =
+/*#__PURE__*/
+function (_GraphQLModule) {
+  _inheritsLoose(CouchDBModule, _GraphQLModule);
 
-  var couchdbQueries = _objectWithoutPropertiesLoose(queries, ["search"]);
+  function CouchDBModule(_ref, moduleConfig) {
+    var cloudant = _ref.cloudant,
+        options = _objectWithoutPropertiesLoose(_ref, ["cloudant"]);
 
-  var typeDefs = [base.typeDefs].concat(Object.keys(cloudant ? queries : couchdbQueries).map(function (key) {
-    return queries[key].typeDefs;
-  }), Object.keys(mutations).map(function (key) {
-    return mutations[key].typeDefs;
-  }));
-  var queryResolvers = Object.keys(cloudant ? queries : couchdbQueries).reduce(function (resolvers, key) {
-    return _extends({}, resolvers, {}, queries[key].resolvers.Query);
-  }, {});
-  var mutationResolvers = Object.keys(mutations).reduce(function (resolvers, key) {
-    return _extends({}, resolvers, {}, mutations[key].resolvers.Mutation);
-  }, {});
-  return new core.GraphQLModule(_extends({}, options, {
-    typeDefs: typeDefs,
-    resolvers: {
-      Query: queryResolvers,
-      Mutation: mutationResolvers
-    }
-  }), moduleConfig);
-}
+    // separate cloudant queries from couchdb
+    var couchdbQueries = _objectWithoutPropertiesLoose(queries, ["search"]); // combine typeDefs
 
+
+    var typeDefs = [base.typeDefs].concat(Object.keys(cloudant ? queries : couchdbQueries).map(function (key) {
+      return queries[key].typeDefs;
+    }), Object.keys(mutations).map(function (key) {
+      return mutations[key].typeDefs;
+    })); // combine Query resolvers
+
+    var queryResolvers = Object.keys(cloudant ? queries : couchdbQueries).reduce(function (resolvers, key) {
+      return _extends({}, resolvers, {}, queries[key].resolvers.Query);
+    }, {}); // combine Mutation resolvers
+
+    var mutationResolvers = Object.keys(mutations).reduce(function (resolvers, key) {
+      return _extends({}, resolvers, {}, mutations[key].resolvers.Mutation);
+    }, {}); // pass args into GraphQLModule
+
+    return _GraphQLModule.call(this, _extends({}, options, {
+      typeDefs: typeDefs,
+      resolvers: {
+        Query: queryResolvers,
+        Mutation: mutationResolvers
+      }
+    }), moduleConfig) || this;
+  }
+
+  return CouchDBModule;
+}(core.GraphQLModule);
+
+exports.CouchDBModule = CouchDBModule;
 exports.allDocs = allDocs;
 exports.base = base;
 exports.bulkDocs = bulkDocs;
 exports.bulkGet = bulkGet;
 exports.changes = changes;
 exports.createContext = createContext;
-exports.createCouchDbModule = createCouchDbModule;
-exports.createResolverFunction = createResolverFunction;
+exports.createResolver = createResolver;
 exports.find = find;
 exports.get = get;
 exports.info = info;
