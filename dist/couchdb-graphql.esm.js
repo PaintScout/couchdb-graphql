@@ -1128,21 +1128,34 @@ function createCouchDbModule(_ref, moduleConfig) {
     return queries[key].typeDefs;
   }), Object.keys(mutations).map(function (key) {
     return mutations[key].typeDefs;
-  })); // combine Query resolvers
+  }));
 
-  var queryResolvers = Object.keys(cloudant ? queries : couchdbQueries).reduce(function (resolvers, key) {
-    return _extends({}, resolvers, {}, queries[key].resolvers.Query);
-  }, {}); // combine Mutation resolvers
+  if (options.typeDefs) {
+    if (Array.isArray(options.typeDefs)) {
+      typeDefs.push.apply(typeDefs, options.typeDefs);
+    } else {
+      typeDefs.push(options.typeDefs);
+    }
+  } // combine resolvers
 
-  var mutationResolvers = Object.keys(mutations).reduce(function (resolvers, key) {
-    return _extends({}, resolvers, {}, mutations[key].resolvers.Mutation);
-  }, {});
+
+  var resolvers = [].concat(Object.keys(cloudant ? queries : couchdbQueries).map(function (key) {
+    return queries[key].resolvers;
+  }), Object.keys(mutations).map(function (key) {
+    return mutations[key].resolvers;
+  }));
+
+  if (options.resolvers) {
+    if (Array.isArray(options.resolvers)) {
+      typeDefs.push.apply(typeDefs, options.resolvers);
+    } else {
+      typeDefs.push(options.resolvers);
+    }
+  }
+
   return new GraphQLModule(_extends({}, options, {
     typeDefs: typeDefs,
-    resolvers: {
-      Query: queryResolvers,
-      Mutation: mutationResolvers
-    }
+    resolvers: resolvers
   }), moduleConfig);
 }
 

@@ -17,11 +17,7 @@ export interface CouchDBModuleOptions<
     any,
     ModuleContext<Context>
   >
->
-  extends Omit<
-    GraphQLModuleOptions<Config, Session, Context, SelfResolvers>,
-    'typeDefs' | 'resolvers'
-  > {
+> extends GraphQLModuleOptions<Config, Session, Context, SelfResolvers> {
   cloudant?: boolean
 }
 
@@ -52,34 +48,35 @@ export function createCouchDbModule<
     ...Object.keys(mutations).map(key => mutations[key].typeDefs),
   ]
 
-  // combine Query resolvers
-  const queryResolvers = Object.keys(
-    cloudant ? queries : couchdbQueries
-  ).reduce(
-    (resolvers, key) => ({
-      ...resolvers,
-      ...queries[key].resolvers.Query,
-    }),
-    {}
-  )
+  if (options.typeDefs) {
+    if (Array.isArray(options.typeDefs)) {
+      typeDefs.push(...options.typeDefs)
+    } else {
+      typeDefs.push(options.typeDefs)
+    }
+  }
 
-  // combine Mutation resolvers
-  const mutationResolvers = Object.keys(mutations).reduce(
-    (resolvers, key) => ({
-      ...resolvers,
-      ...mutations[key].resolvers.Mutation,
-    }),
-    {}
-  )
+  // combine resolvers
+  const resolvers = [
+    ...Object.keys(cloudant ? queries : couchdbQueries).map(
+      key => queries[key].resolvers
+    ),
+    ...Object.keys(mutations).map(key => mutations[key].resolvers),
+  ]
+
+  if (options.resolvers) {
+    if (Array.isArray(options.resolvers)) {
+      typeDefs.push(...options.resolvers)
+    } else {
+      typeDefs.push(options.resolvers)
+    }
+  }
 
   return new GraphQLModule(
     {
       ...options,
       typeDefs,
-      resolvers: {
-        Query: queryResolvers,
-        Mutation: mutationResolvers,
-      },
+      resolvers,
     },
     moduleConfig
   )
