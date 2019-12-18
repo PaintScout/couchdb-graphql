@@ -1151,9 +1151,9 @@ function createCouchDbModule(_ref, moduleConfig) {
 
   if (options.resolvers) {
     if (Array.isArray(options.resolvers)) {
-      typeDefs.push.apply(typeDefs, options.resolvers);
+      resolvers.push.apply(resolvers, options.resolvers);
     } else {
-      typeDefs.push(options.resolvers);
+      resolvers.push(options.resolvers);
     }
   }
 

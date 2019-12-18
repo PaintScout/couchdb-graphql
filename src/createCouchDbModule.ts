@@ -66,9 +66,9 @@ export function createCouchDbModule<
 
   if (options.resolvers) {
     if (Array.isArray(options.resolvers)) {
-      typeDefs.push(...options.resolvers)
+      resolvers.push(...options.resolvers)
     } else {
-      typeDefs.push(options.resolvers)
+      resolvers.push(options.resolvers)
     }
   }
 
