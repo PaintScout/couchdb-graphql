@@ -423,7 +423,8 @@ declare module search_$0 {
 interface CouchDBModuleOptions<Config = any, Session extends object = any, Context = CouchDbContext, SelfResolvers extends Resolvers<any, ModuleContext<Context>> = Resolvers<any, ModuleContext<Context>>> extends Omit<GraphQLModuleOptions<Config, Session, Context, SelfResolvers>, 'typeDefs' | 'resolvers'> {
     cloudant?: boolean;
 }
-declare class CouchDBModule<Config = any, Session extends object = any, Context = CouchDbContext, SelfResolvers extends Resolvers<any, ModuleContext<Context>> = Resolvers<any, ModuleContext<Context>>> extends GraphQLModule {
-    constructor({ cloudant, ...options }: CouchDBModuleOptions<Config, Session, Context, SelfResolvers>, moduleConfig?: Config);
-}
-export { put_$0, bulkDocs_$0, get_$0, info_$0, bulkGet_$0, changes_$0, search_$0, find_$0, query_$0, allDocs_$0, AllDocsOptions, AllDocsResponse, allDocs, BulkDocsResponseObject, BulkDocsResponse, BulkDocsOptions, bulkDocs, BulkGetOptions, BulkGetResponse, bulkGet, ChangesOptions, ChangesResponse, changes, FindOptions, FindResponse, find, GetOptions, get, InfoResponse, info, put, QueryOptions, QueryResponse, query, SearchOptions, SearchResponse, search, CouchDBModuleOptions, CouchDBModule, CouchDbContext, createContext, resolveConflicts, createResolver, CouchDbDocument, queries, mutations, base };
+declare function createCouchDbModule<Config = any, Session extends object = any, Context = CouchDbContext, SelfResolvers extends Resolvers<any, ModuleContext<Context>> = Resolvers<any, ModuleContext<Context>>>({ cloudant, ...options }: CouchDBModuleOptions<Config, Session, Context, SelfResolvers>, moduleConfig?: Config): GraphQLModule<Config, Session, Context, {
+    Query: {};
+    Mutation: {};
+}>;
+export { put_$0, bulkDocs_$0, get_$0, info_$0, bulkGet_$0, changes_$0, search_$0, find_$0, query_$0, allDocs_$0, AllDocsOptions, AllDocsResponse, allDocs, BulkDocsResponseObject, BulkDocsResponse, BulkDocsOptions, bulkDocs, BulkGetOptions, BulkGetResponse, bulkGet, ChangesOptions, ChangesResponse, changes, FindOptions, FindResponse, find, GetOptions, get, InfoResponse, info, put, QueryOptions, QueryResponse, query, SearchOptions, SearchResponse, search, CouchDBModuleOptions, createCouchDbModule, CouchDbContext, createContext, resolveConflicts, createResolver, CouchDbDocument, queries, mutations, base };

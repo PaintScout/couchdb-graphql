@@ -4,7 +4,7 @@ import * as queries from './graphql/queries'
 
 export * from './couchdb'
 
-export * from './CouchDBModule'
+export * from './createCouchDbModule'
 export * from './createContext'
 export * from './util/resolveConflicts'
 export * from './util/createResolver'

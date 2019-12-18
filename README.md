@@ -6,11 +6,11 @@ An Apollo Server for interacting with a CouchDB or Cloudant server
 
 ```js
 import { ApolloServer } from 'apollo-server'
-import { CouchDBModule } from 'couchdb-graphql'
+import { createCouchDbModule } from 'couchdb-graphql'
 import { Request } from 'express'
 
-// Creates a GraphQLModule from graphql-modules
-const { schema, context } = new CouchDBModule({
+// Creates a GraphQLModule from '@graphql-modules/core'
+const { schema, context } = createCouchDbModule({
   // includes extra resolvers for cloudant-specific functionality
   cloudant: true,
 

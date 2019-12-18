@@ -25,12 +25,6 @@ function _extends() {
   return _extends.apply(this, arguments);
 }
 
-function _inheritsLoose(subClass, superClass) {
-  subClass.prototype = Object.create(superClass.prototype);
-  subClass.prototype.constructor = subClass;
-  subClass.__proto__ = superClass;
-}
-
 function _objectWithoutPropertiesLoose(source, excluded) {
   if (source == null) return {};
   var target = {};
@@ -1126,52 +1120,43 @@ var queries = ({
   allDocs: allDocs$1
 });
 
-var CouchDBModule =
-/*#__PURE__*/
-function (_GraphQLModule) {
-  _inheritsLoose(CouchDBModule, _GraphQLModule);
+function createCouchDbModule(_ref, moduleConfig) {
+  var cloudant = _ref.cloudant,
+      options = _objectWithoutPropertiesLoose(_ref, ["cloudant"]);
 
-  function CouchDBModule(_ref, moduleConfig) {
-    var cloudant = _ref.cloudant,
-        options = _objectWithoutPropertiesLoose(_ref, ["cloudant"]);
-
-    // separate cloudant queries from couchdb
-    var couchdbQueries = _objectWithoutPropertiesLoose(queries, ["search"]); // combine typeDefs
+  // separate cloudant queries from couchdb
+  var couchdbQueries = _objectWithoutPropertiesLoose(queries, ["search"]); // combine typeDefs
 
 
-    var typeDefs = [base.typeDefs].concat(Object.keys(cloudant ? queries : couchdbQueries).map(function (key) {
-      return queries[key].typeDefs;
-    }), Object.keys(mutations).map(function (key) {
-      return mutations[key].typeDefs;
-    })); // combine Query resolvers
+  var typeDefs = [base.typeDefs].concat(Object.keys(cloudant ? queries : couchdbQueries).map(function (key) {
+    return queries[key].typeDefs;
+  }), Object.keys(mutations).map(function (key) {
+    return mutations[key].typeDefs;
+  })); // combine Query resolvers
 
-    var queryResolvers = Object.keys(cloudant ? queries : couchdbQueries).reduce(function (resolvers, key) {
-      return _extends({}, resolvers, {}, queries[key].resolvers.Query);
-    }, {}); // combine Mutation resolvers
+  var queryResolvers = Object.keys(cloudant ? queries : couchdbQueries).reduce(function (resolvers, key) {
+    return _extends({}, resolvers, {}, queries[key].resolvers.Query);
+  }, {}); // combine Mutation resolvers
 
-    var mutationResolvers = Object.keys(mutations).reduce(function (resolvers, key) {
-      return _extends({}, resolvers, {}, mutations[key].resolvers.Mutation);
-    }, {}); // pass args into GraphQLModule
+  var mutationResolvers = Object.keys(mutations).reduce(function (resolvers, key) {
+    return _extends({}, resolvers, {}, mutations[key].resolvers.Mutation);
+  }, {});
+  return new core.GraphQLModule(_extends({}, options, {
+    typeDefs: typeDefs,
+    resolvers: {
+      Query: queryResolvers,
+      Mutation: mutationResolvers
+    }
+  }), moduleConfig);
+}
 
-    return _GraphQLModule.call(this, _extends({}, options, {
-      typeDefs: typeDefs,
-      resolvers: {
-        Query: queryResolvers,
-        Mutation: mutationResolvers
-      }
-    }), moduleConfig) || this;
-  }
-
-  return CouchDBModule;
-}(core.GraphQLModule);
-
-exports.CouchDBModule = CouchDBModule;
 exports.allDocs = allDocs;
 exports.base = base;
 exports.bulkDocs = bulkDocs;
 exports.bulkGet = bulkGet;
 exports.changes = changes;
 exports.createContext = createContext;
+exports.createCouchDbModule = createCouchDbModule;
 exports.createResolver = createResolver;
 exports.find = find;
 exports.get = get;

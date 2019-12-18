@@ -1,8 +1,8 @@
 import { ApolloServer, gql } from 'apollo-server'
 import { createContext } from './src/createContext'
-import { CouchDBModule } from './src/CouchDBModule'
+import { createCouchDbModule } from './src/createCouchDbModule'
 
-const { schema, context } = new CouchDBModule({
+const { schema, context } = createCouchDbModule({
   cloudant: true,
   context: ({ req }) => {
     return createContext({
