@@ -1,7 +1,7 @@
 import { GraphQLFieldResolver } from "graphql";
 import { GraphQLModule, GraphQLModuleOptions, Resolvers, ModuleContext } from "@graphql-modules/core";
 interface CouchDbDocument {
-    _id: string;
+    _id?: string;
     _rev?: string;
     [key: string]: any;
 }
