@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-core'
-import { createResolverFunction } from '../../util/createResolverFunction'
+import { createResolver } from '../../util/createResolver'
 import { bulkDocs } from '../../couchdb/bulkDocs'
 
 export const typeDefs = gql`
@@ -22,7 +22,7 @@ export const typeDefs = gql`
 
 export const resolvers = {
   Mutation: {
-    bulkDocs: createResolverFunction(
+    bulkDocs: createResolver(
       (parent, { input, upsert, new_edits = true }, context, info) => {
         return bulkDocs(context, input, { upsert, new_edits })
       }

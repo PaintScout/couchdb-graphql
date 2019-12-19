@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-core'
-import { createResolverFunction } from '../../util/createResolverFunction'
+import { createResolver } from '../../util/createResolver'
 import { query, QueryOptions } from '../../couchdb/query'
 
 export const typeDefs = gql`
@@ -46,10 +46,8 @@ export const typeDefs = gql`
 
 export const resolvers = {
   Query: {
-    query: createResolverFunction<QueryOptions>(
-      async (parent, args, context, info) => {
-        return query(context, args)
-      }
-    ),
+    query: createResolver<QueryOptions>(async (parent, args, context, info) => {
+      return query(context, args)
+    }),
   },
 }

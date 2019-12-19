@@ -1,9 +1,9 @@
-import { ApolloServer } from 'apollo-server'
-import { createSchema } from './src'
+import { ApolloServer, gql } from 'apollo-server'
 import { createContext } from './src/createContext'
+import { createCouchDbModule } from './src/createCouchDbModule'
 
-const server = new ApolloServer({
-  schema: createSchema(),
+const { schema, context } = createCouchDbModule({
+  cloudant: true,
   context: ({ req }) => {
     return createContext({
       dbUrl: process.env.DB_URL,
@@ -17,6 +17,11 @@ const server = new ApolloServer({
       },
     })
   },
+})
+
+const server = new ApolloServer({
+  schema,
+  context,
 })
 
 server.listen().then(({ url }) => {

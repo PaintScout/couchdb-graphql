@@ -1,15 +1,18 @@
-# Cloudant GraphQL Server
+# CouchDB GraphQL Server
 
-proof of concept for a Cloudant GraphQL server
+An Apollo Server for interacting with a CouchDB or Cloudant server
 
 # Usage
 
 ```js
 import { ApolloServer } from 'apollo-server'
-import { createSchema } from 'couchdb-graphql'
+import { createCouchDbModule } from 'couchdb-graphql'
+import { Request } from 'express'
 
-const server = new ApolloServer({
-  schema: createSchema(),
+// Creates a GraphQLModule from '@graphql-modules/core'
+const { schema, context } = createCouchDbModule({
+  // includes extra resolvers for cloudant-specific functionality
+  cloudant: true,
 
   // set dbUrl and dbName in context however you wish
   context: ({ req }) => {
@@ -42,6 +45,11 @@ const server = new ApolloServer({
   },
 })
 
+const server = new ApolloServer({
+  schema,
+  context
+})
+
 server.listen().then(({ url }) => {
   console.log(`🚀  Server ready at ${url}`)
 })
@@ -52,17 +60,7 @@ server.listen().then(({ url }) => {
 - run
 
   ```cli
-  DB_URL=<admin-couchdb-url> yarn dev
+  DB_URL=<couchdb-url> DB_NAME=<db-name>yarn dev
   ```
 
 - open up the GraphiQL editor at http://localhost:4000
-
-- set the `HTTP HEADERS` at the bottom to
-
-  ```json
-  {
-    "db": "your-database-name"
-  }
-  ```
-
-- now you can make requests in the GraphiQL editor

@@ -1,7 +1,7 @@
 import { GraphQLFieldResolver } from "graphql";
-import { GraphQLSchemaModule } from "apollo-server-core";
+import { GraphQLModule, GraphQLModuleOptions, Resolvers, ModuleContext } from "@graphql-modules/core";
 interface CouchDbDocument {
-    _id: string;
+    _id?: string;
     _rev?: string;
     [key: string]: any;
 }
@@ -46,7 +46,7 @@ declare function createContext(args: {
     onConflictsResolved?: CouchDbContext['couchDb']['onConflictsResolved'];
     onDocumentsSaved?: CouchDbContext['couchDb']['onDocumentsSaved'];
 }): CouchDbContext;
-declare function createResolverFunction<T = any>(resolver: GraphQLFieldResolver<any, CouchDbContext, T>): GraphQLFieldResolver<any, CouchDbContext, T>;
+declare function createResolver<T = any>(resolver: GraphQLFieldResolver<any, CouchDbContext, T>): GraphQLFieldResolver<any, CouchDbContext, T>;
 /**
  * Resolves conflicts by calling context.onResolveConflict and saving its result
  */
@@ -420,17 +420,8 @@ declare module search_$0 {
         };
     };
 }
-interface CreateSchemaOptions {
-    /**
-     * Includes schemas for cloudant endpoints
-     *
-     * defaults to true
-     */
+interface CouchDBModuleOptions<Config = any, Session extends object = any, Context = CouchDbContext, SelfResolvers extends Resolvers<any, ModuleContext<Context>> = Resolvers<any, ModuleContext<Context>>> extends GraphQLModuleOptions<Config, Session, Context, SelfResolvers> {
     cloudant?: boolean;
-    schemas?: GraphQLSchemaModule[];
 }
-/**
- * Creates a GraphQL Schema for CouchDB
- */
-declare function createSchema({ schemas, cloudant, }?: CreateSchemaOptions): import("graphql").GraphQLSchema;
-export { put_$0, bulkDocs_$0, get_$0, info_$0, bulkGet_$0, changes_$0, search_$0, find_$0, query_$0, allDocs_$0, AllDocsOptions, AllDocsResponse, allDocs, BulkDocsResponseObject, BulkDocsResponse, BulkDocsOptions, bulkDocs, BulkGetOptions, BulkGetResponse, bulkGet, ChangesOptions, ChangesResponse, changes, FindOptions, FindResponse, find, GetOptions, get, InfoResponse, info, put, QueryOptions, QueryResponse, query, SearchOptions, SearchResponse, search, CreateSchemaOptions, createSchema, CouchDbContext, createContext, resolveConflicts, createResolverFunction, CouchDbDocument, queries, mutations, base };
+declare function createCouchDbModule<Config = any, Session extends object = any, Context = CouchDbContext, SelfResolvers extends Resolvers<any, ModuleContext<Context>> = Resolvers<any, ModuleContext<Context>>>({ cloudant, ...options }: CouchDBModuleOptions<Config, Session, Context, SelfResolvers>, moduleConfig?: Config): GraphQLModule<Config, Session, Context, any>;
+export { put_$0, bulkDocs_$0, get_$0, info_$0, bulkGet_$0, changes_$0, search_$0, find_$0, query_$0, allDocs_$0, AllDocsOptions, AllDocsResponse, allDocs, BulkDocsResponseObject, BulkDocsResponse, BulkDocsOptions, bulkDocs, BulkGetOptions, BulkGetResponse, bulkGet, ChangesOptions, ChangesResponse, changes, FindOptions, FindResponse, find, GetOptions, get, InfoResponse, info, put, QueryOptions, QueryResponse, query, SearchOptions, SearchResponse, search, CouchDBModuleOptions, createCouchDbModule, CouchDbContext, createContext, resolveConflicts, createResolver, CouchDbDocument, queries, mutations, base };

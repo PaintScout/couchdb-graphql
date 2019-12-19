@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server-core';
 import 'isomorphic-fetch';
 import queryString from 'qs';
-import { buildFederatedSchema } from '@apollo/federation';
+import { GraphQLModule } from '@graphql-modules/core';
 
 function _extends() {
   _extends = Object.assign || function (target) {
@@ -46,7 +46,7 @@ function _taggedTemplateLiteralLoose(strings, raw) {
 }
 
 function _templateObject() {
-  var data = _taggedTemplateLiteralLoose(["\n    scalar JSON\n  "]);
+  var data = _taggedTemplateLiteralLoose(["\n    scalar JSON\n\n    type Query\n    type Mutation\n  "]);
 
   _templateObject = function _templateObject() {
     return data;
@@ -70,7 +70,7 @@ function createContext(args) {
   };
 }
 
-function createResolverFunction(resolver) {
+function createResolver(resolver) {
   return resolver;
 }
 
@@ -404,7 +404,7 @@ var resolvers = {
   Mutation: {
     put:
     /*#__PURE__*/
-    createResolverFunction(function (parent, _ref, context, info) {
+    createResolver(function (parent, _ref, context, info) {
       var input = _ref.input,
           upsert = _ref.upsert,
           _ref$new_edits = _ref.new_edits,
@@ -589,7 +589,7 @@ var resolvers$1 = {
   Mutation: {
     bulkDocs:
     /*#__PURE__*/
-    createResolverFunction(function (parent, _ref, context, info) {
+    createResolver(function (parent, _ref, context, info) {
       var input = _ref.input,
           upsert = _ref.upsert,
           _ref$new_edits = _ref.new_edits,
@@ -667,7 +667,7 @@ var resolvers$2 = {
   Query: {
     allDocs:
     /*#__PURE__*/
-    createResolverFunction(function (parent, args, context, info) {
+    createResolver(function (parent, args, context, info) {
       return allDocs(context, args);
     })
   }
@@ -733,7 +733,7 @@ var resolvers$3 = {
   Query: {
     bulkGet:
     /*#__PURE__*/
-    createResolverFunction(function (parent, _ref, context, info) {
+    createResolver(function (parent, _ref, context, info) {
       var docs = _ref.docs,
           revs = _ref.revs;
       return bulkGet(docs, context, {
@@ -796,7 +796,7 @@ var resolvers$4 = {
   Query: {
     changes:
     /*#__PURE__*/
-    createResolverFunction(function (parent, args, context, info) {
+    createResolver(function (parent, args, context, info) {
       return changes(context, args);
     })
   }
@@ -945,7 +945,7 @@ var resolvers$5 = {
   Query: {
     find:
     /*#__PURE__*/
-    createResolverFunction(function (parent, args, context, info) {
+    createResolver(function (parent, args, context, info) {
       return find(context, args);
     })
   }
@@ -979,7 +979,7 @@ var resolvers$6 = {
   Query: {
     get:
     /*#__PURE__*/
-    createResolverFunction(function (parent, _ref, context, info) {
+    createResolver(function (parent, _ref, context, info) {
       var id = _ref.id,
           args = _objectWithoutPropertiesLoose(_ref, ["id"]);
 
@@ -1022,7 +1022,7 @@ var resolvers$7 = {
   Query: {
     info:
     /*#__PURE__*/
-    createResolverFunction(function (parent, args, context) {
+    createResolver(function (parent, args, context) {
       return info(context);
     })
   }
@@ -1052,7 +1052,7 @@ var resolvers$8 = {
   Query: {
     query:
     /*#__PURE__*/
-    createResolverFunction(function (parent, args, context, info) {
+    createResolver(function (parent, args, context, info) {
       try {
         return Promise.resolve(query(context, args));
       } catch (e) {
@@ -1086,7 +1086,7 @@ var resolvers$9 = {
   Query: {
     search:
     /*#__PURE__*/
-    createResolverFunction(function (parent, args, context, info) {
+    createResolver(function (parent, args, context, info) {
       try {
         return Promise.resolve(search(context, args));
       } catch (e) {
@@ -1116,25 +1116,48 @@ var queries = ({
   allDocs: allDocs$1
 });
 
-/**
- * Creates a GraphQL Schema for CouchDB
- */
+function createCouchDbModule(_ref, moduleConfig) {
+  var cloudant = _ref.cloudant,
+      options = _objectWithoutPropertiesLoose(_ref, ["cloudant"]);
 
-function createSchema(_temp) {
-  var _ref = _temp === void 0 ? {} : _temp,
-      _ref$schemas = _ref.schemas,
-      schemas = _ref$schemas === void 0 ? [] : _ref$schemas,
-      _ref$cloudant = _ref.cloudant,
-      cloudant = _ref$cloudant === void 0 ? true : _ref$cloudant;
+  // separate cloudant queries from couchdb
+  var couchdbQueries = _objectWithoutPropertiesLoose(queries, ["search"]); // combine typeDefs
 
-  var couchdbQueries = _objectWithoutPropertiesLoose(queries, ["search"]);
 
-  return buildFederatedSchema([base].concat(Object.keys(cloudant ? queries : couchdbQueries).map(function (key) {
-    return queries[key];
+  var typeDefs = [base.typeDefs].concat(Object.keys(cloudant ? queries : couchdbQueries).map(function (key) {
+    return queries[key].typeDefs;
   }), Object.keys(mutations).map(function (key) {
-    return mutations[key];
-  }), schemas));
+    return mutations[key].typeDefs;
+  }));
+
+  if (options.typeDefs) {
+    if (Array.isArray(options.typeDefs)) {
+      typeDefs.push.apply(typeDefs, options.typeDefs);
+    } else {
+      typeDefs.push(options.typeDefs);
+    }
+  } // combine resolvers
+
+
+  var resolvers = [].concat(Object.keys(cloudant ? queries : couchdbQueries).map(function (key) {
+    return queries[key].resolvers;
+  }), Object.keys(mutations).map(function (key) {
+    return mutations[key].resolvers;
+  }));
+
+  if (options.resolvers) {
+    if (Array.isArray(options.resolvers)) {
+      resolvers.push.apply(resolvers, options.resolvers);
+    } else {
+      resolvers.push(options.resolvers);
+    }
+  }
+
+  return new GraphQLModule(_extends({}, options, {
+    typeDefs: typeDefs,
+    resolvers: resolvers
+  }), moduleConfig);
 }
 
-export { allDocs, base, bulkDocs, bulkGet, changes, createContext, createResolverFunction, createSchema, find, get, info, mutations, put, queries, query, resolveConflicts, search };
+export { allDocs, base, bulkDocs, bulkGet, changes, createContext, createCouchDbModule, createResolver, find, get, info, mutations, put, queries, query, resolveConflicts, search };
 //# sourceMappingURL=couchdb-graphql.esm.js.map
