@@ -49,13 +49,15 @@ export async function put<T extends CouchDbDocument>(
   })
     .then(parseFetchResponse)
     .then(async res => {
-      const [result] = res
+      const result = Array.isArray(res) ? res[0] : res
 
       // resolve conflicts
       if (result && result.id && result.error === 'conflict') {
-        const resolved = await resolveConflicts([doc], context)
+        const [resolved] = await resolveConflicts([doc], context)
 
-        return resolved[0]
+        if (resolved) {
+          return resolved
+        }
       }
 
       return result

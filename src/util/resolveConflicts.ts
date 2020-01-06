@@ -62,7 +62,7 @@ async function getConflictsByDocument(
       result[doc._id] = {
         // the document rejected by the conflict
         document: documents.find(original => original._id === doc._id),
-        // all conflicts in the db including the one with _conflicts
+        // add the stored document in the conflicts array
         conflicts: [doc],
         revToSave: conflictedDoc._rev,
       }
@@ -115,17 +115,15 @@ export async function resolveConflicts(
         context,
       })
 
-      if (!resolvedDocument) {
-        throw new Error('onResolveConflict must return a document')
-      }
-
-      const { _conflicts, ...resolved } = resolvedDocument
-      return {
-        ...resolved,
-        _rev: conflictingDocuments[id].revToSave,
+      if (resolvedDocument) {
+        const { _conflicts, ...resolved } = resolvedDocument
+        return {
+          ...resolved,
+          _rev: conflictingDocuments[id].revToSave,
+        }
       }
     })
-  )
+  ).then(res => res.filter(x => !!x))
 
   const docsToSave = [
     ...resolvedDocs,
@@ -156,15 +154,17 @@ export async function resolveConflicts(
     }),
   }).then(parseFetchResponse)
 
-  if (onConflictsResolved) {
+  const resolvedDocuments = response
+    .filter(result => result.ok)
+    .map(result => ({
+      ...docsToSave.find(doc => doc._id === result.id),
+      _rev: result.rev,
+      _id: result.id,
+    }))
+
+  if (onConflictsResolved && resolvedDocuments.length > 0) {
     onConflictsResolved({
-      documents: response
-        .filter(result => result.ok)
-        .map(result => ({
-          ...docsToSave.find(doc => doc._id === result.id),
-          _rev: result.rev,
-          _id: result.id,
-        })),
+      documents: resolvedDocuments,
       context,
     })
   }

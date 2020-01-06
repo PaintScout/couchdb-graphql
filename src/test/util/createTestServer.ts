@@ -1,12 +1,12 @@
 import { createTestClient } from 'apollo-server-testing'
 import { ApolloServer } from 'apollo-server'
 import { createContext } from '../../createContext'
-import { CouchDBModule } from '../../CouchDBModule'
+import { createCouchDbModule } from '../../createCouchDbModule'
 
 export const dbName = 'test'
 export const dbUrl = 'https://fakeeeeeee.url'
 
-const { schema, context } = new CouchDBModule({
+const { schema, context } = createCouchDbModule({
   cloudant: true,
   context: () => {
     return createContext({
