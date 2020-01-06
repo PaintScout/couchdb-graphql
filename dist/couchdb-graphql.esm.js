@@ -96,16 +96,22 @@ function _catch(body, recover) {
   return result;
 } // Asynchronously await a promise and pass the result to a finally continuation
 
-function parseFetchResponse(response) {
-  if (response.status >= 200 && response.status < 300) {
-    return response.json();
-  } else {
-    var error = new Error(response.statusText); // @ts-ignore
+var parseFetchResponse = function parseFetchResponse(response) {
+  try {
+    if (response.status >= 200 && response.status < 300) {
+      return Promise.resolve(response.json());
+    } else {
+      var error = new Error(response.statusText); // @ts-ignore
 
-    error.response = response;
-    throw error;
+      return Promise.resolve(response.json()).then(function (_response$json) {
+        error.response = _response$json;
+        throw error;
+      });
+    }
+  } catch (e) {
+    return Promise.reject(e);
   }
-}
+};
 
 /**
  * Returns an object where the key is the doc id and the value is the rejected document
