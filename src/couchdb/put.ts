@@ -17,7 +17,7 @@ export async function put<T extends CouchDbDocument>(
 
   const { upsert, new_edits = true } = options
   let url = `${dbUrl}/${dbName}/_bulk_docs`
-  let rev = doc._rev
+  let rev = doc._rev ?? undefined // don't let it be null
 
   // get previous _rev for upsert
   if (upsert) {

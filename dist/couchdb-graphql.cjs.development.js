@@ -280,18 +280,21 @@ function put(context, doc, options) {
     options = {};
   }
 
+  var _a;
+
   return tslib.__awaiter(this, void 0, void 0, function () {
-    var _a, fetch, dbUrl, dbName, onDocumentsSaved, upsert, _b, new_edits, url, rev, _rev, e_1, result, savedDocument;
+    var _b, fetch, dbUrl, dbName, onDocumentsSaved, upsert, _c, new_edits, url, rev, _rev, e_1, result, savedDocument;
 
     var _this = this;
 
-    return tslib.__generator(this, function (_c) {
-      switch (_c.label) {
+    return tslib.__generator(this, function (_d) {
+      switch (_d.label) {
         case 0:
-          _a = context.couchDb, fetch = _a.fetch, dbUrl = _a.dbUrl, dbName = _a.dbName, onDocumentsSaved = _a.onDocumentsSaved;
-          upsert = options.upsert, _b = options.new_edits, new_edits = _b === void 0 ? true : _b;
+          _b = context.couchDb, fetch = _b.fetch, dbUrl = _b.dbUrl, dbName = _b.dbName, onDocumentsSaved = _b.onDocumentsSaved;
+          upsert = options.upsert, _c = options.new_edits, new_edits = _c === void 0 ? true : _c;
           url = dbUrl + "/" + dbName + "/_bulk_docs";
-          rev = doc._rev;
+          rev = (_a = doc._rev, _a !== null && _a !== void 0 ? _a : undefined // don't let it be null
+          );
           if (!upsert) return [3
           /*break*/
           , 4];
@@ -300,24 +303,24 @@ function put(context, doc, options) {
             throw Error('upsert option requires input to contain _id');
           }
 
-          _c.label = 1;
+          _d.label = 1;
 
         case 1:
-          _c.trys.push([1, 3,, 4]);
+          _d.trys.push([1, 3,, 4]);
 
           return [4
           /*yield*/
           , fetch(dbUrl + "/" + dbName + "/" + encodeURIComponent(doc._id)).then(parseFetchResponse)];
 
         case 2:
-          _rev = _c.sent()._rev;
+          _rev = _d.sent()._rev;
           rev = _rev;
           return [3
           /*break*/
           , 4];
 
         case 3:
-          e_1 = _c.sent();
+          e_1 = _d.sent();
 
           if (!e_1.response || e_1.response.status !== 404) {
             throw e_1;
@@ -376,7 +379,7 @@ function put(context, doc, options) {
           })];
 
         case 5:
-          result = _c.sent();
+          result = _d.sent();
 
           if (result && result.error) {
             throw new Error(result.reason);
@@ -516,8 +519,11 @@ function bulkDocs(context, docs, options) {
             },
             body: JSON.stringify({
               docs: docs.map(function (doc) {
+                var _a;
+
                 return tslib.__assign(tslib.__assign({}, doc), {
-                  _rev: upsert && doc._id ? previousRevs[doc._id] : doc._rev
+                  _rev: (_a = // fallback to undefined if it is null
+                  upsert && doc._id ? previousRevs[doc._id] : doc._rev, _a !== null && _a !== void 0 ? _a : undefined)
                 });
               }),
               new_edits: new_edits
