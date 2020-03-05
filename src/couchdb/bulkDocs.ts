@@ -54,12 +54,20 @@ export async function bulkDocs<T extends CouchDbDocument>(
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      docs: docs.map(doc => ({
-        ...doc,
-        _rev:
-          // fallback to undefined if it is null
-          (upsert && doc._id ? previousRevs[doc._id] : doc._rev) ?? undefined,
-      })),
+      docs: docs.map(doc => {
+        const docToSave = {
+          ...doc,
+          _rev:
+            // fallback to undefined if it is null
+            (upsert && doc._id ? previousRevs[doc._id] : doc._rev) ?? undefined,
+        }
+
+        if (docToSave._deleted === null) {
+          delete docToSave._deleted
+        }
+
+        return docToSave
+      }),
       new_edits,
     }),
   })

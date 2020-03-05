@@ -351,4 +351,44 @@ describe('bulkDocs', () => {
       context: { couchDb: { ...context.couchDb, onDocumentsSaved } },
     })
   })
+
+  it('should remove null _deleted from docs', async () => {
+    fetchMock.post(
+      `${context.couchDb.dbUrl}/${context.couchDb.dbName}/_bulk_docs`,
+      {
+        status: 200,
+        body: JSON.stringify([
+          {
+            id: '1',
+            blah: 'blah',
+          },
+        ]),
+      }
+    )
+
+    const result = await bulkDocs(context, [
+      {
+        _id: '1',
+        blah: 'blah',
+        _deleted: null,
+      },
+    ])
+
+    const fetchCall = fetchMock.calls(/_bulk_docs/)[0][1]
+
+    expect(fetchCall).toEqual({
+      headers: expect.anything(),
+      method: 'POST',
+
+      body: JSON.stringify({
+        docs: [
+          {
+            _id: '1',
+            blah: 'blah',
+          },
+        ],
+        new_edits: true,
+      }),
+    })
+  })
 })

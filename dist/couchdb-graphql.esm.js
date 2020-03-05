@@ -288,7 +288,12 @@ function put(context, doc, options) {
           upsert = options.upsert, _c = options.new_edits, new_edits = _c === void 0 ? true : _c;
           url = dbUrl + "/" + dbName + "/_bulk_docs";
           rev = (_a = doc._rev, _a !== null && _a !== void 0 ? _a : undefined // don't let it be null
-          );
+          ); // couchdb errors if _deleted is null
+
+          if (doc._deleted === null) {
+            delete doc._deleted;
+          }
+
           if (!upsert) return [3
           /*break*/
           , 4];
@@ -515,10 +520,16 @@ function bulkDocs(context, docs, options) {
               docs: docs.map(function (doc) {
                 var _a;
 
-                return __assign(__assign({}, doc), {
+                var docToSave = __assign(__assign({}, doc), {
                   _rev: (_a = // fallback to undefined if it is null
                   upsert && doc._id ? previousRevs[doc._id] : doc._rev, _a !== null && _a !== void 0 ? _a : undefined)
                 });
+
+                if (docToSave._deleted === null) {
+                  delete docToSave._deleted;
+                }
+
+                return docToSave;
               }),
               new_edits: new_edits
             })

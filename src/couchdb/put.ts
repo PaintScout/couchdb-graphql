@@ -19,6 +19,11 @@ export async function put<T extends CouchDbDocument>(
   let url = `${dbUrl}/${dbName}/_bulk_docs`
   let rev = doc._rev ?? undefined // don't let it be null
 
+  // couchdb errors if _deleted is null
+  if (doc._deleted === null) {
+    delete doc._deleted
+  }
+
   // get previous _rev for upsert
   if (upsert) {
     if (!doc._id) {
