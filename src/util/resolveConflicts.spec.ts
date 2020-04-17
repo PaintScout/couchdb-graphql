@@ -61,7 +61,7 @@ describe('resolveConflicts', () => {
       })
       .post(`${dbUrl}/${dbName}/_bulk_docs`, {
         status: 200,
-        body: JSON.stringify('good'),
+        body: JSON.stringify([]),
       })
 
     const onResolveConflict = jest.fn(() => savingDocument as any)
@@ -199,7 +199,7 @@ describe('resolveConflicts', () => {
       })
       .post(`${dbUrl}/${dbName}/_bulk_docs`, {
         status: 200,
-        body: JSON.stringify('good'),
+        body: JSON.stringify([]),
       })
 
     const result = await resolveConflicts(
@@ -222,7 +222,7 @@ describe('resolveConflicts', () => {
       method: 'POST',
       body: JSON.stringify({ docs: [resolvedDocument] }),
     })
-    expect(result).toEqual('good')
+    expect(result).toEqual([])
   })
 
   it('should resolve a conflict for a document with _conflicts', async () => {
@@ -276,7 +276,7 @@ describe('resolveConflicts', () => {
       })
       .post(`${dbUrl}/${dbName}/_bulk_docs`, {
         status: 200,
-        body: JSON.stringify('good'),
+        body: JSON.stringify([]),
       })
 
     const result = await resolveConflicts(
@@ -308,6 +308,6 @@ describe('resolveConflicts', () => {
         ],
       }),
     })
-    expect(result).toEqual('good')
+    expect(result).toEqual([])
   })
 })
