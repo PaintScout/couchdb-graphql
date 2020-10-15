@@ -31,7 +31,7 @@ export declare function createContext(args: {
     /**
      * The fetch function used by the requests made to the couchdb server
      *
-     * default is node-fetch
+     * default is isomorphic-fetch
      */
     fetch?: CouchDbContext['couchDb']['fetch'];
     onResolveConflict?: CouchDbContext['couchDb']['onResolveConflict'];

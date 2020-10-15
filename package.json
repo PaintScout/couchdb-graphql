@@ -1,6 +1,6 @@
 {
   "name": "couchdb-graphql",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "private": true,
   "main": "dist/index.js",
   "module": "dist/couchdb-graphql.esm.js",
@@ -9,14 +9,13 @@
     "dist"
   ],
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpileOnly dev.ts",
     "build": "tsdx build",
     "test": "tsdx test",
     "test:watch": "tsdx test --watchAll",
     "lint": "tsdx lint src"
   },
   "peerDependencies": {
-    "graphql": "^15.0.0"
+    "graphql": "^14.0.0 || ^15.0.0"
   },
   "husky": {
     "hooks": {
@@ -35,26 +34,23 @@
     "@types/node": "^12.11.7",
     "@types/qs": "^6.5.3",
     "@types/query-string": "^6.3.0",
-    "apollo-server-integration-testing": "^2.2.0",
-    "apollo-server-testing": "^2.9.7",
+    "@types/isomorphic-fetch": "^0.0.35",
+    "apollo-server-testing": "^2.18.2",
     "express": "^4.17.1",
-    "fetch-mock": "^8.0.0",
+    "fetch-mock": "^9.0.0",
     "graphql": "^15.0.0",
     "husky": "^3.0.9",
-    "ts-node": "^8.4.1",
-    "ts-node-dev": "^1.0.0-pre.43",
-    "tsdx": "^0.12.1",
+    "tsdx": "^0.14.1",
     "typescript": "^3.7.4"
   },
   "dependencies": {
-    "@apollo/federation": "^0.10.2",
-    "@apollographql/apollo-tools": "^0.4.0",
-    "@graphql-modules/core": "^0.7.15",
-    "@types/isomorphic-fetch": "^0.0.35",
-    "apollo-server": "^2.9.7",
-    "isomorphic-fetch": "^2.2.1",
+    "@apollo/federation": "^0.20.4",
+    "@apollographql/apollo-tools": "^0.4.8",
+    "@graphql-modules/core": "^0.7.17",
+    "apollo-server": "^2.18.2",
     "pouchdb-md5": "^7.1.1",
     "qs": "^6.9.0",
-    "tslib": "^1.10.0"
+    "tslib": "^1.10.0",
+    "isomorphic-fetch": "^2.2.1"
   }
 }

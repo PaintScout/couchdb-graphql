@@ -1,12 +1,12 @@
-import { ApolloServer, gql } from 'apollo-server'
-import { createContext } from './src/createContext'
-import { createCouchDbModule } from './src/createCouchDbModule'
+import { ApolloServer } from 'apollo-server'
+import { createCouchDbModule, createContext } from 'couchdb-graphql'
 
 const { schema, context } = createCouchDbModule({
   cloudant: true,
   context: ({ req }) => {
     return createContext({
-      dbUrl: process.env.DB_URL,
+      dbUrl: process.env.DB_URL as string,
+      // go to http://localhost:4000 and set the header to the db name you want to query against
       dbName: req.headers.db as string,
       onResolveConflict({ document, conflicts, context }) {
         return document
