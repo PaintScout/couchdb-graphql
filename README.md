@@ -8,10 +8,6 @@ Currently the package is only available through this GitHub repo
 
 `npm install couchdb-graphql@PaintScout/couchdb-graphql`
 
-If you need to use graphql v14, you can install v1.4.4
-
-`npm install couchdb-graphql@PaintScout/couchdb-graphql#1.4.4`
-
 # Usage
 
 ```js
