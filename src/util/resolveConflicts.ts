@@ -123,7 +123,7 @@ export async function resolveConflicts(
         }
       }
     })
-  ).then(res => res.filter(x => !!x))
+  ).then(res => res.filter(Boolean))
 
   const docsToSave = [
     ...resolvedDocs,
@@ -168,5 +168,10 @@ export async function resolveConflicts(
       context,
     })
   }
-  return response
+
+  return response.map((doc, index) => ({
+    ...resolvedDocs[index],
+    _id: doc.id,
+    _rev: doc.rev,
+  }))
 }
