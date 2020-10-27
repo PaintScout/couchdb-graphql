@@ -1085,9 +1085,7 @@ function _resolveConflicts() {
                 return _ref.apply(this, arguments);
               };
             }())).then(function (res) {
-              return res.filter(function (x) {
-                return !!x;
-              });
+              return res.filter(Boolean);
             });
 
           case 8:
@@ -1132,7 +1130,12 @@ function _resolveConflicts() {
               });
             }
 
-            return _context3.abrupt("return", response);
+            return _context3.abrupt("return", response.map(function (doc, index) {
+              return _extends({}, resolvedDocs[index], {
+                _id: doc.id,
+                _rev: doc.rev
+              });
+            }));
 
           case 16:
           case "end":
@@ -1154,7 +1157,7 @@ function _put() {
   runtime_1.mark(function _callee2(context, doc, options) {
     var _doc$_rev;
 
-    var _context$couchDb, fetch, dbUrl, dbName, onDocumentsSaved, _options, upsert, _options$new_edits, new_edits, url, rev, _ref, _rev, result, savedDocument;
+    var _context$couchDb, fetch, dbUrl, dbName, onDocumentsSaved, _options, upsert, _options$new_edits, new_edits, url, rev, _ref, _rev, result;
 
     return runtime_1.wrap(function _callee2$(_context2) {
       while (1) {
@@ -1257,7 +1260,10 @@ function _put() {
                         return _context.abrupt("return", resolved);
 
                       case 8:
-                        return _context.abrupt("return", result);
+                        return _context.abrupt("return", _extends({}, doc, {
+                          _id: result.id,
+                          _rev: result.rev
+                        }));
 
                       case 9:
                       case "end":
@@ -1284,28 +1290,23 @@ function _put() {
 
           case 26:
             if (!result) {
-              _context2.next = 32;
+              _context2.next = 31;
               break;
             }
 
-            savedDocument = _extends({}, doc, {
-              _id: result.id,
-              _rev: result.rev
-            });
-
             if (onDocumentsSaved) {
               onDocumentsSaved({
-                documents: [savedDocument],
+                documents: [result],
                 context: context
               });
             }
 
-            return _context2.abrupt("return", savedDocument);
+            return _context2.abrupt("return", result);
 
-          case 32:
+          case 31:
             return _context2.abrupt("return", null);
 
-          case 33:
+          case 32:
           case "end":
             return _context2.stop();
         }

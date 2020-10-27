@@ -65,7 +65,7 @@ export async function put<T extends CouchDbDocument>(
         }
       }
 
-      return result
+      return { ...doc, _id: result.id, _rev: result.rev }
     })
 
   if (result && result.error) {
@@ -73,17 +73,11 @@ export async function put<T extends CouchDbDocument>(
   }
 
   if (result) {
-    const savedDocument = {
-      ...doc,
-      _id: result.id,
-      _rev: result.rev,
-    }
-
     if (onDocumentsSaved) {
-      onDocumentsSaved({ documents: [savedDocument], context })
+      onDocumentsSaved({ documents: [result], context })
     }
 
-    return savedDocument
+    return result
   } else {
     // new_edits=false returns empty response
     return null

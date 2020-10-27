@@ -102,9 +102,9 @@ describe('put', () => {
 
     asJestMock(resolveConflicts).mockResolvedValue([
       {
-        id: '1',
-        rev: '3',
-        ok: true,
+        _id: '1',
+        _rev: '3',
+        blah: 'blah',
       },
     ])
 
