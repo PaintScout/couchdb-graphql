@@ -8,3 +8,4 @@ export * from './info';
 export * from './put';
 export * from './query';
 export * from './search';
+export * from './createDb';

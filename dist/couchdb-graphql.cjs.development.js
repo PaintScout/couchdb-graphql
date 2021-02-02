@@ -2079,6 +2079,41 @@ function _search() {
   return _search.apply(this, arguments);
 }
 
+function createDb(_x) {
+  return _createDb.apply(this, arguments);
+}
+
+function _createDb() {
+  _createDb = _asyncToGenerator(
+  /*#__PURE__*/
+  runtime_1.mark(function _callee(context) {
+    var _context$couchDb, fetch, dbUrl, dbName, url, response;
+
+    return runtime_1.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            _context$couchDb = context.couchDb, fetch = _context$couchDb.fetch, dbUrl = _context$couchDb.dbUrl, dbName = _context$couchDb.dbName;
+            url = dbUrl + "/" + dbName;
+            _context.next = 4;
+            return fetch(url, {
+              method: 'PUT'
+            }).then(parseFetchResponse);
+
+          case 4:
+            response = _context.sent;
+            return _context.abrupt("return", response);
+
+          case 6:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, _callee);
+  }));
+  return _createDb.apply(this, arguments);
+}
+
 function _templateObject$6() {
   var data = _taggedTemplateLiteralLoose(["\n  type FindResponse {\n    execution_stats: JSON\n    bookmark: String\n    warning: String\n    docs: [JSON!]\n  }\n\n  extend type Query {\n    find(\n      selector: JSON!\n      limit: Int\n      skip: Int\n      sort: Int\n      fields: [String!]\n      use_index: [String!]\n      r: Int\n      bookmark: String\n      update: Boolean\n      stable: Boolean\n      stale: String\n      execution_stats: Boolean\n    ): FindResponse\n  }\n"]);
 
@@ -2387,6 +2422,7 @@ exports.bulkGet = bulkGet;
 exports.changes = changes;
 exports.createContext = createContext;
 exports.createCouchDbModule = createCouchDbModule;
+exports.createDb = createDb;
 exports.createResolver = createResolver;
 exports.find = find;
 exports.get = get;
