@@ -1157,7 +1157,7 @@ function _put() {
   runtime_1.mark(function _callee2(context, doc, options) {
     var _doc$_rev;
 
-    var _context$couchDb, fetch, dbUrl, dbName, onDocumentsSaved, _options, upsert, _options$new_edits, new_edits, url, rev, _ref, _rev, result;
+    var _context$couchDb, fetch, dbUrl, dbName, onDocumentsSaved, _options, upsert, _options$new_edits, new_edits, url, rev, _ref, _rev, result, err;
 
     return runtime_1.wrap(function _callee2$(_context2) {
       while (1) {
@@ -1179,7 +1179,7 @@ function _put() {
 
 
             if (!upsert) {
-              _context2.next = 21;
+              _context2.next = 22;
               break;
             }
 
@@ -1199,22 +1199,23 @@ function _put() {
             _ref = _context2.sent;
             _rev = _ref._rev;
             rev = _rev;
-            _context2.next = 21;
+            _context2.next = 22;
             break;
 
           case 17:
             _context2.prev = 17;
             _context2.t0 = _context2["catch"](9);
+            _context2.t0._id = doc._id;
 
             if (!(!_context2.t0.response || _context2.t0.response.status !== 404)) {
-              _context2.next = 21;
+              _context2.next = 22;
               break;
             }
 
             throw _context2.t0;
 
-          case 21:
-            _context2.next = 23;
+          case 22:
+            _context2.next = 24;
             return fetch(url, {
               method: 'POST',
               headers: {
@@ -1278,19 +1279,22 @@ function _put() {
               };
             }());
 
-          case 23:
+          case 24:
             result = _context2.sent;
 
             if (!(result && result.error)) {
-              _context2.next = 26;
+              _context2.next = 29;
               break;
             }
 
-            throw new Error(result.reason);
+            err = new Error(result.reason); // @ts-ignore
 
-          case 26:
+            err._id = doc._id;
+            throw err;
+
+          case 29:
             if (!result) {
-              _context2.next = 31;
+              _context2.next = 34;
               break;
             }
 
@@ -1303,10 +1307,10 @@ function _put() {
 
             return _context2.abrupt("return", result);
 
-          case 31:
+          case 34:
             return _context2.abrupt("return", null);
 
-          case 32:
+          case 35:
           case "end":
             return _context2.stop();
         }
@@ -1922,20 +1926,32 @@ function _get() {
 
             _context$couchDb = context.couchDb, fetch = _context$couchDb.fetch, dbUrl = _context$couchDb.dbUrl, dbName = _context$couchDb.dbName;
             hasArgs = Object.keys(options).length > 0;
+
+            if (id) {
+              _context.next = 5;
+              break;
+            }
+
+            throw new Error('id is undefined');
+
+          case 5:
             url = dbUrl + "/" + dbName + "/" + encodeURIComponent(id);
 
             if (hasArgs) {
               url += "?" + queryString.stringify(options);
             }
 
-            _context.next = 7;
-            return fetch(url).then(parseFetchResponse);
+            _context.next = 9;
+            return fetch(url).then(parseFetchResponse)["catch"](function (err) {
+              err._id = id;
+              throw err;
+            });
 
-          case 7:
+          case 9:
             response = _context.sent;
             return _context.abrupt("return", response);
 
-          case 9:
+          case 11:
           case "end":
             return _context.stop();
         }

@@ -20,13 +20,24 @@ export async function get<T extends CouchDbDocument>(
 ): Promise<T> {
   const { fetch, dbUrl, dbName } = context.couchDb
   const hasArgs = Object.keys(options).length > 0
+
+  if (!id) {
+    throw new Error('id is undefined')
+  }
+
   let url = `${dbUrl}/${dbName}/${encodeURIComponent(id)}`
 
   if (hasArgs) {
     url += `?${queryString.stringify(options)}`
   }
 
-  const response = await fetch(url).then(parseFetchResponse)
+  const response = await fetch(url)
+    .then(parseFetchResponse)
+    .catch((err) => {
+      err._id = id
+
+      throw err
+    })
 
   return response
 }

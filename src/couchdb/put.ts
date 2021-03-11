@@ -36,6 +36,7 @@ export async function put<T extends CouchDbDocument>(
       ).then(parseFetchResponse)
       rev = _rev
     } catch (e) {
+      e._id = doc._id
       if (!e.response || e.response.status !== 404) {
         throw e
       }
@@ -53,7 +54,7 @@ export async function put<T extends CouchDbDocument>(
     }),
   })
     .then(parseFetchResponse)
-    .then(async res => {
+    .then(async (res) => {
       const result = Array.isArray(res) ? res[0] : res
 
       // resolve conflicts
@@ -69,7 +70,11 @@ export async function put<T extends CouchDbDocument>(
     })
 
   if (result && result.error) {
-    throw new Error(result.reason)
+    const err = new Error(result.reason)
+    // @ts-ignore
+    err._id = doc._id
+
+    throw err
   }
 
   if (result) {
