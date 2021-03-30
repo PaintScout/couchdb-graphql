@@ -44,6 +44,7 @@ export async function bulkGet<T extends CouchDbDocument>(
     .then(parseFetchResponse)
     .catch(err => {
       err.stack = new Error().stack
+      err.body = JSON.stringify({ docs, revs })
 
       throw err
     })

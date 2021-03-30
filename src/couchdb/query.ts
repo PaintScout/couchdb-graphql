@@ -66,7 +66,7 @@ export async function query<T = any>(
     .then(parseFetchResponse)
     .catch(err => {
       err.stack = new Error().stack
-
+      err.body = fetchOptions.body
       throw err
     })
 

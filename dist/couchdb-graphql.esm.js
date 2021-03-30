@@ -1279,6 +1279,7 @@ function _put() {
               };
             }())["catch"](function (err) {
               err.stack = new Error().stack;
+              err._id = doc._id;
               throw err;
             });
 
@@ -1534,6 +1535,9 @@ function _bulkDocs() {
               };
             }())["catch"](function (err) {
               err.stack = new Error().stack;
+              err.ids = docs.map(function (d) {
+                return d._id;
+              });
               throw err;
             });
 
@@ -1662,6 +1666,12 @@ function _allDocs() {
               })
             }).then(parseFetchResponse)["catch"](function (err) {
               err.stack = new Error().stack;
+              err.body = JSON.stringify({
+                keys: keys,
+                key: key,
+                endkey: endkey,
+                startkey: startkey
+              });
               throw err;
             });
 
@@ -1745,6 +1755,10 @@ function _bulkGet() {
               })
             }).then(parseFetchResponse)["catch"](function (err) {
               err.stack = new Error().stack;
+              err.body = JSON.stringify({
+                docs: docs,
+                revs: revs
+              });
               throw err;
             });
 
@@ -1907,6 +1921,7 @@ function _find() {
               body: JSON.stringify(options)
             }).then(parseFetchResponse)["catch"](function (err) {
               err.stack = new Error().stack;
+              err.body = JSON.stringify(options);
               throw err;
             });
 
@@ -2057,6 +2072,7 @@ function _query() {
             _context.next = 10;
             return fetch(url, fetchOptions).then(parseFetchResponse)["catch"](function (err) {
               err.stack = new Error().stack;
+              err.body = fetchOptions.body;
               throw err;
             });
 
@@ -2100,6 +2116,7 @@ function _search() {
               body: JSON.stringify(options)
             }).then(parseFetchResponse)["catch"](function (err) {
               err.stack = new Error().stack;
+              err.body = JSON.stringify(options);
               throw err;
             });
 

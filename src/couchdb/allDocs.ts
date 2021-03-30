@@ -54,7 +54,12 @@ export async function allDocs<T = any>(
     .then(parseFetchResponse)
     .catch(err => {
       err.stack = new Error().stack
-
+      err.body = JSON.stringify({
+        keys,
+        key,
+        endkey,
+        startkey,
+      })
       throw err
     })
 

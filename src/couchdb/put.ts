@@ -70,6 +70,7 @@ export async function put<T extends CouchDbDocument>(
     })
     .catch(err => {
       err.stack = new Error().stack
+      err._id = doc._id
 
       throw err
     })
