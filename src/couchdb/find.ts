@@ -36,7 +36,13 @@ export async function find<T = any>(
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(options),
-  }).then(parseFetchResponse)
+  })
+    .then(parseFetchResponse)
+    .catch(err => {
+      err.stack = new Error().stack
+
+      throw err
+    })
 
   return response
 }

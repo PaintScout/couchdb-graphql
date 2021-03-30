@@ -53,7 +53,13 @@ export async function changes(
     url += `?${queryString.stringify(options)}`
   }
 
-  const response = await fetch(url).then(parseFetchResponse)
+  const response = await fetch(url)
+    .then(parseFetchResponse)
+    .catch(err => {
+      err.stack = new Error().stack
+
+      throw err
+    })
 
   return response
 }

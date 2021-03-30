@@ -33,8 +33,9 @@ export async function get<T extends CouchDbDocument>(
 
   const response = await fetch(url)
     .then(parseFetchResponse)
-    .catch((err) => {
+    .catch(err => {
       err._id = id
+      err.stack = new Error().stack
 
       throw err
     })

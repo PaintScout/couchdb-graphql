@@ -50,7 +50,13 @@ export async function allDocs<T = any>(
       endkey,
       startkey,
     }),
-  }).then(parseFetchResponse)
+  })
+    .then(parseFetchResponse)
+    .catch(err => {
+      err.stack = new Error().stack
+
+      throw err
+    })
 
   return response
 }

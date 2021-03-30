@@ -32,7 +32,13 @@ export async function info(context: CouchDbContext): Promise<InfoResponse> {
   const { fetch, dbUrl, dbName } = context.couchDb
   let url = `${dbUrl}/${dbName}`
 
-  const response = await fetch(url).then(parseFetchResponse)
+  const response = await fetch(url)
+    .then(parseFetchResponse)
+    .catch(err => {
+      err.stack = new Error().stack
+
+      throw err
+    })
 
   return response
 }

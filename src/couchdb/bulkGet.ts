@@ -40,7 +40,13 @@ export async function bulkGet<T extends CouchDbDocument>(
       docs,
       revs,
     }),
-  }).then(parseFetchResponse)
+  })
+    .then(parseFetchResponse)
+    .catch(err => {
+      err.stack = new Error().stack
+
+      throw err
+    })
 
   return response
 }

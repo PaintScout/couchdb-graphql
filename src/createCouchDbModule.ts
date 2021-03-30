@@ -43,9 +43,9 @@ export function createCouchDbModule<
   const typeDefs = [
     base.typeDefs,
     ...Object.keys(cloudant ? queries : couchdbQueries).map(
-      (key) => queries[key].typeDefs
+      key => queries[key].typeDefs
     ),
-    ...Object.keys(mutations).map((key) => mutations[key].typeDefs),
+    ...Object.keys(mutations).map(key => mutations[key].typeDefs),
   ]
 
   if (options.typeDefs) {
@@ -59,9 +59,9 @@ export function createCouchDbModule<
   // combine resolvers
   const resolvers = [
     ...Object.keys(cloudant ? queries : couchdbQueries).map(
-      (key) => queries[key].resolvers
+      key => queries[key].resolvers
     ),
-    ...Object.keys(mutations).map((key) => mutations[key].resolvers),
+    ...Object.keys(mutations).map(key => mutations[key].resolvers),
   ]
 
   if (options.resolvers) {

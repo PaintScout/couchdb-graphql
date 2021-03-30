@@ -62,7 +62,13 @@ export async function query<T = any>(
     }
   }
 
-  const response = await fetch(url, fetchOptions).then(parseFetchResponse)
+  const response = await fetch(url, fetchOptions)
+    .then(parseFetchResponse)
+    .catch(err => {
+      err.stack = new Error().stack
+
+      throw err
+    })
 
   return response
 }

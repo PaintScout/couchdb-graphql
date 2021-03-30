@@ -8,7 +8,13 @@ export async function createDb<T extends CouchDbDocument>(
   const { fetch, dbUrl, dbName } = context.couchDb
   let url = `${dbUrl}/${dbName}`
 
-  const response = await fetch(url, { method: 'PUT' }).then(parseFetchResponse)
+  const response = await fetch(url, { method: 'PUT' })
+    .then(parseFetchResponse)
+    .catch(err => {
+      err.stack = new Error().stack
+
+      throw err
+    })
 
   return response
 }

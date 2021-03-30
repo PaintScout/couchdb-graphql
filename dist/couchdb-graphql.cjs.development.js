@@ -1283,7 +1283,10 @@ function _put() {
               return function (_x4) {
                 return _ref2.apply(this, arguments);
               };
-            }());
+            }())["catch"](function (err) {
+              err.stack = new Error().stack;
+              throw err;
+            });
 
           case 24:
             result = _context2.sent;
@@ -1535,7 +1538,10 @@ function _bulkDocs() {
               return function (_x4) {
                 return _ref3.apply(this, arguments);
               };
-            }());
+            }())["catch"](function (err) {
+              err.stack = new Error().stack;
+              throw err;
+            });
 
           case 14:
             saveResults = _context2.sent;
@@ -1660,7 +1666,10 @@ function _allDocs() {
                 endkey: endkey,
                 startkey: startkey
               })
-            }).then(parseFetchResponse);
+            }).then(parseFetchResponse)["catch"](function (err) {
+              err.stack = new Error().stack;
+              throw err;
+            });
 
           case 6:
             response = _context.sent;
@@ -1740,7 +1749,10 @@ function _bulkGet() {
                 docs: docs,
                 revs: revs
               })
-            }).then(parseFetchResponse);
+            }).then(parseFetchResponse)["catch"](function (err) {
+              err.stack = new Error().stack;
+              throw err;
+            });
 
           case 6:
             response = _context.sent;
@@ -1827,7 +1839,10 @@ function _changes() {
             }
 
             _context.next = 6;
-            return fetch(url).then(parseFetchResponse);
+            return fetch(url).then(parseFetchResponse)["catch"](function (err) {
+              err.stack = new Error().stack;
+              throw err;
+            });
 
           case 6:
             response = _context.sent;
@@ -1896,7 +1911,10 @@ function _find() {
                 'Content-Type': 'application/json'
               },
               body: JSON.stringify(options)
-            }).then(parseFetchResponse);
+            }).then(parseFetchResponse)["catch"](function (err) {
+              err.stack = new Error().stack;
+              throw err;
+            });
 
           case 4:
             response = _context.sent;
@@ -1950,6 +1968,7 @@ function _get() {
             _context.next = 9;
             return fetch(url).then(parseFetchResponse)["catch"](function (err) {
               err._id = id;
+              err.stack = new Error().stack;
               throw err;
             });
 
@@ -1984,7 +2003,10 @@ function _info() {
             _context$couchDb = context.couchDb, fetch = _context$couchDb.fetch, dbUrl = _context$couchDb.dbUrl, dbName = _context$couchDb.dbName;
             url = dbUrl + "/" + dbName;
             _context.next = 4;
-            return fetch(url).then(parseFetchResponse);
+            return fetch(url).then(parseFetchResponse)["catch"](function (err) {
+              err.stack = new Error().stack;
+              throw err;
+            });
 
           case 4:
             response = _context.sent;
@@ -2039,7 +2061,10 @@ function _query() {
             }
 
             _context.next = 10;
-            return fetch(url, fetchOptions).then(parseFetchResponse);
+            return fetch(url, fetchOptions).then(parseFetchResponse)["catch"](function (err) {
+              err.stack = new Error().stack;
+              throw err;
+            });
 
           case 10:
             response = _context.sent;
@@ -2079,7 +2104,10 @@ function _search() {
                 'Content-Type': 'application/json'
               },
               body: JSON.stringify(options)
-            }).then(parseFetchResponse);
+            }).then(parseFetchResponse)["catch"](function (err) {
+              err.stack = new Error().stack;
+              throw err;
+            });
 
           case 5:
             response = _context.sent;
@@ -2114,7 +2142,10 @@ function _createDb() {
             _context.next = 4;
             return fetch(url, {
               method: 'PUT'
-            }).then(parseFetchResponse);
+            }).then(parseFetchResponse)["catch"](function (err) {
+              err.stack = new Error().stack;
+              throw err;
+            });
 
           case 4:
             response = _context.sent;

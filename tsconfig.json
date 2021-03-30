@@ -1,7 +1,7 @@
 {
-  "exckude": ["src", "types"],
+  "include": ["src", "types"],
   "compilerOptions": {
-    "target": "es5",
+    "target": "es2017",
     "module": "esnext",
     "lib": ["dom", "esnext"],
     "importHelpers": true,
@@ -15,6 +15,7 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "moduleResolution": "node",
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "rootDir": "./src"
   }
 }
