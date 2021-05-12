@@ -1267,10 +1267,7 @@ function _put() {
                         return _context.abrupt("return", resolved);
 
                       case 8:
-                        return _context.abrupt("return", _extends({}, doc, {
-                          _id: result.id,
-                          _rev: result.rev
-                        }));
+                        throw new Error('blasdkjhf');
 
                       case 9:
                       case "end":
@@ -1284,7 +1281,7 @@ function _put() {
                 return _ref2.apply(this, arguments);
               };
             }())["catch"](function (err) {
-              err.stack = new Error().stack;
+              err.stack = new Error(err.message).stack;
               err._id = doc._id;
               throw err;
             });
@@ -1540,7 +1537,7 @@ function _bulkDocs() {
                 return _ref3.apply(this, arguments);
               };
             }())["catch"](function (err) {
-              err.stack = new Error().stack;
+              err.stack = new Error(err.message).stack;
               err.ids = docs.map(function (d) {
                 return d._id;
               });
@@ -1671,7 +1668,7 @@ function _allDocs() {
                 startkey: startkey
               })
             }).then(parseFetchResponse)["catch"](function (err) {
-              err.stack = new Error().stack;
+              err.stack = new Error(err.message).stack;
               err.body = JSON.stringify({
                 keys: keys,
                 key: key,
@@ -1760,7 +1757,7 @@ function _bulkGet() {
                 revs: revs
               })
             }).then(parseFetchResponse)["catch"](function (err) {
-              err.stack = new Error().stack;
+              err.stack = new Error(err.messae).stack;
               err.body = JSON.stringify({
                 docs: docs,
                 revs: revs
@@ -1854,7 +1851,7 @@ function _changes() {
 
             _context.next = 6;
             return fetch(url).then(parseFetchResponse)["catch"](function (err) {
-              err.stack = new Error().stack;
+              err.stack = new Error(err.message).stack;
               throw err;
             });
 
@@ -1926,7 +1923,7 @@ function _find() {
               },
               body: JSON.stringify(options)
             }).then(parseFetchResponse)["catch"](function (err) {
-              err.stack = new Error().stack;
+              err.stack = new Error(err.message).stack;
               err.body = JSON.stringify(options);
               throw err;
             });
@@ -1983,7 +1980,7 @@ function _get() {
             _context.next = 9;
             return fetch(url).then(parseFetchResponse)["catch"](function (err) {
               err._id = id;
-              err.stack = new Error().stack;
+              err.stack = new Error(err.message).stack;
               throw err;
             });
 
@@ -2019,7 +2016,7 @@ function _info() {
             url = dbUrl + "/" + dbName;
             _context.next = 4;
             return fetch(url).then(parseFetchResponse)["catch"](function (err) {
-              err.stack = new Error().stack;
+              err.stack = new Error(err.message).stack;
               throw err;
             });
 
@@ -2077,7 +2074,7 @@ function _query() {
 
             _context.next = 10;
             return fetch(url, fetchOptions).then(parseFetchResponse)["catch"](function (err) {
-              err.stack = new Error().stack;
+              err.stack = new Error(err.message).stack;
               err.body = fetchOptions.body;
               throw err;
             });
@@ -2121,7 +2118,7 @@ function _search() {
               },
               body: JSON.stringify(options)
             }).then(parseFetchResponse)["catch"](function (err) {
-              err.stack = new Error().stack;
+              err.stack = new Error(err.message).stack;
               err.body = JSON.stringify(options);
               throw err;
             });
@@ -2160,7 +2157,7 @@ function _createDb() {
             return fetch(url, {
               method: 'PUT'
             }).then(parseFetchResponse)["catch"](function (err) {
-              err.stack = new Error().stack;
+              err.stack = new Error(err.message).stack;
               throw err;
             });
 

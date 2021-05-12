@@ -53,7 +53,7 @@ export async function search<T = any>(
   })
     .then(parseFetchResponse)
     .catch(err => {
-      err.stack = new Error().stack
+      err.stack = new Error(err.message).stack
       err.body = JSON.stringify(options)
 
       throw err

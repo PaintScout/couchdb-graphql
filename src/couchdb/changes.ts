@@ -56,7 +56,7 @@ export async function changes(
   const response = await fetch(url)
     .then(parseFetchResponse)
     .catch(err => {
-      err.stack = new Error().stack
+      err.stack = new Error(err.message).stack
 
       throw err
     })

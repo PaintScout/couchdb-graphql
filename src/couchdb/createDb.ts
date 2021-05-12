@@ -11,7 +11,7 @@ export async function createDb<T extends CouchDbDocument>(
   const response = await fetch(url, { method: 'PUT' })
     .then(parseFetchResponse)
     .catch(err => {
-      err.stack = new Error().stack
+      err.stack = new Error(err.message).stack
 
       throw err
     })
