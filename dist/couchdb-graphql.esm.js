@@ -1261,9 +1261,6 @@ function _put() {
                         return _context.abrupt("return", resolved);
 
                       case 8:
-                        throw new Error('blasdkjhf');
-
-                      case 9:
                       case "end":
                         return _context.stop();
                     }
