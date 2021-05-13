@@ -35,7 +35,7 @@ export async function get<T extends CouchDbDocument>(
     .then(parseFetchResponse)
     .catch(err => {
       err._id = id
-      err.stack = new Error(err.message).stack
+      err.stack = new Error(err.message).stack + (err.stack ?? '')
 
       throw err
     })

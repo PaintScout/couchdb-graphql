@@ -53,7 +53,7 @@ export async function allDocs<T = any>(
   })
     .then(parseFetchResponse)
     .catch(err => {
-      err.stack = new Error(err.message).stack
+      err.stack = new Error(err.message).stack + (err.stack ?? '')
 
       err.body = JSON.stringify({
         keys,

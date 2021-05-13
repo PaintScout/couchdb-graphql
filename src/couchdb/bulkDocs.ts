@@ -103,7 +103,7 @@ export async function bulkDocs<T extends CouchDbDocument>(
       return res
     })
     .catch(err => {
-      err.stack = new Error(err.message).stack
+      err.stack = new Error(err.message).stack + (err.stack ?? '')
       err.ids = docs.map(d => d._id)
 
       throw err

@@ -1281,7 +1281,9 @@ function _put() {
                 return _ref2.apply(this, arguments);
               };
             }())["catch"](function (err) {
-              err.stack = new Error(err.message).stack;
+              var _err$stack;
+
+              err.stack = new Error(err.message).stack + ((_err$stack = err.stack) != null ? _err$stack : '');
               err._id = doc._id;
               throw err;
             });
@@ -1537,7 +1539,9 @@ function _bulkDocs() {
                 return _ref3.apply(this, arguments);
               };
             }())["catch"](function (err) {
-              err.stack = new Error(err.message).stack;
+              var _err$stack;
+
+              err.stack = new Error(err.message).stack + ((_err$stack = err.stack) != null ? _err$stack : '');
               err.ids = docs.map(function (d) {
                 return d._id;
               });
@@ -1668,7 +1672,9 @@ function _allDocs() {
                 startkey: startkey
               })
             }).then(parseFetchResponse)["catch"](function (err) {
-              err.stack = new Error(err.message).stack;
+              var _err$stack;
+
+              err.stack = new Error(err.message).stack + ((_err$stack = err.stack) != null ? _err$stack : '');
               err.body = JSON.stringify({
                 keys: keys,
                 key: key,
@@ -1851,7 +1857,9 @@ function _changes() {
 
             _context.next = 6;
             return fetch(url).then(parseFetchResponse)["catch"](function (err) {
-              err.stack = new Error(err.message).stack;
+              var _err$stack;
+
+              err.stack = new Error(err.message).stack + ((_err$stack = err.stack) != null ? _err$stack : '');
               throw err;
             });
 
@@ -1923,7 +1931,9 @@ function _find() {
               },
               body: JSON.stringify(options)
             }).then(parseFetchResponse)["catch"](function (err) {
-              err.stack = new Error(err.message).stack;
+              var _err$stack;
+
+              err.stack = new Error(err.message).stack + ((_err$stack = err.stack) != null ? _err$stack : '');
               err.body = JSON.stringify(options);
               throw err;
             });
@@ -1979,8 +1989,10 @@ function _get() {
 
             _context.next = 9;
             return fetch(url).then(parseFetchResponse)["catch"](function (err) {
+              var _err$stack;
+
               err._id = id;
-              err.stack = new Error(err.message).stack;
+              err.stack = new Error(err.message).stack + ((_err$stack = err.stack) != null ? _err$stack : '');
               throw err;
             });
 
@@ -2016,7 +2028,9 @@ function _info() {
             url = dbUrl + "/" + dbName;
             _context.next = 4;
             return fetch(url).then(parseFetchResponse)["catch"](function (err) {
-              err.stack = new Error(err.message).stack;
+              var _err$stack;
+
+              err.stack = new Error(err.message).stack + ((_err$stack = err.stack) != null ? _err$stack : '');
               throw err;
             });
 
@@ -2074,7 +2088,9 @@ function _query() {
 
             _context.next = 10;
             return fetch(url, fetchOptions).then(parseFetchResponse)["catch"](function (err) {
-              err.stack = new Error(err.message).stack;
+              var _err$stack;
+
+              err.stack = new Error(err.message).stack + ((_err$stack = err.stack) != null ? _err$stack : '');
               err.body = fetchOptions.body;
               throw err;
             });
@@ -2118,7 +2134,9 @@ function _search() {
               },
               body: JSON.stringify(options)
             }).then(parseFetchResponse)["catch"](function (err) {
-              err.stack = new Error(err.message).stack;
+              var _err$stack;
+
+              err.stack = new Error(err.message).stack + ((_err$stack = err.stack) != null ? _err$stack : '');
               err.body = JSON.stringify(options);
               throw err;
             });
@@ -2157,7 +2175,9 @@ function _createDb() {
             return fetch(url, {
               method: 'PUT'
             }).then(parseFetchResponse)["catch"](function (err) {
-              err.stack = new Error(err.message).stack;
+              var _err$stack;
+
+              err.stack = new Error(err.message).stack + ((_err$stack = err.stack) != null ? _err$stack : '');
               throw err;
             });
 
