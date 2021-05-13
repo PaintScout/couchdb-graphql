@@ -1,6 +1,6 @@
 {
   "name": "couchdb-graphql",
-  "version": "1.6.8",
+  "version": "1.6.9",
   "private": true,
   "main": "dist/index.js",
   "module": "dist/couchdb-graphql.esm.js",
