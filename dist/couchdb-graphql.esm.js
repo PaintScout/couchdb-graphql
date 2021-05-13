@@ -1261,6 +1261,12 @@ function _put() {
                         return _context.abrupt("return", resolved);
 
                       case 8:
+                        return _context.abrupt("return", _extends({}, doc, {
+                          _id: result.id,
+                          _rev: result.rev
+                        }));
+
+                      case 9:
                       case "end":
                         return _context.stop();
                     }
