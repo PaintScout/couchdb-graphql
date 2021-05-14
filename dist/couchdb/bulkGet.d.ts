@@ -6,7 +6,7 @@ export interface BulkGetOptions {
 export interface BulkGetResponse<T extends CouchDbDocument> {
     results: Array<{
         id: string;
-        docs: [{
+        docs: Array<{
             ok?: T;
             error?: {
                 id: string;
@@ -14,7 +14,7 @@ export interface BulkGetResponse<T extends CouchDbDocument> {
                 error: string;
                 reason: string;
             };
-        }];
+        }>;
     }>;
 }
 export declare function bulkGet<T extends CouchDbDocument>(context: CouchDbContext, docs: Array<{
