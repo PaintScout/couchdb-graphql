@@ -38,7 +38,7 @@ export async function find<T = any>(
     body: JSON.stringify(options),
   })
     .then(parseFetchResponse)
-    .catch(err => {
+    .catch((err) => {
       err.stack = new Error(err.message).stack + (err.stack ?? '')
       err.body = JSON.stringify(options)
       throw err

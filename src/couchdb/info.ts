@@ -34,7 +34,7 @@ export async function info(context: CouchDbContext): Promise<InfoResponse> {
 
   const response = await fetch(url)
     .then(parseFetchResponse)
-    .catch(err => {
+    .catch((err) => {
       err.stack = new Error(err.message).stack + (err.stack ?? '')
 
       throw err

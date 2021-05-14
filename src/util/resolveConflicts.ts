@@ -22,13 +22,13 @@ async function getConflictsByDocument(
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        keys: documents.map(doc => doc._id),
+        keys: documents.map((doc) => doc._id),
       }),
     }
   )
     .then(parseFetchResponse)
-    .then(res => {
-      return res.rows.map(row => row.doc).filter(doc => !!doc)
+    .then((res) => {
+      return res.rows.map((row) => row.doc).filter((doc) => !!doc)
     })
 
   // get full document for each _conflict
@@ -41,7 +41,7 @@ async function getConflictsByDocument(
       docs: documentsWithConflictRevs.reduce(
         (conflicts, doc) => [
           ...conflicts,
-          ...((doc && doc._conflicts) || []).map(rev => ({
+          ...((doc && doc._conflicts) || []).map((rev) => ({
             id: doc._id,
             rev,
           })),
@@ -51,17 +51,19 @@ async function getConflictsByDocument(
     }),
   })
     .then(parseFetchResponse)
-    .then(res => res.results.map(row => row.docs[0].ok).filter(doc => !!doc))
+    .then((res) =>
+      res.results.map((row) => row.docs[0].ok).filter((doc) => !!doc)
+    )
 
   const result = documentsWithConflictRevs.reduce((result, doc) => {
     if (!result[doc._id]) {
       const conflictedDoc = documentsWithConflictRevs.find(
-        d => d._id === doc._id
+        (d) => d._id === doc._id
       )
 
       result[doc._id] = {
         // the document rejected by the conflict
-        document: documents.find(original => original._id === doc._id),
+        document: documents.find((original) => original._id === doc._id),
         // add the stored document in the conflicts array
         conflicts: [doc],
         revToSave: conflictedDoc._rev,
@@ -69,7 +71,7 @@ async function getConflictsByDocument(
     }
 
     // check if any _conflicts were for this document
-    const conflicts = conflictingDocuments.filter(d => d._id === doc._id)
+    const conflicts = conflictingDocuments.filter((d) => d._id === doc._id)
 
     if (conflicts) {
       return {
@@ -108,7 +110,7 @@ export async function resolveConflicts(
   const conflictingDocuments = await getConflictsByDocument(documents, context)
 
   const resolvedDocs = await Promise.all(
-    Object.keys(conflictingDocuments).map(async id => {
+    Object.keys(conflictingDocuments).map(async (id) => {
       const resolvedDocument = await onResolveConflict!({
         document: conflictingDocuments[id].document,
         conflicts: conflictingDocuments[id].conflicts,
@@ -123,7 +125,7 @@ export async function resolveConflicts(
         }
       }
     })
-  ).then(res => res.filter(Boolean))
+  ).then((res) => res.filter(Boolean))
 
   const docsToSave = [
     ...resolvedDocs,
@@ -132,12 +134,13 @@ export async function resolveConflicts(
       (deleted, docId) => [
         ...deleted,
         ...conflictingDocuments[docId].conflicts
-          .map(conflict => ({
+          .map((conflict) => ({
             ...conflict,
             _deleted: true,
           }))
           .filter(
-            conflict => conflict._rev !== conflictingDocuments[docId].revToSave
+            (conflict) =>
+              conflict._rev !== conflictingDocuments[docId].revToSave
           ),
       ],
       [] as any[]
@@ -155,9 +158,9 @@ export async function resolveConflicts(
   }).then(parseFetchResponse)
 
   const resolvedDocuments = response
-    .filter(result => result.ok)
-    .map(result => ({
-      ...docsToSave.find(doc => doc._id === result.id),
+    .filter((result) => result.ok)
+    .map((result) => ({
+      ...docsToSave.find((doc) => doc._id === result.id),
       _rev: result.rev,
       _id: result.id,
     }))

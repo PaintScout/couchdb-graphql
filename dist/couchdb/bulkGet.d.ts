@@ -5,16 +5,19 @@ export interface BulkGetOptions {
 }
 export interface BulkGetResponse<T extends CouchDbDocument> {
     results: Array<{
-        ok?: T;
-        error?: {
-            id: string;
-            rev?: string;
-            error: string;
-            reason: string;
-        };
+        id: string;
+        docs: [{
+            ok?: T;
+            error?: {
+                id: string;
+                rev?: string;
+                error: string;
+                reason: string;
+            };
+        }];
     }>;
 }
-export declare function bulkGet<T extends CouchDbDocument>(docs: Array<{
+export declare function bulkGet<T extends CouchDbDocument>(context: CouchDbContext, docs: Array<{
     id: string;
     rev?: string;
-}>, context: CouchDbContext, { revs }?: BulkGetOptions): Promise<BulkGetResponse<T>>;
+}>, { revs }?: BulkGetOptions): Promise<BulkGetResponse<T>>;

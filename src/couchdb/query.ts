@@ -64,7 +64,7 @@ export async function query<T = any>(
 
   const response = await fetch(url, fetchOptions)
     .then(parseFetchResponse)
-    .catch(err => {
+    .catch((err) => {
       err.stack = new Error(err.message).stack + (err.stack ?? '')
       err.body = fetchOptions.body
       throw err

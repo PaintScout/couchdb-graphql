@@ -1738,7 +1738,7 @@ function bulkGet(_x, _x2, _x3) {
 function _bulkGet() {
   _bulkGet = _asyncToGenerator(
   /*#__PURE__*/
-  runtime_1.mark(function _callee(docs, context, _temp) {
+  runtime_1.mark(function _callee(context, docs, _temp) {
     var _ref, revs, _context$couchDb, fetch, dbUrl, dbName, url, response;
 
     return runtime_1.wrap(function _callee$(_context) {
@@ -1766,7 +1766,9 @@ function _bulkGet() {
                 revs: revs
               })
             }).then(parseFetchResponse)["catch"](function (err) {
-              err.stack = new Error(err.messae).stack;
+              var _err$stack;
+
+              err.stack = new Error(err.message).stack + ((_err$stack = err.stack) != null ? _err$stack : '');
               err.body = JSON.stringify({
                 docs: docs,
                 revs: revs

@@ -9,19 +9,22 @@ export interface BulkGetOptions {
 
 export interface BulkGetResponse<T extends CouchDbDocument> {
   results: Array<{
-    ok?: T
-    error?: {
-      id: string
-      rev?: string
-      error: string
-      reason: string
-    }
+    id: string
+    docs: Array<{
+      ok?: T
+      error?: {
+        id: string
+        rev?: string
+        error: string
+        reason: string
+      }
+    }>
   }>
 }
 
 export async function bulkGet<T extends CouchDbDocument>(
-  docs: Array<{ id: string; rev?: string }>,
   context: CouchDbContext,
+  docs: Array<{ id: string; rev?: string }>,
   { revs }: BulkGetOptions = {}
 ): Promise<BulkGetResponse<T>> {
   const { fetch, dbUrl, dbName } = context.couchDb
@@ -42,8 +45,8 @@ export async function bulkGet<T extends CouchDbDocument>(
     }),
   })
     .then(parseFetchResponse)
-    .catch(err => {
-      err.stack = new Error(err.messae).stack
+    .catch((err) => {
+      err.stack = new Error(err.message).stack + (err.stack ?? '')
       err.body = JSON.stringify({ docs, revs })
 
       throw err

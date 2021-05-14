@@ -54,7 +54,7 @@ export async function put<T extends CouchDbDocument>(
     }),
   })
     .then(parseFetchResponse)
-    .then(async res => {
+    .then(async (res) => {
       const result = Array.isArray(res) ? res[0] : res
 
       // resolve conflicts
@@ -68,7 +68,7 @@ export async function put<T extends CouchDbDocument>(
 
       return { ...doc, _id: result.id, _rev: result.rev }
     })
-    .catch(err => {
+    .catch((err) => {
       err.stack = new Error(err.message).stack + (err.stack ?? '')
       err._id = doc._id
 
